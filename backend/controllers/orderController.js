@@ -3,7 +3,6 @@ import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
 import User from "../models/User.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
-import logger from "../utils/logger.js";
 
 // @desc    Create order (checkout)
 // @route   POST /api/orders
@@ -92,7 +91,7 @@ export const createOrder = asyncHandler(async (req, res) => {
   // Clear cart
   await cart.clearCart();
 
-  logger.info("Order created", {
+  console.log("Order created", {
     orderId: order._id,
     orderNumber: order.orderNumber,
     userId: req.user.id,
@@ -130,7 +129,7 @@ export const getUserOrders = asyncHandler(async (req, res) => {
 
   const totalPages = Math.ceil(total / parseInt(limit));
 
-  logger.info("User orders fetched", {
+  console.log("User orders fetched", {
     userId: req.user.id,
     count: orders.length,
     total,
@@ -175,7 +174,7 @@ export const getOrder = asyncHandler(async (req, res) => {
     });
   }
 
-  logger.info("Order fetched", {
+  console.log("Order fetched", {
     orderId: order._id,
     orderNumber: order.orderNumber,
     userId: req.user.id,
@@ -211,7 +210,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     await user.addCoins(order.coinsEarned);
   }
 
-  logger.info("Order status updated", {
+  console.log("Order status updated", {
     orderId: order._id,
     orderNumber: order.orderNumber,
     status,
@@ -282,7 +281,7 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     await user.addCoins(order.coinsUsed);
   }
 
-  logger.info("Order cancelled", {
+  console.log("Order cancelled", {
     orderId: order._id,
     orderNumber: order.orderNumber,
     userId: req.user.id,
@@ -319,7 +318,7 @@ export const getAllOrders = asyncHandler(async (req, res) => {
 
   const totalPages = Math.ceil(total / parseInt(limit));
 
-  logger.info("All orders fetched by admin", {
+  console.log("All orders fetched by admin", {
     adminId: req.user.id,
     count: orders.length,
     total,

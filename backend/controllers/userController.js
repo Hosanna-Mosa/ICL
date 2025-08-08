@@ -1,7 +1,6 @@
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
-import logger from "../utils/logger.js";
 
 // @desc    Get user profile
 // @route   GET /api/user/profile
@@ -43,7 +42,7 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
 
   await user.save();
 
-  logger.info("User profile updated", { userId: user._id });
+  console.log("User profile updated", { userId: user._id });
 
   res.json({
     success: true,
@@ -73,7 +72,7 @@ export const getWishlist = asyncHandler(async (req, res) => {
     match: { isActive: true },
   });
 
-  logger.info("Wishlist fetched", {
+  console.log("Wishlist fetched", {
     userId: req.user.id,
     count: user.wishlist.length,
   });
@@ -104,7 +103,7 @@ export const addToWishlist = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
   await user.addToWishlist(productId);
 
-  logger.info("Product added to wishlist", {
+  console.log("Product added to wishlist", {
     userId: req.user.id,
     productId,
   });
@@ -127,7 +126,7 @@ export const removeFromWishlist = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
   await user.removeFromWishlist(productId);
 
-  logger.info("Product removed from wishlist", {
+  console.log("Product removed from wishlist", {
     userId: req.user.id,
     productId,
   });
@@ -171,7 +170,7 @@ export const addCoinsToUser = asyncHandler(async (req, res) => {
 
   await user.addCoins(amount);
 
-  logger.info("Coins added to user", {
+  console.log("Coins added to user", {
     userId,
     amount,
     adminId: req.user.id,
@@ -216,7 +215,7 @@ export const redeemCoins = asyncHandler(async (req, res) => {
 
   await user.redeemCoins(amount);
 
-  logger.info("Coins redeemed", {
+  console.log("Coins redeemed", {
     userId: req.user.id,
     amount,
   });
@@ -259,7 +258,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
   const totalPages = Math.ceil(total / parseInt(limit));
 
-  logger.info("All users fetched by admin", {
+  console.log("All users fetched by admin", {
     adminId: req.user.id,
     count: users.length,
     total,
@@ -324,7 +323,7 @@ export const updateUser = asyncHandler(async (req, res) => {
 
   await user.save();
 
-  logger.info("User updated by admin", {
+  console.log("User updated by admin", {
     userId: user._id,
     adminId: req.user.id,
   });

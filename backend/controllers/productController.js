@@ -1,6 +1,5 @@
 import Product from "../models/Product.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
-import logger from "../utils/logger.js";
 
 // @desc    Get all products with filters
 // @route   GET /api/products
@@ -71,7 +70,7 @@ export const getProducts = asyncHandler(async (req, res) => {
 
   const totalPages = Math.ceil(total / parseInt(limit));
 
-  logger.info("Products fetched", {
+  console.log("Products fetched", {
     count: products.length,
     total,
     page: parseInt(page),
@@ -114,7 +113,7 @@ export const getProduct = asyncHandler(async (req, res) => {
     });
   }
 
-  logger.info("Product fetched", {
+  console.log("Product fetched", {
     productId: product._id,
     name: product.name,
   });
@@ -141,7 +140,7 @@ export const createProduct = asyncHandler(async (req, res) => {
 
   const product = await Product.create(productData);
 
-  logger.info("Product created", {
+  console.log("Product created", {
     productId: product._id,
     name: product.name,
     adminId: req.user.id,
@@ -174,7 +173,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
 
   await product.save();
 
-  logger.info("Product updated", {
+  console.log("Product updated", {
     productId: product._id,
     name: product.name,
     adminId: req.user.id,
@@ -204,7 +203,7 @@ export const deleteProduct = asyncHandler(async (req, res) => {
   product.isActive = false;
   await product.save();
 
-  logger.info("Product deleted", {
+  console.log("Product deleted", {
     productId: product._id,
     name: product.name,
     adminId: req.user.id,
@@ -229,7 +228,7 @@ export const getFeaturedProducts = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .limit(parseInt(limit));
 
-  logger.info("Featured products fetched", { count: products.length });
+  console.log("Featured products fetched", { count: products.length });
 
   res.json({
     success: true,
@@ -278,7 +277,7 @@ export const getProductsByCategory = asyncHandler(async (req, res) => {
 
   const totalPages = Math.ceil(total / parseInt(limit));
 
-  logger.info("Products by category fetched", {
+  console.log("Products by category fetched", {
     category,
     count: products.length,
     total,
@@ -332,7 +331,7 @@ export const searchProducts = asyncHandler(async (req, res) => {
 
   const totalPages = Math.ceil(total / parseInt(limit));
 
-  logger.info("Products searched", {
+  console.log("Products searched", {
     query: q,
     count: products.length,
     total,

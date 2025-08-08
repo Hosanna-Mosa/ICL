@@ -1,30 +1,29 @@
 import dotenv from "dotenv";
 import connectDB from "./src/config/database.js";
-import logger from "./src/utils/logger.js";
 
 // Load environment variables
 dotenv.config();
 
 const testSetup = async () => {
   try {
-    logger.info("Testing backend setup...");
+    console.log("Testing backend setup...");
 
     // Test database connection
-    logger.info("Testing database connection...");
+    console.log("Testing database connection...");
     await connectDB();
-    logger.info("✅ Database connection successful");
+    console.log("✅ Database connection successful");
 
     // Test logger
-    logger.info("✅ Logger working correctly");
-    logger.warn("✅ Warning level working");
-    logger.error("✅ Error level working");
+    console.log("✅ Logger working correctly");
+    console.log("✅ Warning level working");
+    console.log("✅ Error level working");
 
-    logger.info("🎉 Backend setup test completed successfully!");
-    logger.info("You can now start the server with: npm run dev");
+    console.log("🎉 Backend setup test completed successfully!");
+    console.log("You can now start the server with: npm run dev");
 
     process.exit(0);
   } catch (error) {
-    logger.error("❌ Backend setup test failed:", error);
+    console.log("❌ Backend setup test failed:", error);
     process.exit(1);
   }
 };

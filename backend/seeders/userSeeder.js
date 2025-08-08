@@ -1,5 +1,4 @@
 import User from "../models/User.js";
-import logger from "../utils/logger.js";
 
 const users = [
   {
@@ -88,15 +87,15 @@ export const seedUsers = async () => {
   try {
     // Clear existing users
     await User.deleteMany({});
-    logger.info("Cleared existing users");
+    console.log("Cleared existing users");
 
     // Create users
     const createdUsers = await User.create(users);
-    logger.info(`Created ${createdUsers.length} users`);
+    console.log(`Created ${createdUsers.length} users`);
 
     return createdUsers;
   } catch (error) {
-    logger.error("Error seeding users:", error);
+    console.log("Error seeding users:", error);
     throw error;
   }
 };

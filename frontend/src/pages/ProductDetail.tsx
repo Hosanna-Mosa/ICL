@@ -3,9 +3,9 @@ import { Heart, ShoppingCart, Plus, Minus, Ruler, Star } from 'lucide-react';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import Button from '@/components/UI/ICLButton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/UI/dialog";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/UI/carousel";
+import { AspectRatio } from "@/components/UI/aspect-ratio";
 
 // Mock product images
 import heroImage from '@/assets/hero-image.jpg';

@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-import logger from "../utils/logger.js";
 
 export const protect = async (req, res, next) => {
   try {
@@ -22,7 +21,7 @@ export const protect = async (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretToken");
 
     // Get user from token
     const user = await User.findById(decoded.id).select("-password");
@@ -44,7 +43,7 @@ export const protect = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    logger.error("Authentication error:", error);
+    console.log("Authentication error:", error);
 
     if (error.name === "JsonWebTokenError") {
       return res.status(401).json({
@@ -88,7 +87,7 @@ export const authorize = (...roles) => {
 };
 
 export const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
+  return jwt.sign({ id }, process.env.JWT_SECRET || "secretToken", {
+    expiresIn: process.env.JWT_EXPIRE || "3d",
   });
 };

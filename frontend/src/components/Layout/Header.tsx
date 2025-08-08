@@ -97,6 +97,7 @@ const Header: React.FC<HeaderProps> = ({ cartItemsCount = 0 }) => {
             >
               <Heart size={20} />
             </Link>
+            {/* TODO: Add authentication state management */}
             <Link 
               to="/account" 
               className="p-2 hover:text-accent transition-colors duration-300"

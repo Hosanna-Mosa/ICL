@@ -1,7 +1,6 @@
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
-import logger from "../utils/logger.js";
 
 // @desc    Get user cart
 // @route   GET /api/cart
@@ -9,7 +8,7 @@ import logger from "../utils/logger.js";
 export const getCart = asyncHandler(async (req, res) => {
   const cart = await Cart.getOrCreateCart(req.user.id);
 
-  logger.info("Cart fetched", {
+  console.log("Cart fetched", {
     userId: req.user.id,
     itemCount: cart.itemCount,
   });
@@ -61,7 +60,7 @@ export const addToCart = asyncHandler(async (req, res) => {
   // Add item to cart
   await cart.addItem(productId, size, quantity, currentPrice);
 
-  logger.info("Item added to cart", {
+  console.log("Item added to cart", {
     userId: req.user.id,
     productId,
     size,
@@ -108,7 +107,7 @@ export const updateCartItem = asyncHandler(async (req, res) => {
   // Update item quantity
   await cart.updateItemQuantity(productId, size, quantity);
 
-  logger.info("Cart item updated", {
+  console.log("Cart item updated", {
     userId: req.user.id,
     productId,
     size,
@@ -135,7 +134,7 @@ export const removeFromCart = asyncHandler(async (req, res) => {
   // Remove item
   await cart.removeItem(productId, size);
 
-  logger.info("Item removed from cart", {
+  console.log("Item removed from cart", {
     userId: req.user.id,
     productId,
     size,
@@ -156,7 +155,7 @@ export const clearCart = asyncHandler(async (req, res) => {
 
   await cart.clearCart();
 
-  logger.info("Cart cleared", { userId: req.user.id });
+  console.log("Cart cleared", { userId: req.user.id });
 
   res.json({
     success: true,
@@ -200,7 +199,7 @@ export const applyCoupon = asyncHandler(async (req, res) => {
 
   await cart.applyCoupon(couponCode, discountAmount);
 
-  logger.info("Coupon applied", {
+  console.log("Coupon applied", {
     userId: req.user.id,
     couponCode,
     discountAmount,
@@ -221,7 +220,7 @@ export const removeCoupon = asyncHandler(async (req, res) => {
 
   await cart.removeCoupon();
 
-  logger.info("Coupon removed", { userId: req.user.id });
+  console.log("Coupon removed", { userId: req.user.id });
 
   res.json({
     success: true,
@@ -258,7 +257,7 @@ export const applyCoinsDiscount = asyncHandler(async (req, res) => {
 
   await cart.applyCoinsDiscount(coinsUsed, discountAmount);
 
-  logger.info("Coins discount applied", {
+  console.log("Coins discount applied", {
     userId: req.user.id,
     coinsUsed,
     discountAmount,
@@ -279,7 +278,7 @@ export const removeCoinsDiscount = asyncHandler(async (req, res) => {
 
   await cart.removeCoinsDiscount();
 
-  logger.info("Coins discount removed", { userId: req.user.id });
+  console.log("Coins discount removed", { userId: req.user.id });
 
   res.json({
     success: true,
