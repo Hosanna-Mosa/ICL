@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, ShoppingCart, Plus, Minus, Ruler, Star } from 'lucide-react';
+
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import Button from '@/components/UI/ICLButton';
