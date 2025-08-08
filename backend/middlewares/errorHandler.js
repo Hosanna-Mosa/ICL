@@ -1,11 +1,9 @@
-import logger from "../utils/logger.js";
-
 export const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
   // Log error
-  logger.error("Error occurred:", {
+  console.log("Error occurred:", {
     message: err.message,
     stack: err.stack,
     url: req.originalUrl,

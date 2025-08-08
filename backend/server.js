@@ -11,7 +11,6 @@ import xss from "xss-clean";
 import connectDB from "./config/database.js";
 import { errorHandler, notFound } from "./middlewares/errorHandler.js";
 import { logRequest, logError, morganMiddleware } from "./utils/logger.js";
-import logger from "./utils/logger.js";
 
 // Import routes
 import authRoutes from "./routes/auth.js";
@@ -33,10 +32,7 @@ connectDB();
 app.use(helmet());
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["https://yourdomain.com"]
-        : ["http://localhost:3000", "http://localhost:5173"],
+    origin: "*",
     credentials: true,
   })
 );
@@ -99,19 +95,19 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 8000;
 
 const server = app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-  logger.info(`API Base URL: http://localhost:${PORT}/api`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`API Base URL: http://localhost:${PORT}/api`);
 });
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err, promise) => {
-  logger.error(`Unhandled Rejection: ${err.message}`);
+  console.log(`Unhandled Rejection: ${err.message}`);
   server.close(() => process.exit(1));
 });
 
 // Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
-  logger.error(`Uncaught Exception: ${err.message}`);
+  console.log(`Uncaught Exception: ${err.message}`);
   server.close(() => process.exit(1));
 });
 

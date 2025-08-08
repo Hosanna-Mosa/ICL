@@ -1,7 +1,6 @@
 import User from "../models/User.js";
 import { generateToken } from "../middlewares/auth.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
-import logger from "../utils/logger.js";
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -34,7 +33,7 @@ export const register = asyncHandler(async (req, res) => {
   user.lastLogin = new Date();
   await user.save();
 
-  logger.info("User registered successfully", {
+  console.log("User registered successfully", {
     userId: user._id,
     email: user.email,
   });
@@ -97,7 +96,7 @@ export const login = asyncHandler(async (req, res) => {
   user.lastLogin = new Date();
   await user.save();
 
-  logger.info("User logged in successfully", {
+  console.log("User logged in successfully", {
     userId: user._id,
     email: user.email,
   });
@@ -161,7 +160,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   await user.save();
 
-  logger.info("User profile updated", { userId: user._id });
+  console.log("User profile updated", { userId: user._id });
 
   res.json({
     success: true,
@@ -203,7 +202,7 @@ export const changePassword = asyncHandler(async (req, res) => {
   user.password = newPassword;
   await user.save();
 
-  logger.info("User password changed", { userId: user._id });
+  console.log("User password changed", { userId: user._id });
 
   res.json({
     success: true,

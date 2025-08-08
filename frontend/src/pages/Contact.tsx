@@ -3,8 +3,8 @@ import { MessageSquare, Instagram, Mail, MapPin } from 'lucide-react';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/UI/input';
+import { Textarea } from '@/components/UI/textarea';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({

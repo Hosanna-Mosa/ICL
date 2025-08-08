@@ -1,5 +1,4 @@
 import Product from "../models/Product.js";
-import logger from "../utils/logger.js";
 
 const products = [
   {
@@ -286,15 +285,15 @@ export const seedProducts = async () => {
   try {
     // Clear existing products
     await Product.deleteMany({});
-    logger.info("Cleared existing products");
+    console.log("Cleared existing products");
 
     // Create products
     const createdProducts = await Product.create(products);
-    logger.info(`Created ${createdProducts.length} products`);
+    console.log(`Created ${createdProducts.length} products`);
 
     return createdProducts;
   } catch (error) {
-    logger.error("Error seeding products:", error);
+    console.log("Error seeding products:", error);
     throw error;
   }
 };
