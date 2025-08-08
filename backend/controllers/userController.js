@@ -1,0 +1,337 @@
+import User from "../models/User.js";
+import Product from "../models/Product.js";
+import { asyncHandler } from "../middlewares/errorHandler.js";
+import logger from "../utils/logger.js";
+
+// @desc    Get user profile
+// @route   GET /api/user/profile
+// @access  Private
+export const getUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+
+  res.json({
+    success: true,
+    data: {
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        coins: user.coins,
+        fullName: user.fullName,
+        address: user.address,
+        lastLogin: user.lastLogin,
+      },
+    },
+  });
+});
+
+// @desc    Update user profile
+// @route   PUT /api/user/profile
+// @access  Private
+export const updateUserProfile = asyncHandler(async (req, res) => {
+  const { firstName, lastName, phone, address } = req.body;
+
+  const user = await User.findById(req.user.id);
+
+  if (firstName) user.firstName = firstName;
+  if (lastName) user.lastName = lastName;
+  if (phone) user.phone = phone;
+  if (address) user.address = address;
+
+  await user.save();
+
+  logger.info("User profile updated", { userId: user._id });
+
+  res.json({
+    success: true,
+    message: "Profile updated successfully",
+    data: {
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        coins: user.coins,
+        fullName: user.fullName,
+        address: user.address,
+      },
+    },
+  });
+});
+
+// @desc    Get user wishlist
+// @route   GET /api/user/wishlist
+// @access  Private
+export const getWishlist = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id).populate({
+    path: "wishlist",
+    match: { isActive: true },
+  });
+
+  logger.info("Wishlist fetched", {
+    userId: req.user.id,
+    count: user.wishlist.length,
+  });
+
+  res.json({
+    success: true,
+    data: {
+      wishlist: user.wishlist,
+    },
+  });
+});
+
+// @desc    Add product to wishlist
+// @route   POST /api/user/wishlist
+// @access  Private
+export const addToWishlist = asyncHandler(async (req, res) => {
+  const { productId } = req.body;
+
+  // Check if product exists and is active
+  const product = await Product.findById(productId);
+  if (!product || !product.isActive) {
+    return res.status(404).json({
+      success: false,
+      message: "Product not found or unavailable",
+    });
+  }
+
+  const user = await User.findById(req.user.id);
+  await user.addToWishlist(productId);
+
+  logger.info("Product added to wishlist", {
+    userId: req.user.id,
+    productId,
+  });
+
+  res.json({
+    success: true,
+    message: "Product added to wishlist successfully",
+    data: {
+      wishlist: user.wishlist,
+    },
+  });
+});
+
+// @desc    Remove product from wishlist
+// @route   DELETE /api/user/wishlist/:productId
+// @access  Private
+export const removeFromWishlist = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+
+  const user = await User.findById(req.user.id);
+  await user.removeFromWishlist(productId);
+
+  logger.info("Product removed from wishlist", {
+    userId: req.user.id,
+    productId,
+  });
+
+  res.json({
+    success: true,
+    message: "Product removed from wishlist successfully",
+    data: {
+      wishlist: user.wishlist,
+    },
+  });
+});
+
+// @desc    Get user coins
+// @route   GET /api/user/coins
+// @access  Private
+export const getUserCoins = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+
+  res.json({
+    success: true,
+    data: {
+      coins: user.coins,
+    },
+  });
+});
+
+// @desc    Add coins to user (Admin only)
+// @route   POST /api/user/coins/add
+// @access  Private/Admin
+export const addCoinsToUser = asyncHandler(async (req, res) => {
+  const { userId, amount } = req.body;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  await user.addCoins(amount);
+
+  logger.info("Coins added to user", {
+    userId,
+    amount,
+    adminId: req.user.id,
+  });
+
+  res.json({
+    success: true,
+    message: "Coins added successfully",
+    data: {
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        coins: user.coins,
+      },
+    },
+  });
+});
+
+// @desc    Redeem coins
+// @route   POST /api/user/coins/redeem
+// @access  Private
+export const redeemCoins = asyncHandler(async (req, res) => {
+  const { amount } = req.body;
+
+  if (amount <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid amount",
+    });
+  }
+
+  const user = await User.findById(req.user.id);
+
+  if (user.coins < amount) {
+    return res.status(400).json({
+      success: false,
+      message: "Insufficient coins",
+    });
+  }
+
+  await user.redeemCoins(amount);
+
+  logger.info("Coins redeemed", {
+    userId: req.user.id,
+    amount,
+  });
+
+  res.json({
+    success: true,
+    message: "Coins redeemed successfully",
+    data: {
+      coins: user.coins,
+    },
+  });
+});
+
+// @desc    Get all users (Admin only)
+// @route   GET /api/user/admin/all
+// @access  Private/Admin
+export const getAllUsers = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 20, role, search } = req.query;
+
+  const query = {};
+  if (role) query.role = role;
+  if (search) {
+    query.$or = [
+      { firstName: { $regex: search, $options: "i" } },
+      { lastName: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const [users, total] = await Promise.all([
+    User.find(query)
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit)),
+    User.countDocuments(query),
+  ]);
+
+  const totalPages = Math.ceil(total / parseInt(limit));
+
+  logger.info("All users fetched by admin", {
+    adminId: req.user.id,
+    count: users.length,
+    total,
+  });
+
+  res.json({
+    success: true,
+    data: {
+      users,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages,
+        hasNext: parseInt(page) < totalPages,
+        hasPrev: parseInt(page) > 1,
+      },
+    },
+  });
+});
+
+// @desc    Get user by ID (Admin only)
+// @route   GET /api/user/admin/:id
+// @access  Private/Admin
+export const getUserById = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id).select("-password");
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  res.json({
+    success: true,
+    data: { user },
+  });
+});
+
+// @desc    Update user (Admin only)
+// @route   PUT /api/user/admin/:id
+// @access  Private/Admin
+export const updateUser = asyncHandler(async (req, res) => {
+  const { firstName, lastName, email, phone, role, isActive, coins } = req.body;
+
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  if (firstName) user.firstName = firstName;
+  if (lastName) user.lastName = lastName;
+  if (email) user.email = email;
+  if (phone) user.phone = phone;
+  if (role) user.role = role;
+  if (typeof isActive === "boolean") user.isActive = isActive;
+  if (typeof coins === "number") user.coins = coins;
+
+  await user.save();
+
+  logger.info("User updated by admin", {
+    userId: user._id,
+    adminId: req.user.id,
+  });
+
+  res.json({
+    success: true,
+    message: "User updated successfully",
+    data: { user },
+  });
+});

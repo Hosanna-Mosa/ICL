@@ -1,0 +1,87 @@
+{"level":"info","message":"Server running in undefined mode on port 8000","timestamp":"2025-08-08 15:53:14"}
+{"level":"info","message":"Health check: http://localhost:8000/health","timestamp":"2025-08-08 15:53:14"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:53:14"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:53:14"}
+{"level":"info","message":"Server running in undefined mode on port 8000","timestamp":"2025-08-08 15:53:23"}
+{"level":"info","message":"Health check: http://localhost:8000/health","timestamp":"2025-08-08 15:53:23"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:53:23"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:53:23"}
+{"level":"info","message":"Server running in undefined mode on port 8000","timestamp":"2025-08-08 15:55:12"}
+{"level":"info","message":"Health check: http://localhost:8000/health","timestamp":"2025-08-08 15:55:12"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:55:12"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:55:12"}
+{"level":"info","message":"Server running in undefined mode on port 8000","timestamp":"2025-08-08 15:55:22"}
+{"level":"info","message":"Health check: http://localhost:8000/health","timestamp":"2025-08-08 15:55:22"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:55:22"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:55:22"}
+{"level":"info","message":"Server running in undefined mode on port 8000","timestamp":"2025-08-08 15:55:32"}
+{"level":"info","message":"Health check: http://localhost:8000/health","timestamp":"2025-08-08 15:55:32"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:55:32"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:55:32"}
+{"level":"info","message":"Server running in undefined mode on port 8000","timestamp":"2025-08-08 15:55:40"}
+{"level":"info","message":"Health check: http://localhost:8000/health","timestamp":"2025-08-08 15:55:40"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:55:40"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:55:40"}
+{"level":"info","message":"Server running in undefined mode on port 8000","timestamp":"2025-08-08 15:55:43"}
+{"level":"info","message":"Health check: http://localhost:8000/health","timestamp":"2025-08-08 15:55:43"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:55:43"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:55:43"}
+{"level":"info","message":"Server running in undefined mode on port 8000","timestamp":"2025-08-08 15:56:01"}
+{"level":"info","message":"Health check: http://localhost:8000/health","timestamp":"2025-08-08 15:56:01"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:56:01"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:56:01"}
+{"level":"info","message":"Server running in undefined mode on port 8000","timestamp":"2025-08-08 15:56:16"}
+{"level":"info","message":"Health check: http://localhost:8000/health","timestamp":"2025-08-08 15:56:16"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:56:16"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:56:16"}
+{"level":"info","message":"Server running in undefined mode on port 8000","timestamp":"2025-08-08 15:56:29"}
+{"level":"info","message":"Health check: http://localhost:8000/health","timestamp":"2025-08-08 15:56:29"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:56:29"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:56:29"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:56:40"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:56:40"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:56:40"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:56:53"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:56:53"}
+{"level":"info","message":"Database connected successfully","timestamp":"2025-08-08 15:56:53"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:57:05"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:57:05"}
+{"level":"info","message":"Database connected successfully","timestamp":"2025-08-08 15:57:05"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:57:18"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:57:18"}
+{"level":"info","message":"Database connected successfully","timestamp":"2025-08-08 15:57:18"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:57:33"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:57:33"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:57:33"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:57:41"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:57:41"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:57:41"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:58:11"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:58:11"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:58:11"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:58:32"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:58:32"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2025-08-08 15:58:32"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:58:59"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:58:59"}
+{"level":"info","message":"Database connected: localhost","timestamp":"2025-08-08 15:58:59"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:59:09"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:59:09"}
+{"level":"info","message":"Database connected: localhost","timestamp":"2025-08-08 15:59:09"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 15:59:31"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 15:59:31"}
+{"level":"info","message":"Database connected: localhost","timestamp":"2025-08-08 15:59:31"}
+{"level":"info","message":"Database connection closed","timestamp":"2025-08-08 16:00:30"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 16:00:46"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 16:00:46"}
+{"level":"info","message":"Database connected: localhost","timestamp":"2025-08-08 16:00:46"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 16:15:02"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 16:15:02"}
+{"level":"info","message":"Database connected: localhost","timestamp":"2025-08-08 16:15:02"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 16:15:08"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 16:15:08"}
+{"level":"info","message":"Database connected: localhost","timestamp":"2025-08-08 16:15:08"}
+{"level":"info","message":"Server running on port 8000","timestamp":"2025-08-08 18:34:25"}
+{"level":"info","message":"API Base URL: http://localhost:8000/api","timestamp":"2025-08-08 18:34:25"}
+{"level":"info","message":"Database connected: ac-tizseg6-shard-00-00.xvohdml.mongodb.net","timestamp":"2025-08-08 18:34:28"}
+{"level":"info","message":"Database connection closed","timestamp":"2025-08-08 18:35:31"}
