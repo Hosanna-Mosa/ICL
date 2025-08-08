@@ -144,32 +144,63 @@ export const cartAPI = {
   },
 
   // Add item to cart
-  addToCart: async (productId, quantity = 1) => {
-    return await apiRequest("/cart/add", {
+  addToCart: async (productId, size, quantity = 1) => {
+    return await apiRequest("/cart", {
       method: "POST",
-      body: JSON.stringify({ productId, quantity }),
+      body: JSON.stringify({ productId, size, quantity }),
     });
   },
 
   // Update cart item quantity
-  updateQuantity: async (itemId, quantity) => {
-    return await apiRequest("/cart/update", {
+  updateCartItem: async (productId, size, quantity) => {
+    return await apiRequest(`/cart/${productId}`, {
       method: "PUT",
-      body: JSON.stringify({ itemId, quantity }),
+      body: JSON.stringify({ size, quantity }),
     });
   },
 
   // Remove item from cart
-  removeFromCart: async (itemId) => {
-    return await apiRequest("/cart/remove", {
+  removeFromCart: async (productId, size) => {
+    const response = await apiRequest(`/cart/${productId}`, {
       method: "DELETE",
-      body: JSON.stringify({ itemId }),
+      body: JSON.stringify({ size }),
     });
+    return response;
   },
 
   // Clear cart
   clearCart: async () => {
-    return await apiRequest("/cart/clear", {
+    return await apiRequest("/cart", {
+      method: "DELETE",
+    });
+  },
+
+  // Apply coupon
+  applyCoupon: async (couponCode) => {
+    return await apiRequest("/cart/coupon", {
+      method: "POST",
+      body: JSON.stringify({ couponCode }),
+    });
+  },
+
+  // Remove coupon
+  removeCoupon: async () => {
+    return await apiRequest("/cart/coupon", {
+      method: "DELETE",
+    });
+  },
+
+  // Apply coins discount
+  applyCoinsDiscount: async (coinsUsed) => {
+   return await apiRequest("/cart/coins", {
+      method: "POST",
+      body: JSON.stringify({ coinsUsed }),
+    });
+  },
+
+  // Remove coins discount
+  removeCoinsDiscount: async () => {
+    return await apiRequest("/cart/coins", {
       method: "DELETE",
     });
   },

@@ -163,7 +163,19 @@ export const validateProductSearch = [
 
 // ID parameter validation
 export const validateId = [
-  param("id").isMongoId().withMessage("Invalid ID format"),
+  param("id")
+    .notEmpty()
+    .withMessage("ID is required")
+    .custom((value) => {
+      // Accept MongoDB ObjectIds (24 hex chars) or simple numeric strings
+      const mongoIdRegex = /^[0-9a-fA-F]{24}$/;
+      const numericRegex = /^[0-9]+$/;
+      
+      if (mongoIdRegex.test(value) || numericRegex.test(value)) {
+        return true;
+      }
+      throw new Error("Invalid ID format - must be MongoDB ObjectId or numeric ID");
+    }),
   validate,
 ];
 
