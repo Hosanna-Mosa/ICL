@@ -179,3 +179,392 @@
 {"level":"info","message":"API Request","method":"POST","responseTime":"388.517","status":"200","timestamp":"2025-08-08 19:22:45","url":"/api/auth/login"}
 {"level":"info","message":"POST /api/auth/login 200 388.517ms","source":"morgan","timestamp":"2025-08-08 19:22:45"}
 {"duration":"392ms","level":"info","message":"Request completed","method":"POST","status":200,"timestamp":"2025-08-08 19:22:45","url":"/api/auth/login"}
+{"level":"error","message":"API Error","method":"POST","responseTime":"15.826","status":"400","timestamp":"2025-08-08 20:59:59","url":"/api/auth/register"}
+{"level":"info","message":"POST /api/auth/register 400 15.826ms","source":"morgan","timestamp":"2025-08-08 20:59:59"}
+{"duration":"28ms","level":"error","message":"Request Error","method":"POST","status":400,"timestamp":"2025-08-08 20:59:59","url":"/api/auth/register"}
+{"level":"error","message":"API Error","method":"POST","responseTime":"5.166","status":"400","timestamp":"2025-08-08 21:00:25","url":"/api/auth/register"}
+{"level":"info","message":"POST /api/auth/register 400 5.166ms","source":"morgan","timestamp":"2025-08-08 21:00:25"}
+{"duration":"9ms","level":"error","message":"Request Error","method":"POST","status":400,"timestamp":"2025-08-08 21:00:25","url":"/api/auth/register"}
+{"level":"info","message":"GET /health 200 1.556ms","source":"morgan","timestamp":"2025-08-08 21:04:38"}
+{"level":"error","message":"API Error","method":"POST","responseTime":"1.870","status":"400","timestamp":"2025-08-08 21:04:57","url":"/api/auth/register"}
+{"level":"info","message":"POST /api/auth/register 400 1.870ms","source":"morgan","timestamp":"2025-08-08 21:04:57"}
+{"duration":"4ms","level":"error","message":"Request Error","method":"POST","status":400,"timestamp":"2025-08-08 21:04:57","url":"/api/auth/register"}
+{"level":"info","message":"API Request","method":"POST","responseTime":"952.426","status":"201","timestamp":"2025-08-08 21:05:48","url":"/api/auth/register"}
+{"level":"info","message":"POST /api/auth/register 201 952.426ms","source":"morgan","timestamp":"2025-08-08 21:05:48"}
+{"duration":"955ms","level":"info","message":"Request completed","method":"POST","status":201,"timestamp":"2025-08-08 21:05:48","url":"/api/auth/register"}
+{"level":"info","message":"GET /api/user/wishlist 200 153.083ms","source":"morgan","timestamp":"2025-08-08 21:05:48"}
+{"level":"info","message":"GET /api/user/wishlist 304 122.333ms","source":"morgan","timestamp":"2025-08-08 21:06:02"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"3.797","status":"400","timestamp":"2025-08-08 21:06:06","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 3.797ms","source":"morgan","timestamp":"2025-08-08 21:06:06"}
+{"level":"info","message":"GET /api/user/wishlist 304 127.496ms","source":"morgan","timestamp":"2025-08-08 21:06:07"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"1.421","status":"400","timestamp":"2025-08-08 21:07:55","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 1.421ms","source":"morgan","timestamp":"2025-08-08 21:07:55"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"1.066","status":"400","timestamp":"2025-08-08 21:07:55","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 1.066ms","source":"morgan","timestamp":"2025-08-08 21:07:55"}
+{"level":"info","message":"GET /api/user/wishlist 304 135.378ms","source":"morgan","timestamp":"2025-08-08 21:07:55"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"0.656","status":"400","timestamp":"2025-08-08 21:08:22","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 0.656ms","source":"morgan","timestamp":"2025-08-08 21:08:22"}
+{"level":"info","message":"GET /api/user/wishlist 304 123.259ms","source":"morgan","timestamp":"2025-08-08 21:08:42"}
+{"level":"info","message":"GET /api/user/wishlist 304 125.127ms","source":"morgan","timestamp":"2025-08-08 21:08:43"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"1.061","status":"400","timestamp":"2025-08-08 21:08:47","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 1.061ms","source":"morgan","timestamp":"2025-08-08 21:08:47"}
+{"level":"info","message":"GET /api/user/wishlist 304 126.008ms","source":"morgan","timestamp":"2025-08-08 21:08:47"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"0.895","status":"400","timestamp":"2025-08-08 21:08:59","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 0.895ms","source":"morgan","timestamp":"2025-08-08 21:08:59"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"0.879","status":"400","timestamp":"2025-08-08 21:09:04","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 0.879ms","source":"morgan","timestamp":"2025-08-08 21:09:04"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"0.789","status":"400","timestamp":"2025-08-08 21:09:14","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 0.789ms","source":"morgan","timestamp":"2025-08-08 21:09:14"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"0.694","status":"400","timestamp":"2025-08-08 21:09:17","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 0.694ms","source":"morgan","timestamp":"2025-08-08 21:09:17"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"0.960","status":"400","timestamp":"2025-08-08 21:09:17","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 0.960ms","source":"morgan","timestamp":"2025-08-08 21:09:17"}
+{"level":"info","message":"GET /api/user/wishlist 304 136.348ms","source":"morgan","timestamp":"2025-08-08 21:09:17"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"0.878","status":"400","timestamp":"2025-08-08 21:10:09","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 0.878ms","source":"morgan","timestamp":"2025-08-08 21:10:09"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"0.876","status":"400","timestamp":"2025-08-08 21:10:10","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 400 0.876ms","source":"morgan","timestamp":"2025-08-08 21:10:10"}
+{"level":"info","message":"GET /api/user/wishlist 304 246.854ms","source":"morgan","timestamp":"2025-08-08 21:10:10"}
+{"level":"info","message":"GET /api/user/wishlist 304 124.910ms","source":"morgan","timestamp":"2025-08-08 21:10:21"}
+{"level":"info","message":"GET /api/user/wishlist 304 122.063ms","source":"morgan","timestamp":"2025-08-08 21:10:21"}
+{"level":"info","message":"GET /api/user/wishlist 304 116.150ms","source":"morgan","timestamp":"2025-08-08 21:10:23"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"0.750","status":"400","timestamp":"2025-08-08 21:10:24","url":"/api/products/1"}
+{"level":"info","message":"GET /api/products/1 400 0.750ms","source":"morgan","timestamp":"2025-08-08 21:10:24"}
+{"level":"info","message":"GET /api/user/wishlist 304 132.678ms","source":"morgan","timestamp":"2025-08-08 21:10:24"}
+{"level":"info","message":"GET /api/user/wishlist 304 158.318ms","source":"morgan","timestamp":"2025-08-08 21:12:46"}
+{"level":"info","message":"GET /api/user/wishlist 304 132.191ms","source":"morgan","timestamp":"2025-08-08 21:12:51"}
+{"level":"info","message":"GET /api/user/wishlist 304 125.053ms","source":"morgan","timestamp":"2025-08-08 21:13:58"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"86.730","status":"404","timestamp":"2025-08-08 21:14:01","url":"/api/products/1"}
+{"level":"info","message":"GET /api/products/1 404 86.730ms","source":"morgan","timestamp":"2025-08-08 21:14:01"}
+{"level":"info","message":"GET /api/user/wishlist 304 145.410ms","source":"morgan","timestamp":"2025-08-08 21:14:01"}
+{"level":"info","message":"GET /api/user/wishlist 304 154.389ms","source":"morgan","timestamp":"2025-08-08 21:14:04"}
+{"level":"info","message":"GET /api/user/wishlist 304 135.774ms","source":"morgan","timestamp":"2025-08-08 21:14:04"}
+{"level":"info","message":"GET /api/user/wishlist 304 128.456ms","source":"morgan","timestamp":"2025-08-08 21:14:05"}
+{"level":"info","message":"GET /api/user/wishlist 304 130.542ms","source":"morgan","timestamp":"2025-08-08 21:14:07"}
+{"level":"info","message":"GET /api/user/wishlist 304 124.377ms","source":"morgan","timestamp":"2025-08-08 21:14:09"}
+{"level":"info","message":"GET /api/user/wishlist 304 120.101ms","source":"morgan","timestamp":"2025-08-08 21:14:11"}
+{"level":"info","message":"GET /api/user/wishlist 304 124.350ms","source":"morgan","timestamp":"2025-08-08 21:14:13"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"59.000","status":"404","timestamp":"2025-08-08 21:14:18","url":"/api/products/1"}
+{"level":"info","message":"GET /api/products/1 404 59.000ms","source":"morgan","timestamp":"2025-08-08 21:14:18"}
+{"level":"info","message":"GET /api/user/wishlist 304 158.638ms","source":"morgan","timestamp":"2025-08-08 21:14:18"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"66.519","status":"404","timestamp":"2025-08-08 21:15:35","url":"/api/products/1"}
+{"level":"info","message":"GET /api/products/1 404 66.519ms","source":"morgan","timestamp":"2025-08-08 21:15:35"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"83.582","status":"404","timestamp":"2025-08-08 21:15:35","url":"/api/products/1"}
+{"level":"info","message":"GET /api/products/1 404 83.582ms","source":"morgan","timestamp":"2025-08-08 21:15:35"}
+{"level":"info","message":"GET /api/user/wishlist 304 153.526ms","source":"morgan","timestamp":"2025-08-08 21:15:35"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"73.234","status":"404","timestamp":"2025-08-08 21:16:04","url":"/api/products/1"}
+{"level":"info","message":"GET /api/products/1 404 73.234ms","source":"morgan","timestamp":"2025-08-08 21:16:04"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"102.396","status":"404","timestamp":"2025-08-08 21:16:04","url":"/api/products/1"}
+{"level":"info","message":"GET /api/products/1 404 102.396ms","source":"morgan","timestamp":"2025-08-08 21:16:04"}
+{"level":"info","message":"GET /api/user/wishlist 304 178.360ms","source":"morgan","timestamp":"2025-08-08 21:16:04"}
+{"level":"info","message":"GET /api/user/wishlist 304 115.689ms","source":"morgan","timestamp":"2025-08-08 21:16:29"}
+{"level":"info","message":"GET /api/user/wishlist 304 133.236ms","source":"morgan","timestamp":"2025-08-08 21:16:35"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"112.576","status":"404","timestamp":"2025-08-08 21:16:39","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 112.576ms","source":"morgan","timestamp":"2025-08-08 21:16:39"}
+{"level":"info","message":"GET /api/user/wishlist 304 188.945ms","source":"morgan","timestamp":"2025-08-08 21:16:39"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"58.871","status":"404","timestamp":"2025-08-08 21:17:36","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 58.871ms","source":"morgan","timestamp":"2025-08-08 21:17:36"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"59.302","status":"404","timestamp":"2025-08-08 21:17:36","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 59.302ms","source":"morgan","timestamp":"2025-08-08 21:17:36"}
+{"level":"info","message":"GET /api/user/wishlist 304 118.374ms","source":"morgan","timestamp":"2025-08-08 21:17:36"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"57.077","status":"404","timestamp":"2025-08-08 21:17:45","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 57.077ms","source":"morgan","timestamp":"2025-08-08 21:17:45"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"76.581","status":"404","timestamp":"2025-08-08 21:17:45","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 76.581ms","source":"morgan","timestamp":"2025-08-08 21:17:45"}
+{"level":"info","message":"GET /api/user/wishlist 304 143.677ms","source":"morgan","timestamp":"2025-08-08 21:17:45"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"52.497","status":"404","timestamp":"2025-08-08 21:18:49","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 52.497ms","source":"morgan","timestamp":"2025-08-08 21:18:49"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"56.903","status":"404","timestamp":"2025-08-08 21:18:49","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 56.903ms","source":"morgan","timestamp":"2025-08-08 21:18:49"}
+{"level":"info","message":"GET /api/user/wishlist 304 125.715ms","source":"morgan","timestamp":"2025-08-08 21:18:49"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"90.231","status":"404","timestamp":"2025-08-08 21:19:08","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 90.231ms","source":"morgan","timestamp":"2025-08-08 21:19:08"}
+{"level":"info","message":"GET /api/user/wishlist 304 145.860ms","source":"morgan","timestamp":"2025-08-08 21:19:08"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"83.401","status":"404","timestamp":"2025-08-08 21:19:08","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 83.401ms","source":"morgan","timestamp":"2025-08-08 21:19:08"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"109.782","status":"404","timestamp":"2025-08-08 21:19:22","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 109.782ms","source":"morgan","timestamp":"2025-08-08 21:19:22"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"57.879","status":"404","timestamp":"2025-08-08 21:19:37","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 57.879ms","source":"morgan","timestamp":"2025-08-08 21:19:37"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"55.791","status":"404","timestamp":"2025-08-08 21:19:52","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 55.791ms","source":"morgan","timestamp":"2025-08-08 21:19:52"}
+{"level":"error","message":"API Error","method":"GET","responseTime":"124.842","status":"404","timestamp":"2025-08-08 21:20:24","url":"/api/products/2"}
+{"level":"info","message":"GET /api/products/2 404 124.842ms","source":"morgan","timestamp":"2025-08-08 21:20:24"}
+{"level":"info","message":"GET /api/products 200 89.498ms","source":"morgan","timestamp":"2025-08-08 21:20:29"}
+{"level":"info","message":"GET /api/user/wishlist 304 162.279ms","source":"morgan","timestamp":"2025-08-08 21:20:29"}
+{"level":"info","message":"GET /api/products?featured=true&limit=6 200 90.497ms","source":"morgan","timestamp":"2025-08-08 21:20:52"}
+{"level":"info","message":"GET /api/user/wishlist 304 113.413ms","source":"morgan","timestamp":"2025-08-08 21:20:52"}
+{"level":"info","message":"GET /api/products 304 72.053ms","source":"morgan","timestamp":"2025-08-08 21:20:58"}
+{"level":"info","message":"GET /api/user/wishlist 304 128.428ms","source":"morgan","timestamp":"2025-08-08 21:20:58"}
+{"level":"info","message":"GET /api/products 304 74.965ms","source":"morgan","timestamp":"2025-08-08 21:22:21"}
+{"level":"info","message":"GET /api/user/wishlist 304 152.606ms","source":"morgan","timestamp":"2025-08-08 21:22:22"}
+{"level":"info","message":"GET /api/user/wishlist 304 106.263ms","source":"morgan","timestamp":"2025-08-08 21:22:29"}
+{"level":"info","message":"GET /api/products 304 63.897ms","source":"morgan","timestamp":"2025-08-08 21:22:40"}
+{"level":"info","message":"GET /api/user/wishlist 304 126.513ms","source":"morgan","timestamp":"2025-08-08 21:22:40"}
+{"level":"info","message":"GET /api/products 304 104.423ms","source":"morgan","timestamp":"2025-08-08 21:28:22"}
+{"level":"info","message":"GET /api/user/wishlist 304 139.402ms","source":"morgan","timestamp":"2025-08-08 21:28:22"}
+{"level":"info","message":"GET /api/products 304 87.042ms","source":"morgan","timestamp":"2025-08-08 21:30:14"}
+{"level":"info","message":"GET /api/user/wishlist 304 139.996ms","source":"morgan","timestamp":"2025-08-08 21:30:14"}
+{"level":"info","message":"GET /api/products 200 82.183ms","source":"morgan","timestamp":"2025-08-08 21:31:31"}
+{"level":"info","message":"GET /api/user/wishlist 304 124.355ms","source":"morgan","timestamp":"2025-08-08 21:31:31"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee8 200 87.170ms","source":"morgan","timestamp":"2025-08-08 21:31:39"}
+{"level":"info","message":"GET /api/user/wishlist 304 119.128ms","source":"morgan","timestamp":"2025-08-08 21:31:39"}
+{"level":"info","message":"GET /api/user/wishlist 304 109.271ms","source":"morgan","timestamp":"2025-08-08 21:31:39"}
+{"level":"info","message":"API Request","method":"POST","responseTime":"239.249","status":"200","timestamp":"2025-08-08 21:31:41","url":"/api/user/wishlist"}
+{"level":"info","message":"POST /api/user/wishlist 200 239.249ms","source":"morgan","timestamp":"2025-08-08 21:31:41"}
+{"duration":"243ms","level":"info","message":"Request completed","method":"POST","status":200,"timestamp":"2025-08-08 21:31:41","url":"/api/user/wishlist"}
+{"level":"info","message":"GET /api/user/wishlist 200 195.406ms","source":"morgan","timestamp":"2025-08-08 21:31:44"}
+{"level":"info","message":"GET /api/user/wishlist 304 176.583ms","source":"morgan","timestamp":"2025-08-08 21:31:44"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee8 304 69.691ms","source":"morgan","timestamp":"2025-08-08 21:31:49"}
+{"level":"info","message":"GET /api/user/wishlist 304 183.853ms","source":"morgan","timestamp":"2025-08-08 21:31:50"}
+{"level":"info","message":"GET /api/user/wishlist 304 182.848ms","source":"morgan","timestamp":"2025-08-08 21:31:50"}
+{"level":"info","message":"GET /api/products?featured=true&limit=6 200 78.044ms","source":"morgan","timestamp":"2025-08-08 21:31:52"}
+{"level":"info","message":"GET /api/user/wishlist 304 183.396ms","source":"morgan","timestamp":"2025-08-08 21:31:52"}
+{"level":"info","message":"GET /api/products 304 77.200ms","source":"morgan","timestamp":"2025-08-08 21:31:57"}
+{"level":"info","message":"GET /api/user/wishlist 304 195.808ms","source":"morgan","timestamp":"2025-08-08 21:31:57"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee2 200 75.236ms","source":"morgan","timestamp":"2025-08-08 21:32:02"}
+{"level":"info","message":"GET /api/user/wishlist 304 179.639ms","source":"morgan","timestamp":"2025-08-08 21:32:02"}
+{"level":"info","message":"GET /api/user/wishlist 304 236.282ms","source":"morgan","timestamp":"2025-08-08 21:32:03"}
+{"level":"info","message":"GET /api/user/wishlist 304 169.469ms","source":"morgan","timestamp":"2025-08-08 21:32:23"}
+{"level":"info","message":"GET /api/user/wishlist 304 168.171ms","source":"morgan","timestamp":"2025-08-08 21:32:30"}
+{"level":"info","message":"GET /api/products 304 119.131ms","source":"morgan","timestamp":"2025-08-08 21:33:32"}
+{"level":"info","message":"GET /api/user/wishlist 304 396.888ms","source":"morgan","timestamp":"2025-08-08 21:33:32"}
+{"level":"info","message":"GET /api/products 304 75.426ms","source":"morgan","timestamp":"2025-08-08 21:38:55"}
+{"level":"info","message":"GET /api/user/wishlist 304 176.905ms","source":"morgan","timestamp":"2025-08-08 21:38:55"}
+{"level":"info","message":"GET /api/user/wishlist 304 179.784ms","source":"morgan","timestamp":"2025-08-08 21:39:43"}
+{"level":"info","message":"GET /api/user/wishlist 304 169.911ms","source":"morgan","timestamp":"2025-08-08 21:39:57"}
+{"level":"info","message":"GET /api/cart 200 201.958ms","source":"morgan","timestamp":"2025-08-08 21:39:57"}
+{"level":"info","message":"GET /api/user/wishlist 304 175.737ms","source":"morgan","timestamp":"2025-08-08 21:43:10"}
+{"level":"info","message":"GET /api/user/wishlist 304 191.000ms","source":"morgan","timestamp":"2025-08-08 21:43:10"}
+{"error":"Not Found - /api/user/wishlist","ip":"::1","level":"error","message":"Error occurred","method":"DELETE","stack":"Error: Not Found - /api/user/wishlist\n    at notFound (file:///D:/Works/ICL/icl2/ICL/backend/middlewares/errorHandler.js:72:17)\n    at Layer.handle [as handle_request] (D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at trim_prefix (D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:328:13)\n    at D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:286:9\n    at Function.process_params (D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:646:15\n    at next (D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:265:14)\n    at protect (file:///D:/Works/ICL/icl2/ICL/backend/middlewares/auth.js:44:5)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)","timestamp":"2025-08-08 21:43:12","url":"/api/user/wishlist","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"}
+{"level":"error","message":"API Error","method":"DELETE","responseTime":"62.800","status":"500","timestamp":"2025-08-08 21:43:12","url":"/api/user/wishlist"}
+{"level":"info","message":"DELETE /api/user/wishlist 500 62.800ms","source":"morgan","timestamp":"2025-08-08 21:43:12"}
+{"duration":"65ms","level":"error","message":"Request Error","method":"DELETE","status":500,"timestamp":"2025-08-08 21:43:12","url":"/api/user/wishlist"}
+{"level":"info","message":"GET /api/products 304 72.351ms","source":"morgan","timestamp":"2025-08-08 21:43:14"}
+{"level":"info","message":"GET /api/user/wishlist 304 178.988ms","source":"morgan","timestamp":"2025-08-08 21:43:14"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee8 304 71.275ms","source":"morgan","timestamp":"2025-08-08 21:43:16"}
+{"level":"info","message":"GET /api/user/wishlist 304 180.352ms","source":"morgan","timestamp":"2025-08-08 21:43:16"}
+{"level":"info","message":"GET /api/user/wishlist 304 178.628ms","source":"morgan","timestamp":"2025-08-08 21:43:16"}
+{"level":"info","message":"GET /api/user/wishlist 304 167.324ms","source":"morgan","timestamp":"2025-08-08 21:43:24"}
+{"level":"info","message":"GET /api/user/wishlist 304 160.917ms","source":"morgan","timestamp":"2025-08-08 21:43:24"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee8 304 64.782ms","source":"morgan","timestamp":"2025-08-08 21:43:27"}
+{"level":"info","message":"GET /api/user/wishlist 304 166.297ms","source":"morgan","timestamp":"2025-08-08 21:43:27"}
+{"level":"info","message":"GET /api/user/wishlist 304 170.981ms","source":"morgan","timestamp":"2025-08-08 21:43:27"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee8 304 79.676ms","source":"morgan","timestamp":"2025-08-08 21:43:45"}
+{"level":"info","message":"GET /api/cart 200 134.768ms","source":"morgan","timestamp":"2025-08-08 21:43:45"}
+{"level":"info","message":"GET /api/user/wishlist 304 179.058ms","source":"morgan","timestamp":"2025-08-08 21:43:45"}
+{"level":"info","message":"GET /api/user/wishlist 304 173.467ms","source":"morgan","timestamp":"2025-08-08 21:43:45"}
+{"level":"info","message":"GET /api/user/wishlist 304 194.325ms","source":"morgan","timestamp":"2025-08-08 21:43:52"}
+{"level":"info","message":"GET /api/user/wishlist 304 194.696ms","source":"morgan","timestamp":"2025-08-08 21:43:52"}
+{"error":"Not Found - /api/user/wishlist","ip":"::1","level":"error","message":"Error occurred","method":"DELETE","stack":"Error: Not Found - /api/user/wishlist\n    at notFound (file:///D:/Works/ICL/icl2/ICL/backend/middlewares/errorHandler.js:72:17)\n    at Layer.handle [as handle_request] (D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at trim_prefix (D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:328:13)\n    at D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:286:9\n    at Function.process_params (D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:646:15\n    at next (D:\\Works\\ICL\\icl2\\ICL\\backend\\node_modules\\express\\lib\\router\\index.js:265:14)\n    at protect (file:///D:/Works/ICL/icl2/ICL/backend/middlewares/auth.js:44:5)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)","timestamp":"2025-08-08 21:43:54","url":"/api/user/wishlist","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"}
+{"level":"error","message":"API Error","method":"DELETE","responseTime":"56.858","status":"500","timestamp":"2025-08-08 21:43:54","url":"/api/user/wishlist"}
+{"level":"info","message":"DELETE /api/user/wishlist 500 56.858ms","source":"morgan","timestamp":"2025-08-08 21:43:54"}
+{"duration":"58ms","level":"error","message":"Request Error","method":"DELETE","status":500,"timestamp":"2025-08-08 21:43:54","url":"/api/user/wishlist"}
+{"level":"info","message":"GET /api/user/wishlist 304 440.881ms","source":"morgan","timestamp":"2025-08-08 21:43:54"}
+{"level":"info","message":"GET /api/user/wishlist 304 330.826ms","source":"morgan","timestamp":"2025-08-08 21:45:08"}
+{"level":"info","message":"GET /api/products 304 114.703ms","source":"morgan","timestamp":"2025-08-08 21:46:32"}
+{"level":"info","message":"GET /api/user/wishlist 304 282.378ms","source":"morgan","timestamp":"2025-08-08 21:46:32"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee8 304 98.552ms","source":"morgan","timestamp":"2025-08-08 21:46:35"}
+{"level":"info","message":"GET /api/user/wishlist 304 227.270ms","source":"morgan","timestamp":"2025-08-08 21:46:35"}
+{"level":"info","message":"GET /api/user/wishlist 304 330.203ms","source":"morgan","timestamp":"2025-08-08 21:46:35"}
+{"level":"info","message":"API Request","method":"POST","responseTime":"315.131","status":"200","timestamp":"2025-08-08 21:46:38","url":"/api/cart"}
+{"level":"info","message":"POST /api/cart 200 315.131ms","source":"morgan","timestamp":"2025-08-08 21:46:38"}
+{"duration":"320ms","level":"info","message":"Request completed","method":"POST","status":200,"timestamp":"2025-08-08 21:46:38","url":"/api/cart"}
+{"level":"info","message":"GET /api/user/wishlist 304 237.499ms","source":"morgan","timestamp":"2025-08-08 21:46:47"}
+{"level":"info","message":"GET /api/cart 200 310.474ms","source":"morgan","timestamp":"2025-08-08 21:46:47"}
+{"level":"info","message":"GET /api/user/wishlist 304 181.350ms","source":"morgan","timestamp":"2025-08-08 21:46:51"}
+{"level":"info","message":"GET /api/products?featured=true&limit=6 304 73.872ms","source":"morgan","timestamp":"2025-08-08 21:46:58"}
+{"level":"info","message":"GET /api/user/wishlist 304 180.299ms","source":"morgan","timestamp":"2025-08-08 21:46:58"}
+{"level":"info","message":"GET /api/user/wishlist 304 175.686ms","source":"morgan","timestamp":"2025-08-08 21:47:00"}
+{"level":"info","message":"GET /api/user/wishlist 304 181.684ms","source":"morgan","timestamp":"2025-08-08 21:47:00"}
+{"level":"info","message":"GET /api/user/wishlist 304 185.455ms","source":"morgan","timestamp":"2025-08-08 21:47:01"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"255.478","status":"200","timestamp":"2025-08-08 21:47:03","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 255.478ms","source":"morgan","timestamp":"2025-08-08 21:47:03"}
+{"duration":"259ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 21:47:03","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/cart 200 185.660ms","source":"morgan","timestamp":"2025-08-08 21:47:07"}
+{"level":"info","message":"GET /api/user/wishlist 304 201.739ms","source":"morgan","timestamp":"2025-08-08 21:47:07"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"250.570","status":"200","timestamp":"2025-08-08 21:47:10","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 250.570ms","source":"morgan","timestamp":"2025-08-08 21:47:10"}
+{"duration":"255ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 21:47:10","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/user/wishlist 304 276.450ms","source":"morgan","timestamp":"2025-08-08 21:47:11"}
+{"level":"info","message":"GET /api/cart 200 264.503ms","source":"morgan","timestamp":"2025-08-08 21:47:11"}
+{"level":"info","message":"GET /api/products 304 69.858ms","source":"morgan","timestamp":"2025-08-08 21:47:14"}
+{"level":"info","message":"GET /api/user/wishlist 304 182.343ms","source":"morgan","timestamp":"2025-08-08 21:47:14"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee2 304 74.559ms","source":"morgan","timestamp":"2025-08-08 21:47:42"}
+{"level":"info","message":"GET /api/user/wishlist 304 281.394ms","source":"morgan","timestamp":"2025-08-08 21:47:42"}
+{"level":"info","message":"GET /api/user/wishlist 304 303.892ms","source":"morgan","timestamp":"2025-08-08 21:47:42"}
+{"level":"info","message":"API Request","method":"POST","responseTime":"508.042","status":"200","timestamp":"2025-08-08 21:47:46","url":"/api/cart"}
+{"level":"info","message":"POST /api/cart 200 508.042ms","source":"morgan","timestamp":"2025-08-08 21:47:46"}
+{"duration":"513ms","level":"info","message":"Request completed","method":"POST","status":200,"timestamp":"2025-08-08 21:47:46","url":"/api/cart"}
+{"level":"info","message":"GET /api/user/wishlist 304 267.358ms","source":"morgan","timestamp":"2025-08-08 21:47:51"}
+{"level":"info","message":"GET /api/cart 200 290.803ms","source":"morgan","timestamp":"2025-08-08 21:47:51"}
+{"level":"info","message":"GET /api/cart 304 307.302ms","source":"morgan","timestamp":"2025-08-08 21:50:06"}
+{"level":"info","message":"GET /api/user/wishlist 304 318.297ms","source":"morgan","timestamp":"2025-08-08 21:50:06"}
+{"level":"info","message":"GET /api/user/wishlist 304 209.519ms","source":"morgan","timestamp":"2025-08-08 21:50:59"}
+{"level":"info","message":"GET /api/products 304 159.525ms","source":"morgan","timestamp":"2025-08-08 21:51:51"}
+{"level":"info","message":"GET /api/user/wishlist 304 351.937ms","source":"morgan","timestamp":"2025-08-08 21:51:51"}
+{"level":"info","message":"GET /api/user/wishlist 304 276.414ms","source":"morgan","timestamp":"2025-08-08 21:51:53"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"678.398","status":"200","timestamp":"2025-08-08 21:51:57","url":"/api/cart"}
+{"level":"info","message":"DELETE /api/cart 200 678.398ms","source":"morgan","timestamp":"2025-08-08 21:51:57"}
+{"duration":"682ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 21:51:57","url":"/api/cart"}
+{"level":"info","message":"GET /api/products 304 103.788ms","source":"morgan","timestamp":"2025-08-08 21:51:59"}
+{"level":"info","message":"GET /api/user/wishlist 304 295.050ms","source":"morgan","timestamp":"2025-08-08 21:51:59"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee8 304 95.793ms","source":"morgan","timestamp":"2025-08-08 21:52:00"}
+{"level":"info","message":"GET /api/user/wishlist 304 319.208ms","source":"morgan","timestamp":"2025-08-08 21:52:01"}
+{"level":"info","message":"GET /api/user/wishlist 304 313.974ms","source":"morgan","timestamp":"2025-08-08 21:52:01"}
+{"level":"error","message":"API Error","method":"POST","responseTime":"219.133","status":"400","timestamp":"2025-08-08 21:52:04","url":"/api/cart"}
+{"level":"info","message":"POST /api/cart 400 219.133ms","source":"morgan","timestamp":"2025-08-08 21:52:04"}
+{"duration":"226ms","level":"error","message":"Request Error","method":"POST","status":400,"timestamp":"2025-08-08 21:52:04","url":"/api/cart"}
+{"level":"info","message":"API Request","method":"POST","responseTime":"455.865","status":"200","timestamp":"2025-08-08 21:52:10","url":"/api/cart"}
+{"level":"info","message":"POST /api/cart 200 455.865ms","source":"morgan","timestamp":"2025-08-08 21:52:10"}
+{"duration":"459ms","level":"info","message":"Request completed","method":"POST","status":200,"timestamp":"2025-08-08 21:52:10","url":"/api/cart"}
+{"level":"info","message":"GET /api/user/wishlist 304 1718.726ms","source":"morgan","timestamp":"2025-08-08 21:52:58"}
+{"level":"info","message":"GET /api/cart 200 1896.183ms","source":"morgan","timestamp":"2025-08-08 21:52:58"}
+{"level":"info","message":"GET /api/user/wishlist 304 232.849ms","source":"morgan","timestamp":"2025-08-08 21:53:20"}
+{"level":"info","message":"GET /api/user/wishlist 304 208.291ms","source":"morgan","timestamp":"2025-08-08 21:53:21"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"306.204","status":"200","timestamp":"2025-08-08 21:53:24","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 306.204ms","source":"morgan","timestamp":"2025-08-08 21:53:24"}
+{"duration":"313ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 21:53:24","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/cart 200 195.106ms","source":"morgan","timestamp":"2025-08-08 21:55:01"}
+{"level":"info","message":"GET /api/user/wishlist 304 213.939ms","source":"morgan","timestamp":"2025-08-08 21:55:01"}
+{"level":"info","message":"GET /api/cart 304 192.822ms","source":"morgan","timestamp":"2025-08-08 21:55:18"}
+{"level":"info","message":"GET /api/user/wishlist 304 205.744ms","source":"morgan","timestamp":"2025-08-08 21:55:18"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"281.342","status":"200","timestamp":"2025-08-08 21:55:21","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 281.342ms","source":"morgan","timestamp":"2025-08-08 21:55:21"}
+{"duration":"288ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 21:55:21","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/cart 200 199.440ms","source":"morgan","timestamp":"2025-08-08 21:55:24"}
+{"level":"info","message":"GET /api/user/wishlist 304 214.063ms","source":"morgan","timestamp":"2025-08-08 21:55:24"}
+{"level":"info","message":"GET /api/cart 304 238.216ms","source":"morgan","timestamp":"2025-08-08 21:55:42"}
+{"level":"info","message":"GET /api/user/wishlist 304 248.567ms","source":"morgan","timestamp":"2025-08-08 21:55:42"}
+{"level":"info","message":"GET /api/user/wishlist 304 247.001ms","source":"morgan","timestamp":"2025-08-08 21:56:02"}
+{"level":"info","message":"GET /api/user/wishlist 304 249.734ms","source":"morgan","timestamp":"2025-08-08 21:56:06"}
+{"level":"info","message":"GET /api/cart 304 244.477ms","source":"morgan","timestamp":"2025-08-08 21:56:06"}
+{"level":"info","message":"GET /api/user/wishlist 304 322.195ms","source":"morgan","timestamp":"2025-08-08 21:56:07"}
+{"level":"info","message":"GET /api/cart 304 337.319ms","source":"morgan","timestamp":"2025-08-08 21:56:57"}
+{"level":"info","message":"GET /api/user/wishlist 304 384.707ms","source":"morgan","timestamp":"2025-08-08 21:56:57"}
+{"level":"info","message":"GET /api/user/wishlist 304 381.118ms","source":"morgan","timestamp":"2025-08-08 21:56:59"}
+{"level":"info","message":"GET /api/user/wishlist 304 511.868ms","source":"morgan","timestamp":"2025-08-08 21:58:05"}
+{"level":"info","message":"GET /api/cart 304 514.872ms","source":"morgan","timestamp":"2025-08-08 21:58:05"}
+{"level":"info","message":"GET /api/user/wishlist 304 215.250ms","source":"morgan","timestamp":"2025-08-08 21:58:15"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"386.231","status":"200","timestamp":"2025-08-08 21:58:18","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 386.231ms","source":"morgan","timestamp":"2025-08-08 21:58:18"}
+{"duration":"396ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 21:58:18","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/cart 200 347.763ms","source":"morgan","timestamp":"2025-08-08 21:58:18"}
+{"level":"info","message":"GET /api/user/wishlist 304 196.737ms","source":"morgan","timestamp":"2025-08-08 21:58:40"}
+{"level":"info","message":"GET /api/cart 304 244.121ms","source":"morgan","timestamp":"2025-08-08 21:58:40"}
+{"level":"info","message":"GET /api/cart 304 184.819ms","source":"morgan","timestamp":"2025-08-08 21:58:53"}
+{"level":"info","message":"GET /api/user/wishlist 304 319.262ms","source":"morgan","timestamp":"2025-08-08 21:58:53"}
+{"level":"info","message":"GET /api/cart 304 191.580ms","source":"morgan","timestamp":"2025-08-08 21:59:08"}
+{"level":"info","message":"GET /api/user/wishlist 304 239.761ms","source":"morgan","timestamp":"2025-08-08 21:59:08"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"339.678","status":"200","timestamp":"2025-08-08 21:59:12","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 339.678ms","source":"morgan","timestamp":"2025-08-08 21:59:12"}
+{"duration":"343ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 21:59:12","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/products 304 89.359ms","source":"morgan","timestamp":"2025-08-08 21:59:14"}
+{"level":"info","message":"GET /api/user/wishlist 304 254.975ms","source":"morgan","timestamp":"2025-08-08 21:59:14"}
+{"level":"info","message":"GET /api/user/wishlist 304 240.601ms","source":"morgan","timestamp":"2025-08-08 21:59:16"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"329.053","status":"200","timestamp":"2025-08-08 21:59:18","url":"/api/cart"}
+{"level":"info","message":"DELETE /api/cart 200 329.053ms","source":"morgan","timestamp":"2025-08-08 21:59:18"}
+{"duration":"332ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 21:59:18","url":"/api/cart"}
+{"level":"info","message":"GET /api/products 304 75.370ms","source":"morgan","timestamp":"2025-08-08 21:59:20"}
+{"level":"info","message":"GET /api/user/wishlist 304 238.495ms","source":"morgan","timestamp":"2025-08-08 21:59:20"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee8 304 72.456ms","source":"morgan","timestamp":"2025-08-08 21:59:21"}
+{"level":"info","message":"GET /api/user/wishlist 304 248.955ms","source":"morgan","timestamp":"2025-08-08 21:59:22"}
+{"level":"info","message":"GET /api/user/wishlist 304 368.339ms","source":"morgan","timestamp":"2025-08-08 21:59:22"}
+{"level":"info","message":"API Request","method":"POST","responseTime":"317.600","status":"200","timestamp":"2025-08-08 21:59:24","url":"/api/cart"}
+{"level":"info","message":"POST /api/cart 200 317.600ms","source":"morgan","timestamp":"2025-08-08 21:59:24"}
+{"duration":"320ms","level":"info","message":"Request completed","method":"POST","status":200,"timestamp":"2025-08-08 21:59:24","url":"/api/cart"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee8 304 67.224ms","source":"morgan","timestamp":"2025-08-08 21:59:25"}
+{"level":"info","message":"GET /api/user/wishlist 304 195.927ms","source":"morgan","timestamp":"2025-08-08 21:59:25"}
+{"level":"info","message":"GET /api/cart 200 244.214ms","source":"morgan","timestamp":"2025-08-08 21:59:25"}
+{"level":"info","message":"GET /api/user/wishlist 304 181.025ms","source":"morgan","timestamp":"2025-08-08 21:59:25"}
+{"level":"info","message":"GET /api/user/wishlist 304 203.767ms","source":"morgan","timestamp":"2025-08-08 21:59:26"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"341.021","status":"200","timestamp":"2025-08-08 21:59:29","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 341.021ms","source":"morgan","timestamp":"2025-08-08 21:59:29"}
+{"duration":"344ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 21:59:29","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/user/wishlist 304 181.175ms","source":"morgan","timestamp":"2025-08-08 21:59:47"}
+{"level":"info","message":"GET /api/cart 200 244.212ms","source":"morgan","timestamp":"2025-08-08 21:59:47"}
+{"level":"info","message":"GET /api/cart 304 218.837ms","source":"morgan","timestamp":"2025-08-08 22:00:01"}
+{"level":"info","message":"GET /api/user/wishlist 304 239.177ms","source":"morgan","timestamp":"2025-08-08 22:00:01"}
+{"level":"info","message":"GET /api/cart 304 190.261ms","source":"morgan","timestamp":"2025-08-08 22:00:39"}
+{"level":"info","message":"GET /api/user/wishlist 304 238.345ms","source":"morgan","timestamp":"2025-08-08 22:00:39"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"322.460","status":"200","timestamp":"2025-08-08 22:00:41","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 322.460ms","source":"morgan","timestamp":"2025-08-08 22:00:41"}
+{"duration":"326ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:00:41","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/cart 200 206.264ms","source":"morgan","timestamp":"2025-08-08 22:00:45"}
+{"level":"info","message":"GET /api/user/wishlist 304 237.127ms","source":"morgan","timestamp":"2025-08-08 22:00:45"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"322.561","status":"200","timestamp":"2025-08-08 22:01:20","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 322.561ms","source":"morgan","timestamp":"2025-08-08 22:01:20"}
+{"duration":"327ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:01:20","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/cart 200 188.495ms","source":"morgan","timestamp":"2025-08-08 22:02:06"}
+{"level":"info","message":"GET /api/user/wishlist 304 336.276ms","source":"morgan","timestamp":"2025-08-08 22:02:06"}
+{"level":"info","message":"GET /api/cart 304 161.299ms","source":"morgan","timestamp":"2025-08-08 22:02:23"}
+{"level":"info","message":"GET /api/user/wishlist 304 226.665ms","source":"morgan","timestamp":"2025-08-08 22:02:23"}
+{"level":"info","message":"GET /api/cart 304 197.361ms","source":"morgan","timestamp":"2025-08-08 22:02:35"}
+{"level":"info","message":"GET /api/user/wishlist 304 232.817ms","source":"morgan","timestamp":"2025-08-08 22:02:35"}
+{"level":"info","message":"GET /api/cart 304 190.443ms","source":"morgan","timestamp":"2025-08-08 22:03:01"}
+{"level":"info","message":"GET /api/user/wishlist 304 227.062ms","source":"morgan","timestamp":"2025-08-08 22:03:01"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"340.196","status":"200","timestamp":"2025-08-08 22:03:03","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 340.196ms","source":"morgan","timestamp":"2025-08-08 22:03:03"}
+{"duration":"346ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:03:03","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"318.208","status":"200","timestamp":"2025-08-08 22:03:19","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 318.208ms","source":"morgan","timestamp":"2025-08-08 22:03:19"}
+{"duration":"321ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:03:19","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/cart 200 171.955ms","source":"morgan","timestamp":"2025-08-08 22:04:16"}
+{"level":"info","message":"GET /api/user/wishlist 304 248.298ms","source":"morgan","timestamp":"2025-08-08 22:04:16"}
+{"level":"info","message":"GET /api/cart 304 250.838ms","source":"morgan","timestamp":"2025-08-08 22:04:36"}
+{"level":"info","message":"GET /api/user/wishlist 304 259.905ms","source":"morgan","timestamp":"2025-08-08 22:04:36"}
+{"level":"info","message":"GET /api/cart 304 344.646ms","source":"morgan","timestamp":"2025-08-08 22:04:39"}
+{"level":"info","message":"GET /api/user/wishlist 304 355.066ms","source":"morgan","timestamp":"2025-08-08 22:04:39"}
+{"level":"info","message":"GET /api/cart 304 289.471ms","source":"morgan","timestamp":"2025-08-08 22:04:42"}
+{"level":"info","message":"GET /api/user/wishlist 304 365.579ms","source":"morgan","timestamp":"2025-08-08 22:04:42"}
+{"level":"info","message":"GET /api/cart 304 165.329ms","source":"morgan","timestamp":"2025-08-08 22:04:50"}
+{"level":"info","message":"GET /api/user/wishlist 304 251.028ms","source":"morgan","timestamp":"2025-08-08 22:04:50"}
+{"level":"info","message":"GET /api/cart 304 159.412ms","source":"morgan","timestamp":"2025-08-08 22:04:55"}
+{"level":"info","message":"GET /api/user/wishlist 304 225.667ms","source":"morgan","timestamp":"2025-08-08 22:04:55"}
+{"level":"info","message":"GET /api/cart 304 197.878ms","source":"morgan","timestamp":"2025-08-08 22:05:12"}
+{"level":"info","message":"GET /api/user/wishlist 304 281.190ms","source":"morgan","timestamp":"2025-08-08 22:05:12"}
+{"level":"info","message":"GET /api/cart 304 159.633ms","source":"morgan","timestamp":"2025-08-08 22:05:18"}
+{"level":"info","message":"GET /api/user/wishlist 304 221.916ms","source":"morgan","timestamp":"2025-08-08 22:05:18"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"381.900","status":"200","timestamp":"2025-08-08 22:05:28","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 381.900ms","source":"morgan","timestamp":"2025-08-08 22:05:28"}
+{"duration":"385ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:05:28","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/user/wishlist 304 361.147ms","source":"morgan","timestamp":"2025-08-08 22:08:18"}
+{"level":"info","message":"GET /api/cart 200 351.504ms","source":"morgan","timestamp":"2025-08-08 22:08:18"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"394.291","status":"200","timestamp":"2025-08-08 22:08:21","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 394.291ms","source":"morgan","timestamp":"2025-08-08 22:08:21"}
+{"duration":"403ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:08:21","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"339.315","status":"200","timestamp":"2025-08-08 22:08:30","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 339.315ms","source":"morgan","timestamp":"2025-08-08 22:08:30"}
+{"duration":"344ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:08:30","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/user/wishlist 304 339.348ms","source":"morgan","timestamp":"2025-08-08 22:08:39"}
+{"level":"info","message":"GET /api/cart 200 330.741ms","source":"morgan","timestamp":"2025-08-08 22:08:39"}
+{"level":"info","message":"GET /api/cart 304 308.046ms","source":"morgan","timestamp":"2025-08-08 22:08:55"}
+{"level":"info","message":"GET /api/user/wishlist 304 318.460ms","source":"morgan","timestamp":"2025-08-08 22:08:55"}
+{"level":"info","message":"GET /api/user/wishlist 304 263.179ms","source":"morgan","timestamp":"2025-08-08 22:09:43"}
+{"level":"info","message":"GET /api/cart 304 350.593ms","source":"morgan","timestamp":"2025-08-08 22:09:43"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"412.016","status":"200","timestamp":"2025-08-08 22:09:46","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 412.016ms","source":"morgan","timestamp":"2025-08-08 22:09:46"}
+{"duration":"415ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:09:46","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"2578.386","status":"200","timestamp":"2025-08-08 22:10:18","url":"/api/cart"}
+{"level":"info","message":"DELETE /api/cart 200 2578.386ms","source":"morgan","timestamp":"2025-08-08 22:10:18"}
+{"duration":"2581ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:10:18","url":"/api/cart"}
+{"level":"info","message":"GET /api/user/wishlist 304 1739.457ms","source":"morgan","timestamp":"2025-08-08 22:10:18"}
+{"level":"info","message":"GET /api/cart 200 479.028ms","source":"morgan","timestamp":"2025-08-08 22:10:18"}
+{"level":"info","message":"GET /api/products 304 528.739ms","source":"morgan","timestamp":"2025-08-08 22:10:20"}
+{"level":"info","message":"GET /api/user/wishlist 304 1966.006ms","source":"morgan","timestamp":"2025-08-08 22:10:22"}
+{"level":"info","message":"GET /api/products/68961f68ad2e6f6a057a1ee8 304 539.059ms","source":"morgan","timestamp":"2025-08-08 22:10:22"}
+{"level":"info","message":"GET /api/user/wishlist 304 737.879ms","source":"morgan","timestamp":"2025-08-08 22:10:23"}
+{"level":"info","message":"GET /api/user/wishlist 304 223.959ms","source":"morgan","timestamp":"2025-08-08 22:10:23"}
+{"level":"info","message":"API Request","method":"POST","responseTime":"341.204","status":"200","timestamp":"2025-08-08 22:10:28","url":"/api/cart"}
+{"level":"info","message":"POST /api/cart 200 341.204ms","source":"morgan","timestamp":"2025-08-08 22:10:28"}
+{"duration":"344ms","level":"info","message":"Request completed","method":"POST","status":200,"timestamp":"2025-08-08 22:10:28","url":"/api/cart"}
+{"level":"info","message":"GET /api/user/wishlist 304 358.834ms","source":"morgan","timestamp":"2025-08-08 22:10:37"}
+{"level":"info","message":"GET /api/cart 200 346.202ms","source":"morgan","timestamp":"2025-08-08 22:10:37"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"475.751","status":"200","timestamp":"2025-08-08 22:10:40","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 475.751ms","source":"morgan","timestamp":"2025-08-08 22:10:40"}
+{"duration":"479ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:10:40","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"GET /api/user/wishlist 304 6793.407ms","source":"morgan","timestamp":"2025-08-08 22:11:32"}
+{"level":"info","message":"GET /api/cart 200 8114.112ms","source":"morgan","timestamp":"2025-08-08 22:11:33"}
+{"level":"info","message":"API Request","method":"DELETE","responseTime":"534.822","status":"200","timestamp":"2025-08-08 22:11:36","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}
+{"level":"info","message":"DELETE /api/cart/68961f68ad2e6f6a057a1ee8 200 534.822ms","source":"morgan","timestamp":"2025-08-08 22:11:36"}
+{"duration":"542ms","level":"info","message":"Request completed","method":"DELETE","status":200,"timestamp":"2025-08-08 22:11:36","url":"/api/cart/68961f68ad2e6f6a057a1ee8"}

@@ -1,60 +1,110 @@
 import React, { useState } from 'react';
-import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, Loader2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import { Button } from '@/components/ui/button';
-import productHoodie from '@/assets/product-hoodie.jpg';
-import productTee from '@/assets/product-tee.jpg';
-
-interface CartItem {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  size: string;
-  quantity: number;
-}
+import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Cart: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      name: 'Oversized Black Hoodie',
-      image: productHoodie,
-      price: 2499,
-      size: 'L',
-      quantity: 1
-    },
-    {
-      id: 2,
-      name: 'Essential White Tee',
-      image: productTee,
-      price: 1299,
-      size: 'M',
-      quantity: 2
-    }
-  ]);
+  const { cart, loading, updateCartItem, removeFromCart, clearCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
+  const [clearingCart, setClearingCart] = useState(false);
 
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity === 0) {
-      removeItem(id);
-      return;
+  const handleUpdateQuantity = async (productId: string, size: string, newQuantity: number) => {
+    const itemKey = `${productId}-${size}`;
+    setUpdatingItems(prev => new Set(prev).add(itemKey));
+    
+    try {
+      await updateCartItem(productId, size, newQuantity);
+    } finally {
+      setUpdatingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itemKey);
+        return newSet;
+      });
     }
-    setCartItems(cartItems.map(item => 
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    ));
   };
 
-  const removeItem = (id: number) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
+  const handleRemoveItem = async (productId: string, size: string) => {
+    const itemKey = `${productId}-${size}`;
+    setUpdatingItems(prev => new Set(prev).add(itemKey));
+    
+    try {
+      await removeFromCart(productId, size);
+    } finally {
+      setUpdatingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itemKey);
+        return newSet;
+      });
+    }
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal > 2000 ? 0 : 150;
-  const total = subtotal + shipping;
+  const handleClearCart = async () => {
+    setClearingCart(true);
+    try {
+      await clearCart();
+    } finally {
+      setClearingCart(false);
+    }
+  };
 
-  if (cartItems.length === 0) {
+  // Calculate shipping based on subtotal
+  const shipping = cart && cart.subtotal > 2000 ? 0 : 150;
+  const total = cart ? cart.total + shipping : 0;
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-32 pb-20 px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading your cart...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show sign-in prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-32 pb-20 px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="mb-8">
+              <ShoppingBag className="w-24 h-24 text-muted-foreground mx-auto mb-6" />
+              <h1 className="text-3xl font-bold text-foreground mb-4">
+                Sign in to view your cart
+              </h1>
+              <p className="text-muted-foreground text-lg mb-8">
+                Please sign in to access your shopping cart and continue shopping.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Link to="/login">
+                  <Button className="btn-hero">Sign In</Button>
+                </Link>
+                <Link to="/register">
+                  <Button variant="outline">Create Account</Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show empty cart
+  if (!cart || cart.items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -84,81 +134,124 @@ const Cart: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItemsCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)} />
+      <Header />
       
       <div className="pt-32 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-8">
-            Shopping Cart
-          </h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+              Shopping Cart
+            </h1>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearCart}
+              disabled={clearingCart}
+              className="text-destructive hover:text-destructive border-destructive hover:border-destructive"
+            >
+              {clearingCart ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Clearing...
+                </>
+              ) : (
+                <>
+                  <X className="w-4 h-4 mr-2" />
+                  Clear Cart
+                </>
+              )}
+            </Button>
+          </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Cart Items */}
             <div className="lg:col-span-2">
               <div className="space-y-6">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="bg-card p-6 shadow-soft">
-                    <div className="flex flex-col sm:flex-row gap-6">
-                      {/* Product Image */}
-                      <div className="w-full sm:w-32 h-40 bg-muted overflow-hidden">
-                        <img 
-                          src={item.image} 
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      
-                      {/* Product Details */}
-                      <div className="flex-1 space-y-4">
-                        <div>
-                          <h3 className="font-bold text-foreground text-lg">
-                            {item.name}
-                          </h3>
-                          <p className="text-muted-foreground">Size: {item.size}</p>
-                          <p className="text-foreground font-bold text-lg">
-                            ₹{item.price.toLocaleString()}
-                          </p>
+                {cart.items.map((item) => {
+                  const itemKey = `${item.product._id}-${item.size}`;
+                  const isUpdating = updatingItems.has(itemKey);
+                  const currentPrice = item.product.salePrice || item.product.basePrice;
+                  
+                  return (
+                    <div key={itemKey} className="bg-card p-6 shadow-soft">
+                      <div className="flex flex-col sm:flex-row gap-6">
+                        {/* Product Image */}
+                        <div className="w-full sm:w-32 h-40 bg-muted overflow-hidden">
+                          <img 
+                            src={item.product.images[0]?.url || '/placeholder.svg'} 
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                         
-                        {/* Quantity Controls */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm text-muted-foreground">Qty:</span>
-                            <div className="flex items-center border rounded">
-                              <button
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                className="p-2 hover:bg-muted transition-colors"
-                              >
-                                <Minus className="w-4 h-4" />
-                              </button>
-                              <span className="px-4 py-2 font-medium">{item.quantity}</span>
-                              <button
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                className="p-2 hover:bg-muted transition-colors"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                            </div>
+                        {/* Product Details */}
+                        <div className="flex-1 space-y-4">
+                          <div>
+                            <h3 className="font-bold text-foreground text-lg">
+                              {item.product.name}
+                            </h3>
+                            <p className="text-muted-foreground">Size: {item.size}</p>
+                            <p className="text-foreground font-bold text-lg">
+                              ₹{currentPrice.toLocaleString()}
+                            </p>
                           </div>
                           
-                          <button
-                            onClick={() => removeItem(item.id)}
-                            className="text-destructive hover:text-destructive/80 p-2"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        </div>
-                        
-                        {/* Subtotal */}
-                        <div className="text-right">
-                          <p className="font-bold text-foreground">
-                            ₹{(item.price * item.quantity).toLocaleString()}
-                          </p>
+                          {/* Quantity Controls */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm text-muted-foreground">Qty:</span>
+                              <div className="flex items-center border rounded">
+                                <button
+                                  onClick={() => handleUpdateQuantity(item.product._id, item.size, item.quantity - 1)}
+                                  disabled={isUpdating}
+                                  className="p-2 hover:bg-muted transition-colors disabled:opacity-50"
+                                >
+                                  {isUpdating ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Minus className="w-4 h-4" />
+                                  )}
+                                </button>
+                                <span className="px-4 py-2 font-medium">{item.quantity}</span>
+                                <button
+                                  onClick={() => handleUpdateQuantity(item.product._id, item.size, item.quantity + 1)}
+                                  disabled={isUpdating}
+                                  className="p-2 hover:bg-muted transition-colors disabled:opacity-50"
+                                >
+                                  {isUpdating ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Plus className="w-4 h-4" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                            
+                            <button
+                              onClick={() => handleRemoveItem(item.product._id, item.size)}
+                              disabled={isUpdating}
+                              className="text-destructive hover:text-destructive/80 p-2 disabled:opacity-50"
+                              title="Remove item"
+                            >
+                              {isUpdating ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-5 h-5" />
+                              )}
+                            </button>
+                          </div>
+                          
+                          {/* Subtotal */}
+                          <div className="text-right">
+                            <p className="font-bold text-foreground">
+                              ₹{(currentPrice * item.quantity).toLocaleString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
             
@@ -172,8 +265,22 @@ const Cart: React.FC = () => {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="text-foreground">₹{subtotal.toLocaleString()}</span>
+                    <span className="text-foreground">₹{cart.subtotal.toLocaleString()}</span>
                   </div>
+                  
+                  {cart.discountAmount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Coupon Discount</span>
+                      <span>-₹{cart.discountAmount.toLocaleString()}</span>
+                    </div>
+                  )}
+                  
+                  {cart.coinsDiscount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Coins Discount</span>
+                      <span>-₹{cart.coinsDiscount.toLocaleString()}</span>
+                    </div>
+                  )}
                   
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>

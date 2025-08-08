@@ -105,7 +105,7 @@ export const updateCartItem = asyncHandler(async (req, res) => {
   const cart = await Cart.getOrCreateCart(req.user.id);
 
   // Update item quantity
-  await cart.updateItemQuantity(productId, size, quantity);
+  const updatedCart = await cart.updateItemQuantity(productId, size, quantity);
 
   console.log("Cart item updated", {
     userId: req.user.id,
@@ -117,7 +117,7 @@ export const updateCartItem = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     message: "Cart updated successfully",
-    data: { cart },
+    data: { cart: updatedCart },
   });
 });
 
@@ -132,7 +132,7 @@ export const removeFromCart = asyncHandler(async (req, res) => {
   const cart = await Cart.getOrCreateCart(req.user.id);
 
   // Remove item
-  await cart.removeItem(productId, size);
+  const updatedCart = await cart.removeItem(productId, size);
 
   console.log("Item removed from cart", {
     userId: req.user.id,
@@ -143,7 +143,7 @@ export const removeFromCart = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     message: "Item removed from cart successfully",
-    data: { cart },
+    data: { cart: updatedCart },
   });
 });
 
@@ -153,14 +153,14 @@ export const removeFromCart = asyncHandler(async (req, res) => {
 export const clearCart = asyncHandler(async (req, res) => {
   const cart = await Cart.getOrCreateCart(req.user.id);
 
-  await cart.clearCart();
+  const updatedCart = await cart.clearCart();
 
   console.log("Cart cleared", { userId: req.user.id });
 
   res.json({
     success: true,
     message: "Cart cleared successfully",
-    data: { cart },
+    data: { cart: updatedCart },
   });
 });
 
