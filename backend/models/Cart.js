@@ -145,13 +145,22 @@ cartSchema.methods.updateItemQuantity = async function (
 
 // Method to remove item from cart
 cartSchema.methods.removeItem = async function (productId, size) {
+  console.log('removeItem called with:', { productId, size });
+  console.log('Before filtering - items count:', this.items.length);
+  console.log('Items before:', this.items.map(item => ({ product: item.product.toString(), size: item.size })));
+  
   this.items = this.items.filter(
     (item) =>
       !(item.product.toString() === productId.toString() && item.size === size)
   );
+  
+  console.log('After filtering - items count:', this.items.length);
+  console.log('Items after:', this.items.map(item => ({ product: item.product.toString(), size: item.size })));
 
   this.lastUpdated = new Date();
-  return await this.save();
+  const savedCart = await this.save();
+  console.log('Cart saved successfully, items count:', savedCart.items.length);
+  return savedCart;
 };
 
 // Method to clear cart

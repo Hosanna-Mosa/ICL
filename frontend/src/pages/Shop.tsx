@@ -1,35 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Filter, Grid, List, Heart } from 'lucide-react';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import Button from '@/components/UI/ICLButton';
 import { Link } from 'react-router-dom';
+import { productsAPI } from '@/utils/api';
 
-// Mock product data
-const products = [
-  {
-    id: '1',
-    name: 'Oversized Logo Hoodie',
-    price: 2999,
-    originalPrice: 3499,
-    image: '/src/assets/product-hoodie.jpg',
-    category: 'Hoodies',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'White', 'Grey'],
-    isNew: true
-  },
-  {
-    id: '2',
-    name: 'Essential Oversized Tee',
-    price: 1299,
-    image: '/src/assets/product-tee.jpg',
-    category: 'Tees',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['White', 'Black', 'Beige'],
-    isNew: true
-  },
-  // Add more products as needed
-];
+interface Product {
+  _id: string;
+  name: string;
+  basePrice: number;
+  salePrice?: number;
+  images: Array<{ url: string; alt?: string; isPrimary: boolean }>;
+  category: string;
+  isFeatured?: boolean;
+  isNew?: boolean;
+}
 
 const categories = ['All', 'New Drops', 'Hoodies', 'Tees', 'Bottoms', 'Accessories'];
 const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -42,12 +28,32 @@ const priceRanges = [
 ];
 
 const Shop: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await productsAPI.getAll();
+        if (response.success) {
+          setProducts(response.data.products);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const filteredProducts = products.filter(product => {
     if (selectedCategory !== 'All' && product.category !== selectedCategory) return false;
@@ -203,88 +209,95 @@ const Shop: React.FC = () => {
               </div>
 
               {/* Products Grid */}
-              <div className={`grid gap-6 ${
-                viewMode === 'grid' 
-                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-                  : 'grid-cols-1'
-              }`}>
-                {filteredProducts.map(product => (
-                  <div key={product.id} className="card-product group">
-                    <div className="relative overflow-hidden aspect-square bg-muted">
-                      <img 
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                      />
-                      
-                      {/* Badges */}
-                      <div className="absolute top-4 left-4 flex flex-col gap-2">
-                        {product.isNew && (
-                          <span className="bg-accent text-accent-foreground px-3 py-1 text-xs font-medium tracking-widest uppercase">
-                            NEW
-                          </span>
-                        )}
-                        {product.originalPrice && (
-                          <span className="bg-destructive text-destructive-foreground px-3 py-1 text-xs font-medium tracking-widest uppercase">
-                            SALE
-                          </span>
-                        )}
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-4 text-muted-foreground">Loading products...</p>
+                </div>
+              ) : (
+                <div className={`grid gap-6 ${
+                  viewMode === 'grid' 
+                    ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+                    : 'grid-cols-1'
+                }`}>
+                  {filteredProducts.map(product => (
+                    <div key={product._id} className="card-product group">
+                      <div className="relative overflow-hidden aspect-square bg-muted">
+                        <img 
+                          src={product.images[0]?.url || '/placeholder.svg'}
+                          alt={product.name}
+                          className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+                        />
+                        
+                        {/* Badges */}
+                        <div className="absolute top-4 left-4 flex flex-col gap-2">
+                          {product.isNew && (
+                            <span className="bg-accent text-accent-foreground px-3 py-1 text-xs font-medium tracking-widest uppercase">
+                              NEW
+                            </span>
+                          )}
+                          {product.salePrice && (
+                            <span className="bg-destructive text-destructive-foreground px-3 py-1 text-xs font-medium tracking-widest uppercase">
+                              SALE
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Wishlist Button */}
+                        <button 
+                          className="absolute top-4 right-4 p-2 bg-background/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:text-accent"
+                          aria-label="Add to wishlist"
+                        >
+                          <Heart size={16} />
+                        </button>
+
+                        {/* Quick Add Overlay */}
+                        <div className="absolute inset-0 bg-primary/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <Link to={`/product/${product._id}`}>
+                            <Button variant="ghost" size="lg" className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                              QUICK VIEW
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
 
-                      {/* Wishlist Button */}
-                      <button 
-                        className="absolute top-4 right-4 p-2 bg-background/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:text-accent"
-                        aria-label="Add to wishlist"
-                      >
-                        <Heart size={16} />
-                      </button>
+                      {/* Product Info */}
+                      <div className="p-6 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-label text-muted-foreground">
+                            {product.category}
+                          </span>
+                        </div>
+                        
+                        <h3 className="font-medium text-lg leading-tight">
+                          {product.name}
+                        </h3>
+                        
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xl font-semibold">
+                            ₹{(product.salePrice || product.basePrice).toLocaleString()}
+                          </span>
+                          {product.salePrice && (
+                            <span className="text-muted-foreground line-through">
+                              ₹{product.basePrice.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
 
-                      {/* Quick Add Overlay */}
-                      <div className="absolute inset-0 bg-primary/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                        <Link to={`/product/${product.id}`}>
-                          <Button variant="ghost" size="lg" className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                            QUICK VIEW
+                        <Link to={`/product/${product._id}`}>
+                          <Button 
+                            variant="outline" 
+                            size="md" 
+                            className="w-full mt-4 hover:bg-primary hover:text-primary-foreground hover:border-primary"
+                          >
+                            ADD TO CART
                           </Button>
                         </Link>
                       </div>
                     </div>
-
-                    {/* Product Info */}
-                    <div className="p-6 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-label text-muted-foreground">
-                          {product.category}
-                        </span>
-                      </div>
-                      
-                      <h3 className="font-medium text-lg leading-tight">
-                        {product.name}
-                      </h3>
-                      
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xl font-semibold">
-                          ₹{product.price.toLocaleString()}
-                        </span>
-                        {product.originalPrice && (
-                          <span className="text-muted-foreground line-through">
-                            ₹{product.originalPrice.toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-
-                      <Link to={`/product/${product.id}`}>
-                        <Button 
-                          variant="outline" 
-                          size="md" 
-                          className="w-full mt-4 hover:bg-primary hover:text-primary-foreground hover:border-primary"
-                        >
-                          ADD TO CART
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </main>
           </div>
         </div>

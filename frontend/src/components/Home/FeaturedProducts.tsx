@@ -1,50 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import Button from '../UI/ICLButton';
-import productHoodie from '@/assets/product-hoodie.jpg';
-import productTee from '@/assets/product-tee.jpg';
-import productPants from '@/assets/product-pants.jpg';
+import { productsAPI } from '@/utils/api';
 
 interface Product {
-  id: string;
+  _id: string;
   name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
+  basePrice: number;
+  salePrice?: number;
+  images: Array<{ url: string; alt?: string; isPrimary: boolean }>;
   category: string;
+  isFeatured?: boolean;
   isNew?: boolean;
 }
 
-const products: Product[] = [
-  {
-    id: '1',
-    name: 'Oversized Logo Hoodie',
-    price: 2999,
-    originalPrice: 3499,
-    image: productHoodie,
-    category: 'Hoodies',
-    isNew: true
-  },
-  {
-    id: '2', 
-    name: 'Essential Oversized Tee',
-    price: 1299,
-    image: productTee,
-    category: 'Tees',
-    isNew: true
-  },
-  {
-    id: '3',
-    name: 'Urban Cargo Joggers',
-    price: 2499,
-    originalPrice: 2899,
-    image: productPants,
-    category: 'Bottoms'
-  }
-];
-
 const FeaturedProducts: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        const response = await productsAPI.getAll({ featured: 'true', limit: '6' });
+        if (response.success) {
+          setProducts(response.data.products);
+        }
+      } catch (error) {
+        console.error('Error fetching featured products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-16 lg:py-24 bg-background">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading featured products...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16 lg:py-24 bg-background">
       <div className="container mx-auto px-4 lg:px-8">
@@ -61,11 +65,11 @@ const FeaturedProducts: React.FC = () => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
           {products.map((product) => (
-            <div key={product.id} className="card-product group">
+            <div key={product._id} className="card-product group">
               {/* Product Image */}
               <div className="relative overflow-hidden aspect-square bg-muted">
                 <img 
-                  src={product.image}
+                  src={product.images[0]?.url || '/placeholder.svg'}
                   alt={product.name}
                   className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
                 />
@@ -77,7 +81,7 @@ const FeaturedProducts: React.FC = () => {
                       NEW
                     </span>
                   )}
-                  {product.originalPrice && (
+                  {product.salePrice && (
                     <span className="bg-destructive text-destructive-foreground px-3 py-1 text-xs font-medium tracking-widest uppercase">
                       SALE
                     </span>
@@ -94,11 +98,11 @@ const FeaturedProducts: React.FC = () => {
 
                 {/* Quick Add Overlay */}
                 <div className="absolute inset-0 bg-primary/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <Link to={`/product/${product.id}`}>
-                    <Button variant="ghost" size="lg" className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                      QUICK VIEW
-                    </Button>
-                  </Link>
+                                  <Link to={`/product/${product._id}`}>
+                  <Button variant="ghost" size="lg" className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                    QUICK VIEW
+                  </Button>
+                </Link>
                 </div>
               </div>
 
@@ -116,16 +120,16 @@ const FeaturedProducts: React.FC = () => {
                 
                 <div className="flex items-center space-x-2">
                   <span className="text-xl font-semibold">
-                    ₹{product.price.toLocaleString()}
+                    ₹{(product.salePrice || product.basePrice).toLocaleString()}
                   </span>
-                  {product.originalPrice && (
+                  {product.salePrice && (
                     <span className="text-muted-foreground line-through">
-                      ₹{product.originalPrice.toLocaleString()}
+                      ₹{product.basePrice.toLocaleString()}
                     </span>
                   )}
                 </div>
 
-                <Link to={`/product/${product.id}`}>
+                <Link to={`/product/${product._id}`}>
                   <Button 
                     variant="outline" 
                     size="md" 

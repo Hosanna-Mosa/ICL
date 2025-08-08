@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag, User, Heart } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
+import { userAPI } from '@/utils/api';
 
-interface HeaderProps {
-  cartItemsCount?: number;
-}
-
-const Header: React.FC<HeaderProps> = ({ cartItemsCount = 0 }) => {
+const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const { cart } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +21,28 @@ const Header: React.FC<HeaderProps> = ({ cartItemsCount = 0 }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Fetch wishlist count when authenticated
+  useEffect(() => {
+    const fetchWishlistCount = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await userAPI.getWishlist();
+          if (response.success) {
+            setWishlistCount(response.data.wishlist.length);
+          }
+        } catch (error) {
+          console.error('Error fetching wishlist count:', error);
+          // Set to 0 if API fails
+          setWishlistCount(0);
+        }
+      } else {
+        setWishlistCount(0);
+      }
+    };
+
+    fetchWishlistCount();
+  }, [isAuthenticated]);
 
   const navItems = [
     { label: 'SHOP', href: '/shop', dropdown: ['NEW DROPS', 'HOODIES', 'TEES', 'BOTTOMS', 'ACCESSORIES'] },
@@ -92,10 +116,15 @@ const Header: React.FC<HeaderProps> = ({ cartItemsCount = 0 }) => {
           <div className="flex items-center space-x-4">
             <Link 
               to="/wishlist" 
-              className="p-2 hover:text-accent transition-colors duration-300"
+              className="relative p-2 hover:text-accent transition-colors duration-300"
               aria-label="Wishlist"
             >
               <Heart size={20} />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
             </Link>
             {/* TODO: Add authentication state management */}
             <Link 
@@ -111,9 +140,9 @@ const Header: React.FC<HeaderProps> = ({ cartItemsCount = 0 }) => {
               aria-label="Shopping cart"
             >
               <ShoppingBag size={20} />
-              {cartItemsCount > 0 && (
+              {cart && cart.itemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartItemsCount}
+                  {cart.itemCount}
                 </span>
               )}
             </Link>

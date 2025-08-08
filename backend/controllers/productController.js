@@ -97,7 +97,24 @@ export const getProducts = asyncHandler(async (req, res) => {
 // @route   GET /api/products/:id
 // @access  Public
 export const getProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id);
+  let product = null;
+  const { id } = req.params;
+
+  // Check if it's a MongoDB ObjectId
+  const mongoIdRegex = /^[0-9a-fA-F]{24}$/;
+  if (mongoIdRegex.test(id)) {
+    product = await Product.findById(id);
+  } else {
+    // Handle numeric IDs (for frontend mock data compatibility)
+    const numericId = parseInt(id);
+    if (!isNaN(numericId)) {
+      // Try to find product by position in database (for demo purposes)
+      const products = await Product.find({ isActive: true }).sort({ createdAt: 1 });
+      if (numericId > 0 && numericId <= products.length) {
+        product = products[numericId - 1];
+      }
+    }
+  }
 
   if (!product) {
     return res.status(404).json({

@@ -298,4 +298,6 @@ export const seedProducts = async () => {
   }
 };
 
+seedProducts();
+
 export default seedProducts;
