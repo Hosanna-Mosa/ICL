@@ -179,3 +179,9 @@
 {"level":"info","message":"API Request","method":"POST","responseTime":"388.517","status":"200","timestamp":"2025-08-08 19:22:45","url":"/api/auth/login"}
 {"level":"info","message":"POST /api/auth/login 200 388.517ms","source":"morgan","timestamp":"2025-08-08 19:22:45"}
 {"duration":"392ms","level":"info","message":"Request completed","method":"POST","status":200,"timestamp":"2025-08-08 19:22:45","url":"/api/auth/login"}
+{"level":"info","message":"API Request","method":"POST","responseTime":"1213.222","status":"201","timestamp":"2025-08-08 19:43:17","url":"/api/auth/register"}
+{"level":"info","message":"POST /api/auth/register 201 1213.222ms","source":"morgan","timestamp":"2025-08-08 19:43:17"}
+{"duration":"1233ms","level":"info","message":"Request completed","method":"POST","status":201,"timestamp":"2025-08-08 19:43:17","url":"/api/auth/register"}
+{"level":"info","message":"API Request","method":"POST","responseTime":"1729.009","status":"200","timestamp":"2025-08-08 19:53:49","url":"/api/auth/login"}
+{"level":"info","message":"POST /api/auth/login 200 1729.009ms","source":"morgan","timestamp":"2025-08-08 19:53:49"}
+{"duration":"1733ms","level":"info","message":"Request completed","method":"POST","status":200,"timestamp":"2025-08-08 19:53:49","url":"/api/auth/login"}
