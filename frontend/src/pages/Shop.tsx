@@ -203,33 +203,7 @@ const Shop: React.FC = () => {
               </div>
 
               {/* Products Grid */}
-              <div className={`grid gap-6 ${
-                viewMode === 'grid' 
-                  ? 'grid-cols-2 md:grid-cols-2 lg:grid-cols-3' 
-                  : 'grid-cols-1'
-              }`}>
-                {filteredProducts.map(product => (
-                  <div key={product.id} className="card-product group">
-                    <div className="relative overflow-hidden aspect-square bg-muted">
-                      <img 
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                      />
-                      
-                      {/* Badges */}
-                      <div className="absolute top-4 left-4 flex flex-col gap-2">
-                        {product.isNew && (
-                          <span className="bg-accent text-accent-foreground px-3 py-1 text-xs font-medium tracking-widest uppercase">
-                            NEW
-                          </span>
-                        )}
-                        {product.originalPrice && (
-                          <span className="bg-destructive text-destructive-foreground px-3 py-1 text-xs font-medium tracking-widest uppercase">
-                            SALE
-                          </span>
-                        )}
-                      </div>
+             
 
                       {/* Wishlist Button */}
                       <button 
