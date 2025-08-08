@@ -209,6 +209,7 @@ const Shop: React.FC = () => {
               </div>
 
               {/* Products Grid */}
+
               {loading ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -242,6 +243,7 @@ const Shop: React.FC = () => {
                             </span>
                           )}
                         </div>
+
 
                         {/* Wishlist Button */}
                         <button 

@@ -4,6 +4,13 @@ import Footer from '@/components/Layout/Footer';
 import lookbookImage from '@/assets/lookbook-1.jpg';
 
 const Lookbook: React.FC = () => {
+  // Custom styles for desktop masonry layout
+  const getDesktopHeight = (index: number) => {
+    if (index % 3 === 0) return '600px';
+    if (index % 4 === 1) return '500px';
+    return '400px';
+  };
+
   const lookbookItems = [
     {
       id: 1,
@@ -51,6 +58,15 @@ const Lookbook: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <style>
+        {`
+          @media (min-width: 768px) {
+            .desktop-masonry {
+              height: var(--desktop-height) !important;
+            }
+          }
+        `}
+      </style>
       <Header />
       
       {/* Hero Section */}
@@ -74,17 +90,17 @@ const Lookbook: React.FC = () => {
           </h2>
           
           {/* Masonry Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {lookbookItems.map((item, index) => (
-              <div 
-                key={item.id} 
-                className={`group relative overflow-hidden bg-card ${
-                  index % 3 === 0 ? 'md:row-span-2' : ''
-                } ${index % 4 === 1 ? 'lg:row-span-2' : ''}`}
-                style={{
-                  height: index % 3 === 0 ? '600px' : index % 4 === 1 ? '500px' : '400px'
-                }}
-              >
+                             <div 
+                 key={item.id} 
+                 className={`group relative overflow-hidden bg-card h-80 md:h-auto desktop-masonry ${
+                   index % 3 === 0 ? 'md:row-span-2' : ''
+                 } ${index % 4 === 1 ? 'lg:row-span-2' : ''}`}
+                 style={{
+                   '--desktop-height': getDesktopHeight(index)
+                 } as React.CSSProperties}
+               >
                 <div className="relative h-full overflow-hidden">
                   <img 
                     src={item.image} 
@@ -94,18 +110,18 @@ const Lookbook: React.FC = () => {
                   
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300">
-                    <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      <h3 className="text-white font-bold text-xl mb-2">
+                    <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      <h3 className="text-white font-bold text-lg md:text-xl mb-1 md:mb-2">
                         {item.title}
                       </h3>
-                      <p className="text-white/90 text-sm mb-4">
+                      <p className="text-white/90 text-xs md:text-sm mb-2 md:mb-4">
                         {item.description}
                       </p>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1 md:gap-2">
                         {item.products.map((product, idx) => (
                           <span 
                             key={idx}
-                            className="px-3 py-1 bg-white/20 text-white text-xs rounded-full"
+                            className="px-2 md:px-3 py-0.5 md:py-1 bg-white/20 text-white text-xs rounded-full"
                           >
                             {product}
                           </span>
@@ -127,7 +143,7 @@ const Lookbook: React.FC = () => {
             URBAN FITS
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {lookbookItems.slice(0, 4).map((item) => (
               <div key={item.id} className="group relative overflow-hidden bg-card h-80">
                 <img 

@@ -55,7 +55,7 @@ const Header: React.FC = () => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full ${
         isScrolled ? 'bg-background/95 backdrop-blur-sm shadow-soft' : 'bg-transparent'
       }`}
     >

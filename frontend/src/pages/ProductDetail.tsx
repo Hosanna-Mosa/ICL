@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, ShoppingCart, Plus, Minus, Ruler, Star, Loader2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import Button from '@/components/UI/ICLButton';
@@ -51,6 +52,11 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const productImages = [heroImage, productHoodie, productTee, productPants];
   const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
@@ -244,7 +250,7 @@ const ProductDetail = () => {
       <Header />
       
       <main className="pt-20">
-        <div className="container mx-auto px-4 py-8">
+        <div className="w-full px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             
             {/* Image Gallery Section */}
@@ -309,6 +315,9 @@ const ProductDetail = () => {
               </div>
 
               {/* Price */}
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-3xl font-bold text-foreground">₹{product.price.toLocaleString()}</span>
+                <span className="text-lg text-muted-foreground line-through">₹{product.originalPrice.toLocaleString()}</span>
 
                 <span className="px-2 py-1 bg-accent text-accent-foreground text-sm font-medium rounded">
                   {Math.round((1 - (currentProduct.salePrice || currentProduct.basePrice) / currentProduct.basePrice) * 100)}% OFF
@@ -357,7 +366,7 @@ const ProductDetail = () => {
                   </Dialog>
                 </div>
                 
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                   {sizes.map((size) => (
                     <button
                       key={size}
@@ -462,7 +471,7 @@ const ProductDetail = () => {
           {/* Related Products */}
           <section className="mt-16">
             <h2 className="text-section font-bold mb-8 text-center">You May Also Like</h2>
-            <Carousel className="w-full max-w-5xl mx-auto">
+            <Carousel className="w-full">
               <CarouselContent>
                 {relatedProducts.map((relatedProduct) => (
                   <CarouselItem key={relatedProduct.id} className="md:basis-1/2 lg:basis-1/3">
@@ -490,7 +499,7 @@ const ProductDetail = () => {
       </main>
 
       {/* Mobile Sticky Add to Cart */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-50">
         <Button
           variant="hero"
           size="lg"
