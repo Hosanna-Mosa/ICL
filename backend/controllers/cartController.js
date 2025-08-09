@@ -60,6 +60,9 @@ export const addToCart = asyncHandler(async (req, res) => {
   // Add item to cart
   await cart.addItem(productId, size, quantity, currentPrice);
 
+  // Ensure populated cart is returned
+  await cart.populate("items.product");
+
   console.log("Item added to cart", {
     userId: req.user.id,
     productId,
@@ -105,7 +108,10 @@ export const updateCartItem = asyncHandler(async (req, res) => {
   const cart = await Cart.getOrCreateCart(req.user.id);
 
   // Update item quantity
-  const updatedCart = await cart.updateItemQuantity(productId, size, quantity);
+  let updatedCart = await cart.updateItemQuantity(productId, size, quantity);
+
+  // Ensure populated cart is returned
+  updatedCart = await updatedCart.populate("items.product");
 
   console.log("Cart item updated", {
     userId: req.user.id,
@@ -132,7 +138,10 @@ export const removeFromCart = asyncHandler(async (req, res) => {
   const cart = await Cart.getOrCreateCart(req.user.id);
 
   // Remove item
-  const updatedCart = await cart.removeItem(productId, size);
+  let updatedCart = await cart.removeItem(productId, size);
+
+  // Ensure populated cart is returned
+  updatedCart = await updatedCart.populate("items.product");
 
   console.log("Item removed from cart", {
     userId: req.user.id,
@@ -153,7 +162,10 @@ export const removeFromCart = asyncHandler(async (req, res) => {
 export const clearCart = asyncHandler(async (req, res) => {
   const cart = await Cart.getOrCreateCart(req.user.id);
 
-  const updatedCart = await cart.clearCart();
+  let updatedCart = await cart.clearCart();
+
+  // Ensure populated cart is returned (items array will be empty, but keep response consistent)
+  updatedCart = await updatedCart.populate("items.product");
 
   console.log("Cart cleared", { userId: req.user.id });
 
@@ -198,6 +210,7 @@ export const applyCoupon = asyncHandler(async (req, res) => {
     coupon.discount > 0 ? (cart.subtotal * coupon.discount) / 100 : 0;
 
   await cart.applyCoupon(couponCode, discountAmount);
+  await cart.populate("items.product");
 
   console.log("Coupon applied", {
     userId: req.user.id,
@@ -219,6 +232,7 @@ export const removeCoupon = asyncHandler(async (req, res) => {
   const cart = await Cart.getOrCreateCart(req.user.id);
 
   await cart.removeCoupon();
+  await cart.populate("items.product");
 
   console.log("Coupon removed", { userId: req.user.id });
 
@@ -256,6 +270,7 @@ export const applyCoinsDiscount = asyncHandler(async (req, res) => {
   const discountAmount = Math.min(coinsUsed, cart.subtotal);
 
   await cart.applyCoinsDiscount(coinsUsed, discountAmount);
+  await cart.populate("items.product");
 
   console.log("Coins discount applied", {
     userId: req.user.id,
@@ -277,6 +292,7 @@ export const removeCoinsDiscount = asyncHandler(async (req, res) => {
   const cart = await Cart.getOrCreateCart(req.user.id);
 
   await cart.removeCoinsDiscount();
+  await cart.populate("items.product");
 
   console.log("Coins discount removed", { userId: req.user.id });
 

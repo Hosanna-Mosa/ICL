@@ -11,7 +11,7 @@ import {
   removeCoinsDiscount,
 } from "../controllers/cartController.js";
 import { protect } from "../middlewares/auth.js";
-import { validateCartItem } from "../middlewares/validation.js";
+import { validateCartItem, validateCartItemUpdate } from "../middlewares/validation.js";
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.use(protect);
 // Cart management
 router.get("/", getCart);
 router.post("/", validateCartItem, addToCart);
-router.put("/:productId", validateCartItem, updateCartItem);
+router.put("/:productId", validateCartItemUpdate, updateCartItem);
 router.delete("/:productId", removeFromCart);
 router.delete("/", clearCart);
 

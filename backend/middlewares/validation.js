@@ -93,6 +93,18 @@ export const validateCartItem = [
   validate,
 ];
 
+// Cart item update validation (productId comes from route param, quantity can be 0 to remove)
+export const validateCartItemUpdate = [
+  param("productId").isMongoId().withMessage("Invalid product ID"),
+  body("size")
+    .isIn(["XS", "S", "M", "L", "XL", "XXL", "XXXL"])
+    .withMessage("Invalid size"),
+  body("quantity")
+    .isInt({ min: 0, max: 10 })
+    .withMessage("Quantity must be between 0 and 10"),
+  validate,
+];
+
 // Order validation
 export const validateOrder = [
   body("shippingAddress.firstName")
@@ -175,6 +187,22 @@ export const validateId = [
         return true;
       }
       throw new Error("Invalid ID format - must be MongoDB ObjectId or numeric ID");
+    }),
+  validate,
+];
+
+// ProductId parameter validation for routes using :productId
+export const validateProductIdParam = [
+  param("productId")
+    .notEmpty()
+    .withMessage("Product ID is required")
+    .custom((value) => {
+      const mongoIdRegex = /^[0-9a-fA-F]{24}$/;
+      const numericRegex = /^[0-9]+$/;
+      if (mongoIdRegex.test(value) || numericRegex.test(value)) {
+        return true;
+      }
+      throw new Error("Invalid product ID format - must be MongoDB ObjectId or numeric ID");
     }),
   validate,
 ];

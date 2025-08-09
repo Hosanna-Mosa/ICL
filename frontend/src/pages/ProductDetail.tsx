@@ -59,8 +59,6 @@ const ProductDetail = () => {
   }, []);
 
   const productImages = [heroImage, productHoodie, productTee, productPants];
-  const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
-  const unavailableSizes = ['S', 'XXL'];
 
   // Fetch product data
   useEffect(() => {
@@ -128,6 +126,17 @@ const ProductDetail = () => {
       if (isWishlisted) {
         await userAPI.removeFromWishlist(product._id);
         setIsWishlisted(false);
+        // Notify header to update wishlist count
+        try {
+          const refreshed = await userAPI.getWishlist();
+          if (refreshed.success) {
+            window.dispatchEvent(
+              new CustomEvent('wishlist:updated', {
+                detail: { count: refreshed.data.wishlist.length },
+              })
+            );
+          }
+        } catch {}
         toast({
           title: "Removed from wishlist",
           description: "Product removed from your wishlist",
@@ -135,6 +144,17 @@ const ProductDetail = () => {
       } else {
         await userAPI.addToWishlist(product._id);
         setIsWishlisted(true);
+        // Notify header to update wishlist count
+        try {
+          const refreshed = await userAPI.getWishlist();
+          if (refreshed.success) {
+            window.dispatchEvent(
+              new CustomEvent('wishlist:updated', {
+                detail: { count: refreshed.data.wishlist.length },
+              })
+            );
+          }
+        } catch {}
         toast({
           title: "Added to wishlist",
           description: "Product added to your wishlist",
@@ -211,6 +231,18 @@ const ProductDetail = () => {
   // Use product data only
   const currentProduct = product;
 
+  // Get current price based on selected size
+  const getCurrentPrice = () => {
+    if (!currentProduct) return 0;
+    
+    if (selectedSize && currentProduct.sizes) {
+      const sizeObj = currentProduct.sizes.find(s => s.size === selectedSize);
+      if (sizeObj) return sizeObj.price;
+    }
+    
+    return currentProduct.salePrice || currentProduct.basePrice;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -259,7 +291,11 @@ const ProductDetail = () => {
               <div className="relative overflow-hidden rounded-lg bg-surface">
                 <AspectRatio ratio={1}>
                   <img
-                    src={currentProduct.images[selectedImage]?.url || currentProduct.images[0]?.url || '/placeholder.svg'}
+                    src={
+                      currentProduct.images && currentProduct.images.length > 0
+                        ? (currentProduct.images[selectedImage]?.url || currentProduct.images[0]?.url || '/placeholder.svg')
+                        : '/placeholder.svg'
+                    }
                     alt={currentProduct.name}
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                   />
@@ -281,23 +317,25 @@ const ProductDetail = () => {
               </div>
 
               {/* Thumbnail Gallery */}
-              <div className="flex gap-3 overflow-x-auto">
-                {currentProduct.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                      selectedImage === index ? 'border-primary' : 'border-border'
-                    }`}
-                  >
-                    <img
-                      src={image.url}
-                      alt={image.alt || `${currentProduct.name} view ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
+              {currentProduct.images && currentProduct.images.length > 1 && (
+                <div className="flex gap-3 overflow-x-auto">
+                  {currentProduct.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
+                        selectedImage === index ? 'border-primary' : 'border-border'
+                      }`}
+                    >
+                      <img
+                        src={image.url || '/placeholder.svg'}
+                        alt={image.alt || `${currentProduct.name} view ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Product Info Section */}
@@ -316,12 +354,15 @@ const ProductDetail = () => {
 
               {/* Price */}
               <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-3xl font-bold text-foreground">₹{product.price.toLocaleString()}</span>
-                <span className="text-lg text-muted-foreground line-through">₹{product.originalPrice.toLocaleString()}</span>
-
-                <span className="px-2 py-1 bg-accent text-accent-foreground text-sm font-medium rounded">
-                  {Math.round((1 - (currentProduct.salePrice || currentProduct.basePrice) / currentProduct.basePrice) * 100)}% OFF
-                </span>
+                <span className="text-3xl font-bold text-foreground">₹{(currentProduct.salePrice || currentProduct.basePrice).toLocaleString()}</span>
+                {currentProduct.salePrice && (
+                  <span className="text-lg text-muted-foreground line-through">₹{currentProduct.basePrice.toLocaleString()}</span>
+                )}
+                {currentProduct.salePrice && (
+                  <span className="px-2 py-1 bg-accent text-accent-foreground text-sm font-medium rounded">
+                    {Math.round((1 - currentProduct.salePrice / currentProduct.basePrice) * 100)}% OFF
+                  </span>
+                )}
               </div>
 
               {/* Coins Notice */}
@@ -367,22 +408,27 @@ const ProductDetail = () => {
                 </div>
                 
                 <div className="flex gap-3 flex-wrap">
-                  {sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      disabled={unavailableSizes.includes(size)}
-                      className={`px-4 py-2 border rounded-lg font-medium transition-colors ${
-                        selectedSize === size
-                          ? 'border-primary bg-primary text-primary-foreground'
-                          : unavailableSizes.includes(size)
-                          ? 'border-border bg-muted text-muted-foreground cursor-not-allowed opacity-50'
-                          : 'border-border bg-background text-foreground hover:border-primary'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  {currentProduct.sizes && currentProduct.sizes.length > 0 ? (
+                    currentProduct.sizes.map((sizeObj) => (
+                      <button
+                        key={sizeObj.size}
+                        onClick={() => setSelectedSize(sizeObj.size)}
+                        disabled={sizeObj.stock === 0}
+                        className={`px-4 py-2 border rounded-lg font-medium transition-colors ${
+                          selectedSize === sizeObj.size
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : sizeObj.stock === 0
+                            ? 'border-border bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                            : 'border-border bg-background text-foreground hover:border-primary'
+                        }`}
+                      >
+                        {sizeObj.size}
+                        {sizeObj.stock === 0 && <span className="ml-1 text-xs">(Out of Stock)</span>}
+                      </button>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">No sizes available</p>
+                  )}
                 </div>
               </div>
 
@@ -425,7 +471,7 @@ const ProductDetail = () => {
                   ) : (
                     <>
                       <ShoppingCart className="w-5 h-5 mr-2" />
-                      Add to Cart - ₹{((currentProduct.salePrice || currentProduct.basePrice) * quantity).toLocaleString()}
+                      Add to Cart - ₹{(getCurrentPrice() * quantity).toLocaleString()}
                     </>
                   )}
                 </Button>
@@ -515,7 +561,7 @@ const ProductDetail = () => {
           ) : (
             <>
               <ShoppingCart className="w-5 h-5 mr-2" />
-              Add to Cart - ₹{((currentProduct.salePrice || currentProduct.basePrice) * quantity).toLocaleString()}
+              Add to Cart - ₹{(getCurrentPrice() * quantity).toLocaleString()}
             </>
           )}
         </Button>

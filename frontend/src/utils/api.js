@@ -272,9 +272,8 @@ export const userAPI = {
 
   // Remove item from wishlist
   removeFromWishlist: async (productId) => {
-    return await apiRequest("/user/wishlist", {
+    return await apiRequest(`/user/wishlist/${productId}`, {
       method: "DELETE",
-      body: JSON.stringify({ productId }),
     });
   },
 };
