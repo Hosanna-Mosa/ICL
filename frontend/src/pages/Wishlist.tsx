@@ -223,14 +223,11 @@ const Wishlist = () => {
       
       <main className="pt-20">
         <div className="container mx-auto px-4 py-8">
-          {/* Header */}
+          {/* Section Header */}
           <div className="mb-8">
-            <h1 className="text-hero font-bold mb-2">My Wishlist</h1>
-            <p className="text-muted-foreground">
-              {wishlistItems.length} {wishlistItems.length === 1 ? 'item' : 'items'} saved
-            </p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">MY WISHLIST</h1>
           </div>
-
+          
           {wishlistItems.length === 0 ? (
             /* Empty State */
             <div className="text-center py-16">

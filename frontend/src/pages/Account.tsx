@@ -443,10 +443,9 @@ const Account: React.FC = () => {
 
       <div className="pt-32 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-              My Account
-            </h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">MY ACCOUNT</h1>
             <Button
               onClick={handleLogout}
               variant="outline"

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
-import Button from '../UI/ICLButton';
-import { productsAPI } from '@/utils/api';
+import { Heart, Loader2 } from 'lucide-react';
+import { productsAPI, userAPI } from '@/utils/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface Product {
   _id: string;
@@ -18,11 +19,15 @@ interface Product {
 const FeaturedProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [wishlistItems, setWishlistItems] = useState<string[]>([]);
+  const [wishlistLoading, setWishlistLoading] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const response = await productsAPI.getAll({ featured: 'true', limit: '6' });
+        const response = await productsAPI.getAll({ featured: 'true', limit: '8' });
         if (response.success) {
           setProducts(response.data.products);
         }
@@ -35,6 +40,100 @@ const FeaturedProducts: React.FC = () => {
 
     fetchFeaturedProducts();
   }, []);
+
+  // Fetch wishlist when authenticated
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await userAPI.getWishlist();
+          if (response.success) {
+            const wishlistProductIds = response.data.wishlist.map((item: any) => item._id);
+            setWishlistItems(wishlistProductIds);
+          }
+        } catch (error) {
+          console.error('Error fetching wishlist:', error);
+        }
+      } else {
+        setWishlistItems([]);
+      }
+    };
+
+    fetchWishlist();
+  }, [isAuthenticated]);
+
+  // Handle wishlist toggle
+  const handleWishlistToggle = async (productId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save products to your wishlist",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setWishlistLoading(productId);
+      const isInWishlist = wishlistItems.includes(productId);
+
+      if (isInWishlist) {
+        // Remove from wishlist
+        await userAPI.removeFromWishlist(productId);
+        setWishlistItems(prev => prev.filter(id => id !== productId));
+        
+        // Update wishlist count in header
+        try {
+          const refreshed = await userAPI.getWishlist();
+          if (refreshed.success) {
+            window.dispatchEvent(
+              new CustomEvent('wishlist:updated', {
+                detail: { count: refreshed.data.wishlist.length },
+              })
+            );
+          }
+        } catch {}
+        
+        toast({
+          title: "Removed from wishlist",
+          description: "Product removed from your wishlist",
+        });
+      } else {
+        // Add to wishlist
+        await userAPI.addToWishlist(productId);
+        setWishlistItems(prev => [...prev, productId]);
+        
+        // Update wishlist count in header
+        try {
+          const refreshed = await userAPI.getWishlist();
+          if (refreshed.success) {
+            window.dispatchEvent(
+              new CustomEvent('wishlist:updated', {
+                detail: { count: refreshed.data.wishlist.length },
+              })
+            );
+          }
+        } catch {}
+        
+        toast({
+          title: "Added to wishlist",
+          description: "Product added to your wishlist",
+        });
+      }
+    } catch (error: any) {
+      console.error('Error toggling wishlist:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update wishlist",
+        variant: "destructive",
+      });
+    } finally {
+      setWishlistLoading(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -62,12 +161,12 @@ const FeaturedProducts: React.FC = () => {
           </p>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+        {/* Products Grid - Updated to match image style */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-3">
           {products.map((product) => (
-            <div key={product._id} className="card-product group">
+            <Link key={product._id} to={`/product/${product._id}`} className="group block">
               {/* Product Image */}
-              <div className="relative overflow-hidden aspect-square bg-muted">
+              <div className="relative overflow-hidden aspect-[4/5] bg-muted mb-1">
                 <img 
                   src={product.images[0]?.url || '/placeholder.svg'}
                   alt={product.name}
@@ -75,14 +174,14 @@ const FeaturedProducts: React.FC = () => {
                 />
                 
                 {/* Badges */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                <div className="absolute top-1 left-1 flex flex-col gap-1">
                   {product.isNew && (
-                    <span className="bg-accent text-accent-foreground px-3 py-1 text-xs font-medium tracking-widest uppercase">
+                    <span className="bg-accent text-accent-foreground px-1.5 py-0.5 text-xs font-medium tracking-widest uppercase">
                       NEW
                     </span>
                   )}
                   {product.salePrice && (
-                    <span className="bg-destructive text-destructive-foreground px-3 py-1 text-xs font-medium tracking-widest uppercase">
+                    <span className="bg-destructive text-destructive-foreground px-1.5 py-0.5 text-xs font-medium tracking-widest uppercase">
                       SALE
                     </span>
                   )}
@@ -90,65 +189,49 @@ const FeaturedProducts: React.FC = () => {
 
                 {/* Wishlist Button */}
                 <button 
-                  className="absolute top-4 right-4 p-2 bg-background/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-background hover:text-accent"
+                  className="absolute top-1 right-1 p-1 bg-background/80 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-background hover:text-accent z-10 disabled:opacity-50"
                   aria-label="Add to wishlist"
+                  onClick={(e) => handleWishlistToggle(product._id, e)}
+                  disabled={wishlistLoading === product._id}
                 >
-                  <Heart size={16} />
+                  {wishlistLoading === product._id ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <Heart 
+                      size={12} 
+                      className={wishlistItems.includes(product._id) ? 'fill-accent text-accent' : 'text-foreground'} 
+                    />
+                  )}
                 </button>
-
-                {/* Quick Add Overlay */}
-                <div className="absolute inset-0 bg-primary/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                  <Link to={`/product/${product._id}`}>
-                  <Button variant="ghost" size="lg" className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                    QUICK VIEW
-                  </Button>
-                </Link>
-                </div>
               </div>
 
-              {/* Product Info */}
-              <div className="p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-label text-muted-foreground">
-                    {product.category}
-                  </span>
-                </div>
-                
-                <h3 className="font-medium text-lg leading-tight">
+              {/* Product Info - Simplified */}
+              <div className="space-y-0">
+                <h3 className="font-medium text-xs leading-tight line-clamp-2">
                   {product.name}
                 </h3>
                 
-                <div className="flex items-center space-x-2">
-                  <span className="text-xl font-semibold">
+                <div className="flex items-center space-x-1 mt-0.5">
+                  <span className="text-sm font-semibold">
                     ₹{(product.salePrice || product.basePrice).toLocaleString()}
                   </span>
                   {product.salePrice && (
-                    <span className="text-muted-foreground line-through">
+                    <span className="text-muted-foreground line-through text-xs">
                       ₹{product.basePrice.toLocaleString()}
                     </span>
                   )}
                 </div>
-
-                <Link to={`/product/${product._id}`}>
-                  <Button 
-                    variant="outline" 
-                    size="md" 
-                    className="w-full mt-4 hover:bg-primary hover:text-primary-foreground hover:border-primary"
-                  >
-                    ADD TO CART
-                  </Button>
-                </Link>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
         {/* View All CTA */}
         <div className="text-center mt-12 lg:mt-16">
           <Link to="/shop">
-            <Button variant="accent" size="lg">
+            <button className="bg-primary text-primary-foreground px-8 py-3 font-medium tracking-widest uppercase hover:bg-primary/90 transition-colors">
               EXPLORE ALL PRODUCTS
-            </Button>
+            </button>
           </Link>
         </div>
       </div>

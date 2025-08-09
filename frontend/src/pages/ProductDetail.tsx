@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, ShoppingCart, Plus, Minus, Ruler, Star, Loader2 } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { Heart, ShoppingCart, Plus, Minus, Ruler, Star, Loader2, ArrowRight } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
@@ -40,8 +40,9 @@ interface Product {
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
   const { toast } = useToast();
   
   const [product, setProduct] = useState<Product | null>(null);
@@ -52,10 +53,36 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
+  const [isInCart, setIsInCart] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
+
+  // Handle scroll detection
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const productDetailsSection = document.querySelector('.product-details-section');
+      
+      if (productDetailsSection) {
+        const sectionRect = productDetailsSection.getBoundingClientRect();
+        const sectionBottom = sectionRect.bottom;
+        const windowHeight = window.innerHeight;
+        
+        // Show sticky button when scrolling past 100px and hide when past product details section
+        const shouldShow = scrollTop > 100 && sectionBottom > windowHeight;
+        setIsScrolled(shouldShow);
+      } else {
+        // Fallback: show after 100px scroll
+        setIsScrolled(scrollTop > 100);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const productImages = [heroImage, productHoodie, productTee, productPants];
@@ -172,6 +199,18 @@ const ProductDetail = () => {
     }
   };
 
+  // Check if product is in cart
+  useEffect(() => {
+    if (cart && product) {
+      const productInCart = cart.items.some(
+        item => item.product._id === product._id && item.size === selectedSize
+      );
+      setIsInCart(productInCart);
+    } else {
+      setIsInCart(false);
+    }
+  }, [cart, product, selectedSize]);
+
   // Handle add to cart
   const handleAddToCart = async () => {
     if (!product || !selectedSize) {
@@ -198,6 +237,7 @@ const ProductDetail = () => {
       if (success) {
         // Reset quantity after successful add
         setQuantity(1);
+        setIsInCart(true);
       }
     } catch (error: any) {
       console.error('Error adding to cart:', error);
@@ -209,6 +249,11 @@ const ProductDetail = () => {
     } finally {
       setAddToCartLoading(false);
     }
+  };
+
+  // Handle go to cart
+  const handleGoToCart = () => {
+    navigate('/cart');
   };
 
   const relatedProducts = [
@@ -283,7 +328,7 @@ const ProductDetail = () => {
       
       <main className="pt-20">
         <div className="w-full px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 product-details-section">
             
             {/* Image Gallery Section */}
             <div className="space-y-4">
@@ -454,8 +499,20 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              {/* Add to Cart Button */}
-              <div className="space-y-3">
+              {/* Add to Cart Button - Desktop Only */}
+              <div className="space-y-3 lg:block hidden">
+                {isInCart ? (
+                  <Button
+                    variant="hero"
+                    size="lg"
+                    className="w-full"
+                    onClick={handleGoToCart}
+                  >
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    Go to Cart
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                ) : (
                 <Button
                   variant="hero"
                   size="lg"
@@ -475,6 +532,7 @@ const ProductDetail = () => {
                     </>
                   )}
                 </Button>
+                )}
                 
                 <div className="text-sm text-muted-foreground">
                   <p>• Free shipping on UPI payments</p>
@@ -544,8 +602,23 @@ const ProductDetail = () => {
         </div>
       </main>
 
-      {/* Mobile Sticky Add to Cart */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-50">
+      {/* Sticky Add to Cart - Desktop and Mobile */}
+      <div className={`fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-50 transition-transform duration-300 ${
+        isScrolled ? 'translate-y-0' : 'translate-y-full'
+      }`}>
+        <div className="max-w-7xl mx-auto">
+          {isInCart ? (
+            <Button
+              variant="hero"
+              size="lg"
+              className="w-full"
+              onClick={handleGoToCart}
+            >
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              Go to Cart
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          ) : (
         <Button
           variant="hero"
           size="lg"
@@ -565,6 +638,8 @@ const ProductDetail = () => {
             </>
           )}
         </Button>
+          )}
+        </div>
       </div>
 
       <Footer />

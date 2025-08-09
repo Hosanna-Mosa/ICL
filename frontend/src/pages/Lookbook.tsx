@@ -69,16 +69,10 @@ const Lookbook: React.FC = () => {
       </style>
       <Header />
       
-      {/* Hero Section */}
-      <section className="pt-32 pb-16 px-4">
+      {/* Section Header */}
+      <section className="pt-32 pb-8 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-            LOOKBOOK
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Street inspirations and urban fits showcasing the ICL lifestyle. 
-            Discover how to style our premium streetwear pieces.
-          </p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">LOOKBOOK</h1>
         </div>
       </section>
 
