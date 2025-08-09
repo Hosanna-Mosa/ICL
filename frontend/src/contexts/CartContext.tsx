@@ -4,6 +4,7 @@ import React, {
   useState,
   ReactNode,
   useEffect,
+  useRef,
 } from "react";
 import { useAuth } from "./AuthContext";
 import { cartAPI } from "@/utils/api";
@@ -41,7 +42,6 @@ interface CartContextType {
   cart: Cart | null;
   loading: boolean;
   addToCart: (productId: string, size: string, quantity: number) => Promise<boolean>;
-  updateCartItem: (productId: string, size: string, quantity: number) => Promise<boolean>;
   removeFromCart: (productId: string, size: string) => Promise<boolean>;
   clearCart: () => Promise<boolean>;
   refreshCart: () => Promise<void>;
@@ -64,6 +64,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
+
+  // No quantity debounce state needed since quantity controls were removed
 
   // Fetch cart data when user is authenticated
   useEffect(() => {
@@ -118,80 +120,54 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       return false;
     }
 
-    try {
-      setLoading(true);
-      const response = await cartAPI.addToCart(productId, size, quantity);
-      if (response.success) {
-        setCart(response.data.cart);
-        toast({
-          title: "Added to cart",
-          description: "Item added to your cart successfully",
-        });
-        return true;
-      } else {
+    // Fire-and-forget API call to avoid UI lag
+    (async () => {
+      try {
+        const response = await cartAPI.addToCart(productId, size, quantity);
+        if (response.success) {
+          setCart(response.data.cart);
+          toast({
+            title: "Added to cart",
+            description: "Item added to your cart successfully",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: response.message || "Failed to add item to cart",
+            variant: "destructive",
+          });
+        }
+      } catch (error: any) {
+        console.error("Error adding to cart:", error);
         toast({
           title: "Error",
-          description: response.message || "Failed to add item to cart",
+          description: error.message || "Failed to add item to cart",
           variant: "destructive",
         });
-        return false;
       }
-    } catch (error: any) {
-      console.error("Error adding to cart:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add item to cart",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    })();
+
+    return true;
   };
 
-  const updateCartItem = async (productId: string, size: string, quantity: number): Promise<boolean> => {
-    try {
-      setLoading(true);
-      const response = await cartAPI.updateCartItem(productId, size, quantity);
-      if (response.success) {
-        setCart(response.data.cart);
-        return true;
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to update cart",
-          variant: "destructive",
-        });
-        return false;
-      }
-    } catch (error: any) {
-      console.error("Error updating cart:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update cart",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Quantity update functions removed with quantity controls
 
   const removeFromCart = async (productId: string, size: string): Promise<boolean> => {
     try {
-      setLoading(true);
       
       // Immediately remove item from local state for instant UI feedback
       if (cart) {
         const updatedItems = cart.items.filter(
           item => !(item.product._id === productId && item.size === size)
         );
+        const newSubtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const discounts = (cart.discountAmount || 0) + (cart.coinsDiscount || 0);
         const updatedCart = {
           ...cart,
           items: updatedItems,
           itemCount: updatedItems.reduce((sum, item) => sum + item.quantity, 0),
-          subtotal: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-          total: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+          subtotal: newSubtotal,
+          total: Math.max(0, newSubtotal - discounts)
         };
         setCart(updatedCart);
       }
@@ -226,13 +202,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       });
       return false;
     } finally {
-      setLoading(false);
     }
   };
 
   const clearCart = async (): Promise<boolean> => {
     try {
-      setLoading(true);
       
       // Immediately clear local state for instant UI feedback
       if (cart) {
@@ -279,13 +253,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       });
       return false;
     } finally {
-      setLoading(false);
     }
   };
 
   const applyCoupon = async (couponCode: string): Promise<boolean> => {
     try {
-      setLoading(true);
       const response = await cartAPI.applyCoupon(couponCode);
       if (response.success) {
         setCart(response.data.cart);
@@ -311,13 +283,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       });
       return false;
     } finally {
-      setLoading(false);
     }
   };
 
   const removeCoupon = async (): Promise<boolean> => {
     try {
-      setLoading(true);
       const response = await cartAPI.removeCoupon();
       if (response.success) {
         setCart(response.data.cart);
@@ -343,13 +313,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       });
       return false;
     } finally {
-      setLoading(false);
     }
   };
 
   const applyCoinsDiscount = async (coinsUsed: number): Promise<boolean> => {
     try {
-      setLoading(true);
       const response = await cartAPI.applyCoinsDiscount(coinsUsed);
       if (response.success) {
         setCart(response.data.cart);
@@ -375,13 +343,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       });
       return false;
     } finally {
-      setLoading(false);
     }
   };
 
   const removeCoinsDiscount = async (): Promise<boolean> => {
     try {
-      setLoading(true);
       const response = await cartAPI.removeCoinsDiscount();
       if (response.success) {
         setCart(response.data.cart);
@@ -407,7 +373,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       });
       return false;
     } finally {
-      setLoading(false);
     }
   };
 
@@ -415,7 +380,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     cart,
     loading: loading || initialLoading,
     addToCart,
-    updateCartItem,
     removeFromCart,
     clearCart,
     refreshCart,

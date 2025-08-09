@@ -92,10 +92,13 @@ cartSchema.index({ "items.product": 1 });
 
 // Method to add item to cart
 cartSchema.methods.addItem = async function (productId, size, quantity, price) {
-  const existingItem = this.items.find(
-    (item) =>
-      item.product.toString() === productId.toString() && item.size === size
-  );
+  const existingItem = this.items.find((item) => {
+    const itemProductId =
+      item.product && item.product._id
+        ? item.product._id.toString()
+        : item.product.toString();
+    return itemProductId === productId.toString() && item.size === size;
+  });
 
   if (existingItem) {
     existingItem.quantity = Math.min(10, existingItem.quantity + quantity);
@@ -119,10 +122,13 @@ cartSchema.methods.updateItemQuantity = async function (
   size,
   quantity
 ) {
-  const item = this.items.find(
-    (item) =>
-      item.product.toString() === productId.toString() && item.size === size
-  );
+  const item = this.items.find((item) => {
+    const itemProductId =
+      item.product && item.product._id
+        ? item.product._id.toString()
+        : item.product.toString();
+    return itemProductId === productId.toString() && item.size === size;
+  });
 
   if (!item) {
     throw new Error("Item not found in cart");
@@ -149,10 +155,13 @@ cartSchema.methods.removeItem = async function (productId, size) {
   console.log('Before filtering - items count:', this.items.length);
   console.log('Items before:', this.items.map(item => ({ product: item.product.toString(), size: item.size })));
   
-  this.items = this.items.filter(
-    (item) =>
-      !(item.product.toString() === productId.toString() && item.size === size)
-  );
+  this.items = this.items.filter((item) => {
+    const itemProductId =
+      item.product && item.product._id
+        ? item.product._id.toString()
+        : item.product.toString();
+    return !(itemProductId === productId.toString() && item.size === size);
+  });
   
   console.log('After filtering - items count:', this.items.length);
   console.log('Items after:', this.items.map(item => ({ product: item.product.toString(), size: item.size })));

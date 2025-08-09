@@ -1,39 +1,59 @@
 import React, { useState } from 'react';
-import { Minus, Plus, Trash2, ShoppingBag, Loader2, X } from 'lucide-react';
+import { Trash2, ShoppingBag, Loader2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/UI/button';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/UI/toast';
 
 const Cart: React.FC = () => {
-  const { cart, loading, updateCartItem, removeFromCart, clearCart } = useCart();
+  const { cart, loading, removeFromCart, clearCart, addToCart } = useCart();
   const { isAuthenticated } = useAuth();
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
   const [clearingCart, setClearingCart] = useState(false);
+  const { toast } = useToast();
 
-  const handleUpdateQuantity = async (productId: string, size: string, newQuantity: number) => {
-    const itemKey = `${productId}-${size}`;
-    setUpdatingItems(prev => new Set(prev).add(itemKey));
-    
-    try {
-      await updateCartItem(productId, size, newQuantity);
-    } finally {
-      setUpdatingItems(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(itemKey);
-        return newSet;
-      });
-    }
-  };
+  
 
   const handleRemoveItem = async (productId: string, size: string) => {
     const itemKey = `${productId}-${size}`;
     setUpdatingItems(prev => new Set(prev).add(itemKey));
+    const removedItem = cart?.items.find(
+      (i) => i.product._id === productId && i.size === size
+    );
+    const removedQuantity = removedItem?.quantity ?? 1;
+    const removedName = removedItem?.product.name ?? 'Item';
     
     try {
-      await removeFromCart(productId, size);
+      const success = await removeFromCart(productId, size);
+      if (success) {
+        toast({
+          title: 'Removed from cart',
+          description: `${removedName} removed from your cart`,
+          action: (
+            <ToastAction
+              altText="Undo"
+              onClick={async () => {
+                try {
+                  await addToCart(productId, size, removedQuantity);
+                } catch (e: any) {
+                  console.error('Undo add to cart failed:', e);
+                  toast({
+                    title: 'Error',
+                    description: e?.message || 'Failed to undo remove',
+                    variant: 'destructive',
+                  });
+                }
+              }}
+            >
+              Undo
+            </ToastAction>
+          ),
+        });
+      }
     } finally {
       setUpdatingItems(prev => {
         const newSet = new Set(prev);
@@ -170,7 +190,7 @@ const Cart: React.FC = () => {
                 {cart.items.map((item) => {
                   const itemKey = `${item.product._id}-${item.size}`;
                   const isUpdating = updatingItems.has(itemKey);
-                  const currentPrice = item.product.salePrice || item.product.basePrice;
+                  const currentPrice = item.price;
                   
                   return (
                     <div key={itemKey} className="bg-card p-6 shadow-soft">
@@ -196,37 +216,8 @@ const Cart: React.FC = () => {
                             </p>
                           </div>
                           
-                          {/* Quantity Controls */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <span className="text-sm text-muted-foreground">Qty:</span>
-                              <div className="flex items-center border rounded">
-                                <button
-                                  onClick={() => handleUpdateQuantity(item.product._id, item.size, item.quantity - 1)}
-                                  disabled={isUpdating}
-                                  className="p-2 hover:bg-muted transition-colors disabled:opacity-50"
-                                >
-                                  {isUpdating ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <Minus className="w-4 h-4" />
-                                  )}
-                                </button>
-                                <span className="px-4 py-2 font-medium">{item.quantity}</span>
-                                <button
-                                  onClick={() => handleUpdateQuantity(item.product._id, item.size, item.quantity + 1)}
-                                  disabled={isUpdating}
-                                  className="p-2 hover:bg-muted transition-colors disabled:opacity-50"
-                                >
-                                  {isUpdating ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <Plus className="w-4 h-4" />
-                                  )}
-                                </button>
-                              </div>
-                            </div>
-                            
+                          {/* Actions */}
+                          <div className="flex items-center justify-end">
                             <button
                               onClick={() => handleRemoveItem(item.product._id, item.size)}
                               disabled={isUpdating}
@@ -244,7 +235,7 @@ const Cart: React.FC = () => {
                           {/* Subtotal */}
                           <div className="text-right">
                             <p className="font-bold text-foreground">
-                              ₹{(currentPrice * item.quantity).toLocaleString()}
+                              ₹{(item.price * item.quantity).toLocaleString()}
                             </p>
                           </div>
                         </div>

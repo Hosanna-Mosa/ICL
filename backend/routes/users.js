@@ -13,7 +13,7 @@ import {
   updateUser,
 } from "../controllers/userController.js";
 import { protect, authorize } from "../middlewares/auth.js";
-import { validateId, validateCoins } from "../middlewares/validation.js";
+import { validateId, validateCoins, validateProductIdParam } from "../middlewares/validation.js";
 
 const router = express.Router();
 
@@ -24,7 +24,7 @@ router.get("/profile", getUserProfile);
 router.put("/profile", updateUserProfile);
 router.get("/wishlist", getWishlist);
 router.post("/wishlist", addToWishlist);
-router.delete("/wishlist/:productId", validateId, removeFromWishlist);
+router.delete("/wishlist/:productId", validateProductIdParam, removeFromWishlist);
 router.get("/coins", getUserCoins);
 router.post("/coins/redeem", validateCoins, redeemCoins);
 

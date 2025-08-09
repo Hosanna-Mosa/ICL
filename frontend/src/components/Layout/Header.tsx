@@ -44,6 +44,20 @@ const Header: React.FC = () => {
     fetchWishlistCount();
   }, [isAuthenticated]);
 
+  // React to wishlist updates across the app
+  useEffect(() => {
+    const handleWishlistUpdated = (e: Event) => {
+      const custom = e as CustomEvent<{ count: number }>;
+      if (typeof custom.detail?.count === 'number') {
+        setWishlistCount(custom.detail.count);
+      }
+    };
+    window.addEventListener('wishlist:updated', handleWishlistUpdated as EventListener);
+    return () => {
+      window.removeEventListener('wishlist:updated', handleWishlistUpdated as EventListener);
+    };
+  }, []);
+
   const navItems = [
     { label: 'SHOP', href: '/shop', dropdown: ['NEW DROPS', 'HOODIES', 'TEES', 'BOTTOMS', 'ACCESSORIES'] },
     { label: 'LOOKBOOK', href: '/lookbook' },

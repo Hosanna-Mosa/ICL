@@ -7,6 +7,8 @@ import Button from '@/components/UI/ICLButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { userAPI } from '@/utils/api';
 import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/UI/toast';
+import { useCart } from '@/contexts/CartContext';
 
 interface WishlistItem {
   _id: string;
@@ -19,14 +21,16 @@ interface WishlistItem {
   reviewCount: number;
   category: string;
   isInStock: boolean;
+  sizes?: Array<{ size: string; stock: number; price: number }>;
 }
 
 const Wishlist = () => {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingItem, setRemovingItem] = useState<string | null>(null);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -42,13 +46,18 @@ const Wishlist = () => {
       const response = await userAPI.getWishlist();
       if (response.success) {
         setWishlistItems(response.data.wishlist);
+        window.dispatchEvent(
+          new CustomEvent('wishlist:updated', {
+            detail: { count: response.data.wishlist.length },
+          })
+        );
       }
     } catch (error: any) {
       console.error('Error fetching wishlist:', error);
-      // Show demo message instead of error
       toast({
-        title: "Demo Mode",
-        description: "Wishlist is in demo mode. Backend not connected.",
+        title: "Error",
+        description: error.message || "Failed to load wishlist",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -59,40 +68,92 @@ const Wishlist = () => {
     try {
       setRemovingItem(productId);
       const response = await userAPI.removeFromWishlist(productId);
-      
       if (response.success) {
-        setWishlistItems(prev => prev.filter(item => item._id !== productId));
+        // Use server response for source of truth
+        const updated = response.data.wishlist || [];
+        setWishlistItems(updated);
+        window.dispatchEvent(
+          new CustomEvent('wishlist:updated', {
+            detail: { count: updated.length },
+          })
+        );
         toast({
-          title: "Success",
-          description: "Product removed from wishlist",
+          title: "Removed from wishlist",
+          description: "Item removed.",
+          action: (
+            <ToastAction
+              altText="Undo"
+              onClick={async () => {
+                try {
+                  await userAPI.addToWishlist(productId);
+                  // Refresh list and count
+                  const refreshed = await userAPI.getWishlist();
+                  if (refreshed.success) {
+                    setWishlistItems(refreshed.data.wishlist);
+                    window.dispatchEvent(
+                      new CustomEvent('wishlist:updated', {
+                        detail: { count: refreshed.data.wishlist.length },
+                      })
+                    );
+                  }
+                } catch (e: any) {
+                  console.error('Undo failed:', e);
+                  toast({
+                    title: 'Error',
+                    description: e?.message || 'Failed to undo remove',
+                    variant: 'destructive',
+                  });
+                }
+              }}
+            >
+              Undo
+            </ToastAction>
+          ),
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to remove product from wishlist",
+          variant: "destructive",
         });
       }
     } catch (error: any) {
       console.error('Error removing from wishlist:', error);
-      // Remove from UI even if API fails
-      setWishlistItems(prev => prev.filter(item => item._id !== productId));
       toast({
-        title: "Demo Mode",
-        description: "Product removed from wishlist (demo mode)",
+        title: "Error",
+        description: error.message || "Failed to remove product from wishlist",
+        variant: "destructive",
       });
     } finally {
       setRemovingItem(null);
     }
   };
 
-  const addToCart = async (productId: string) => {
+  const addWishlistItemToCart = async (product: WishlistItem) => {
     try {
-      // TODO: Implement add to cart functionality
-      toast({
-        title: "Success",
-        description: "Product added to cart",
-      });
+      // Pick the first available size with stock > 0
+      const availableSize = product.sizes?.find((s) => s.stock > 0)?.size;
+      if (!availableSize) {
+        toast({
+          title: 'Unavailable',
+          description: 'No available sizes to add to cart',
+          variant: 'destructive',
+        });
+        return;
+      }
+      const success = await addToCart(product._id, availableSize, 1);
+      if (success) {
+        toast({
+          title: 'Added to cart',
+          description: `${product.name} (${availableSize}) added to cart`,
+        });
+      }
     } catch (error: any) {
       console.error('Error adding to cart:', error);
       toast({
-        title: "Error",
-        description: "Failed to add product to cart",
-        variant: "destructive",
+        title: 'Error',
+        description: error?.message || 'Failed to add product to cart',
+        variant: 'destructive',
       });
     }
   };
@@ -254,7 +315,7 @@ const Wishlist = () => {
                         variant="hero"
                         size="sm"
                         className="flex-1"
-                        onClick={() => addToCart(item._id)}
+                        onClick={() => addWishlistItemToCart(item)}
                         disabled={!item.isInStock}
                       >
                         <ShoppingCart className="w-4 h-4 mr-2" />
