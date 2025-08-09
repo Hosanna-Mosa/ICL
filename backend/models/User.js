@@ -1,6 +1,26 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+const addressSchema = new mongoose.Schema(
+  {
+    firstName: { type: String, required: true, trim: true },
+    lastName: { type: String, required: true, trim: true },
+    phone: {
+      type: String,
+      trim: true,
+      match: [/^[0-9]{10}$/, "Please enter a valid 10-digit phone number"],
+      required: true,
+    },
+    street: { type: String, required: true, trim: true },
+    city: { type: String, required: true, trim: true },
+    state: { type: String, required: true, trim: true },
+    zipCode: { type: String, required: true, trim: true },
+    country: { type: String, default: "India", trim: true },
+    isDefault: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
+
 const userSchema = new mongoose.Schema(
   {
     firstName: {
@@ -47,6 +67,7 @@ const userSchema = new mongoose.Schema(
         default: "India",
       },
     },
+    addresses: [addressSchema],
     role: {
       type: String,
       enum: ["user", "admin"],

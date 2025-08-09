@@ -11,6 +11,10 @@ import {
   getAllUsers,
   getUserById,
   updateUser,
+  getAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
 } from "../controllers/userController.js";
 import { protect, authorize } from "../middlewares/auth.js";
 import { validateId, validateCoins, validateProductIdParam } from "../middlewares/validation.js";
@@ -27,6 +31,11 @@ router.post("/wishlist", addToWishlist);
 router.delete("/wishlist/:productId", validateProductIdParam, removeFromWishlist);
 router.get("/coins", getUserCoins);
 router.post("/coins/redeem", validateCoins, redeemCoins);
+// Address book
+router.get("/addresses", getAddresses);
+router.post("/addresses", addAddress);
+router.put("/addresses/:addressId", updateAddress);
+router.delete("/addresses/:addressId", deleteAddress);
 
 // Admin routes
 router.post("/coins/add", authorize("admin"), addCoinsToUser);

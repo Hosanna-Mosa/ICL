@@ -42,6 +42,10 @@ const Header: React.FC = () => {
     };
 
     fetchWishlistCount();
+    // Re-fetch on auth change events
+    const handleAuthChanged = () => fetchWishlistCount();
+    window.addEventListener('auth:changed', handleAuthChanged as EventListener);
+    return () => window.removeEventListener('auth:changed', handleAuthChanged as EventListener);
   }, [isAuthenticated]);
 
   // React to wishlist updates across the app
