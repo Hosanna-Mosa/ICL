@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, Grid, List, Heart, Loader2 } from 'lucide-react';
+import { Filter, Grid, List, Heart, Loader2, X } from 'lucide-react';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import Button from '@/components/UI/ICLButton';
@@ -174,8 +174,105 @@ const Shop: React.FC = () => {
           
           <div className="flex flex-col lg:flex-row gap-8">
             
-            {/* Filters Sidebar */}
-            <aside className={`lg:w-1/4 space-y-6 ${isFilterOpen ? 'block' : 'hidden lg:block'}`}>
+            {/* Mobile Filter Overlay */}
+            {isFilterOpen && (
+              <div className="fixed inset-0 bg-black/50 z-50 lg:hidden" onClick={() => setIsFilterOpen(false)}>
+                <div className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-background shadow-strong" onClick={(e) => e.stopPropagation()}>
+                  <div className="p-6 h-full overflow-y-auto">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-semibold">FILTERS</h3>
+                      <button
+                        onClick={() => setIsFilterOpen(false)}
+                        className="p-2 hover:bg-muted rounded-full transition-colors"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                    
+                    {/* Categories */}
+                    <div className="space-y-3 mb-6">
+                      <h4 className="text-sm font-medium tracking-widest uppercase">Category</h4>
+                      <div className="space-y-2">
+                        {categories.map(category => (
+                          <button
+                            key={category}
+                            onClick={() => setSelectedCategory(category)}
+                            className={`block w-full text-left text-sm py-2 px-3 rounded transition-colors duration-300 ${
+                              selectedCategory === category ? 'text-accent font-medium bg-accent/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                            }`}
+                          >
+                            {category}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Size Filter */}
+                    <div className="space-y-3 mb-6 pb-6 border-b border-border">
+                      <h4 className="text-sm font-medium tracking-widest uppercase">Size</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        {sizes.map(size => (
+                          <button
+                            key={size}
+                            onClick={() => {
+                              setSelectedSizes(prev => 
+                                prev.includes(size) 
+                                  ? prev.filter(s => s !== size)
+                                  : [...prev, size]
+                              );
+                            }}
+                            className={`p-3 text-sm border transition-all duration-300 rounded ${
+                              selectedSizes.includes(size)
+                                ? 'border-accent bg-accent text-accent-foreground'
+                                : 'border-border hover:border-accent'
+                            }`}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Price Range */}
+                    <div className="space-y-3 mb-6 pb-6 border-b border-border">
+                      <h4 className="text-sm font-medium tracking-widest uppercase">Price Range</h4>
+                      <div className="space-y-3">
+                        {priceRanges.map(range => (
+                          <label key={range.label} className="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-muted transition-colors">
+                            <input
+                              type="radio"
+                              name="priceRange"
+                              value={range.label}
+                              checked={selectedPriceRange === range.label}
+                              onChange={(e) => setSelectedPriceRange(e.target.value)}
+                              className="text-accent focus:ring-accent"
+                            />
+                            <span className="text-sm text-muted-foreground">{range.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={() => {
+                        setSelectedCategory('All');
+                        setSelectedSizes([]);
+                        setSelectedColors([]);
+                        setSelectedPriceRange('');
+                      }}
+                    >
+                      CLEAR FILTERS
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Desktop Filters Sidebar */}
+            <aside className="hidden lg:block lg:w-1/4 space-y-6">
               <div className="sticky top-24">
                 <h3 className="text-lg font-semibold mb-4">FILTERS</h3>
                 
@@ -266,25 +363,22 @@ const Shop: React.FC = () => {
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={() => setIsFilterOpen(!isFilterOpen)}
-                    className="lg:hidden flex items-center space-x-2 text-sm font-medium"
+                    className="lg:hidden flex items-center space-x-2 text-sm font-medium px-3 py-2 border border-border rounded hover:bg-muted transition-colors"
                   >
                     <Filter size={16} />
                     <span>FILTERS</span>
                   </button>
-                  <span className="text-sm text-muted-foreground">
-                    {filteredProducts.length} products
-                  </span>
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <select className="text-sm border border-border px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-accent">
+                  <select className="text-sm border border-border px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-accent rounded">
                     <option>SORT BY: FEATURED</option>
                     <option>PRICE: LOW TO HIGH</option>
                     <option>PRICE: HIGH TO LOW</option>
                     <option>NEWEST FIRST</option>
                   </select>
 
-                  <div className="flex border border-border">
+                  <div className="flex border border-border rounded overflow-hidden">
                     <button
                       onClick={() => setViewMode('grid')}
                       className={`p-2 ${viewMode === 'grid' ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
