@@ -1,6 +1,6 @@
 // API Configuration
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 // Helper function to get auth token from localStorage
 const getAuthToken = () => {
@@ -48,6 +48,21 @@ const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+
+    // Auto-handle unauthorized responses by clearing auth and notifying app
+    if (response.status === 401 || response.status === 403) {
+      try {
+        removeAuthToken();
+        removeUserData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("auth:changed", {
+              detail: { isAuthenticated: false, reason: "unauthorized" },
+            })
+          );
+        }
+      } catch {}
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -99,6 +114,13 @@ export const authAPI = {
   logout: () => {
     removeAuthToken();
     removeUserData();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("auth:changed", {
+          detail: { isAuthenticated: false, reason: "logout" },
+        })
+      );
+    }
   },
 
   // Get current user
@@ -273,6 +295,28 @@ export const userAPI = {
   // Remove item from wishlist
   removeFromWishlist: async (productId) => {
     return await apiRequest(`/user/wishlist/${productId}`, {
+      method: "DELETE",
+    });
+  },
+
+  // Address book
+  getAddresses: async () => {
+    return await apiRequest("/user/addresses");
+  },
+  addAddress: async (address) => {
+    return await apiRequest("/user/addresses", {
+      method: "POST",
+      body: JSON.stringify(address),
+    });
+  },
+  updateAddress: async (addressId, address) => {
+    return await apiRequest(`/user/addresses/${addressId}`, {
+      method: "PUT",
+      body: JSON.stringify(address),
+    });
+  },
+  deleteAddress: async (addressId) => {
+    return await apiRequest(`/user/addresses/${addressId}`, {
       method: "DELETE",
     });
   },

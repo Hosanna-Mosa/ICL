@@ -42,6 +42,7 @@ interface CartContextType {
   cart: Cart | null;
   loading: boolean;
   addToCart: (productId: string, size: string, quantity: number) => Promise<boolean>;
+  updateItemQuantity: (productId: string, size: string, quantity: number) => Promise<boolean>;
   removeFromCart: (productId: string, size: string) => Promise<boolean>;
   clearCart: () => Promise<boolean>;
   refreshCart: () => Promise<void>;
@@ -150,7 +151,66 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     return true;
   };
 
-  // Quantity update functions removed with quantity controls
+  // Update quantity for an item
+  const updateItemQuantity = async (
+    productId: string,
+    size: string,
+    quantity: number
+  ): Promise<boolean> => {
+    if (!cart) return false;
+    if (quantity < 1) {
+      // If quantity would drop below 1, remove the item
+      return await removeFromCart(productId, size);
+    }
+
+    try {
+      // Optimistic update for snappy UI
+      const updatedItems = cart.items.map((item) => {
+        if (item.product._id === productId && item.size === size) {
+          return { ...item, quantity };
+        }
+        return item;
+      });
+
+      const newSubtotal = updatedItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+      const discounts = (cart.discountAmount || 0) + (cart.coinsDiscount || 0);
+      const updatedCart: Cart = {
+        ...cart,
+        items: updatedItems,
+        itemCount: updatedItems.reduce((sum, item) => sum + item.quantity, 0),
+        subtotal: newSubtotal,
+        total: Math.max(0, newSubtotal - discounts),
+      };
+      setCart(updatedCart);
+
+      const response = await cartAPI.updateCartItem(productId, size, quantity);
+      if (response.success) {
+        setCart(response.data.cart);
+        return true;
+      }
+
+      // Re-sync if server rejected
+      await refreshCart();
+      toast({
+        title: "Error",
+        description: response.message || "Failed to update quantity",
+        variant: "destructive",
+      });
+      return false;
+    } catch (error: any) {
+      console.error("Error updating cart item quantity:", error);
+      await refreshCart();
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to update quantity",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
 
   const removeFromCart = async (productId: string, size: string): Promise<boolean> => {
     try {
@@ -380,6 +440,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     cart,
     loading: loading || initialLoading,
     addToCart,
+    updateItemQuantity,
     removeFromCart,
     clearCart,
     refreshCart,

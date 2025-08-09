@@ -21,6 +21,7 @@ export const getUserProfile = asyncHandler(async (req, res) => {
         coins: user.coins,
         fullName: user.fullName,
         address: user.address,
+        addresses: user.addresses || [],
         lastLogin: user.lastLogin,
       },
     },
@@ -32,7 +33,6 @@ export const getUserProfile = asyncHandler(async (req, res) => {
 // @access  Private
 export const updateUserProfile = asyncHandler(async (req, res) => {
   const { firstName, lastName, phone, address } = req.body;
-
   const user = await User.findById(req.user.id);
 
   if (firstName) user.firstName = firstName;
@@ -58,9 +58,64 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
         coins: user.coins,
         fullName: user.fullName,
         address: user.address,
+        addresses: user.addresses || [],
       },
     },
   });
+});
+
+// Address book CRUD
+// @route GET /api/user/addresses
+export const getAddresses = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  res.json({ success: true, data: { addresses: user.addresses || [] } });
+});
+
+// @route POST /api/user/addresses
+export const addAddress = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  const address = req.body;
+  if (address.isDefault) {
+    user.addresses.forEach((a) => (a.isDefault = false));
+  }
+  user.addresses.push(address);
+  await user.save();
+  res.status(201).json({ success: true, message: "Address added", data: { addresses: user.addresses } });
+});
+
+// @route PUT /api/user/addresses/:addressId
+export const updateAddress = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  const { addressId } = req.params;
+  const update = req.body;
+  const address = user.addresses.id(addressId);
+  if (!address) {
+    return res.status(404).json({ success: false, message: "Address not found" });
+  }
+  if (update.isDefault) {
+    user.addresses.forEach((a) => (a.isDefault = false));
+  }
+  Object.assign(address, update);
+  await user.save();
+  res.json({ success: true, message: "Address updated", data: { addresses: user.addresses } });
+});
+
+// @route DELETE /api/user/addresses/:addressId
+export const deleteAddress = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  const { addressId } = req.params;
+  const address = user.addresses.id(addressId);
+  if (!address) {
+    return res.status(404).json({ success: false, message: "Address not found" });
+  }
+  // Mongoose v7 removed remove(); use deleteOne() or pull()
+  if (typeof address.deleteOne === 'function') {
+    await address.deleteOne();
+  } else {
+    user.addresses.pull({ _id: addressId });
+  }
+  await user.save();
+  res.json({ success: true, message: "Address removed", data: { addresses: user.addresses } });
 });
 
 // @desc    Get user wishlist

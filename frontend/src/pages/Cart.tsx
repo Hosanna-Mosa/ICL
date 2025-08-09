@@ -3,14 +3,14 @@ import { Trash2, ShoppingBag, Loader2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
-import { Button } from '@/components/UI/button';
+import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/UI/toast';
 
 const Cart: React.FC = () => {
-  const { cart, loading, removeFromCart, clearCart, addToCart } = useCart();
+  const { cart, loading, removeFromCart, clearCart, addToCart, updateItemQuantity } = useCart();
   const { isAuthenticated } = useAuth();
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
   const [clearingCart, setClearingCart] = useState(false);
@@ -217,7 +217,30 @@ const Cart: React.FC = () => {
                           </div>
                           
                           {/* Actions */}
-                          <div className="flex items-center justify-end">
+                          <div className="flex items-center justify-between">
+                            {/* Quantity Controls */}
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={isUpdating}
+                                onClick={() => updateItemQuantity(item.product._id, item.size, item.quantity - 1)}
+                              >
+                                -
+                              </Button>
+                              <span className="w-8 text-center select-none">{item.quantity}</span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={isUpdating}
+                                onClick={() => updateItemQuantity(item.product._id, item.size, item.quantity + 1)}
+                              >
+                                +
+                              </Button>
+                            </div>
+
+                            {/* Remove */}
+                            <div className="flex items-center">
                             <button
                               onClick={() => handleRemoveItem(item.product._id, item.size)}
                               disabled={isUpdating}
@@ -230,6 +253,7 @@ const Cart: React.FC = () => {
                                 <Trash2 className="w-5 h-5" />
                               )}
                             </button>
+                            </div>
                           </div>
                           
                           {/* Subtotal */}

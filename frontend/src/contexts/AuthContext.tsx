@@ -57,6 +57,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     checkAuth();
+    // Listen for global auth changes (e.g., token invalidated)
+    const handleAuthChanged = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { isAuthenticated?: boolean };
+      if (detail && detail.isAuthenticated === false) {
+        setUser(null);
+      }
+    };
+    window.addEventListener("auth:changed", handleAuthChanged as EventListener);
+    return () => window.removeEventListener("auth:changed", handleAuthChanged as EventListener);
   }, []);
 
   const login = async (email: string, password: string) => {
