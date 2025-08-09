@@ -63,43 +63,21 @@ const logger = winston.createLogger({
   ],
 });
 
-// Create Morgan stream for API logging
+// Create Morgan stream for API logging (write plain line to stdout only)
 const morganStream = {
   write: (message) => {
-    logger.info(message.trim(), { source: "morgan" });
+    // Write the concise line without winston prefixes/metadata
+    process.stdout.write(message);
   },
 };
 
-// Custom Morgan format for essential API logging
+// Custom Morgan format for essential API logging (concise single line)
 const morganFormat = morgan(
   (tokens, req, res) => {
     const status = tokens.status(req, res);
     const method = tokens.method(req, res);
     const url = tokens.url(req, res);
     const responseTime = tokens["response-time"](req, res);
-
-    // Only log errors or important requests
-    if (
-      status >= 400 ||
-      method === "POST" ||
-      method === "PUT" ||
-      method === "DELETE"
-    ) {
-      const logData = {
-        method,
-        url,
-        status,
-        responseTime,
-        timestamp: new Date().toISOString(),
-      };
-
-      if (status >= 400) {
-        logger.error("API Error", logData);
-      } else {
-        logger.info("API Request", logData);
-      }
-    }
-
     return `${method} ${url} ${status} ${responseTime}ms`;
   },
   { stream: morganStream }
@@ -107,29 +85,7 @@ const morganFormat = morgan(
 
 // Helper functions for different log levels
 export const logRequest = (req, res, next) => {
-  // Only log important requests (errors, POST, PUT, DELETE)
-  if (req.method === "GET" && res.statusCode < 400) {
-    return next();
-  }
-
-  const start = Date.now();
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    const logData = {
-      method: req.method,
-      url: req.originalUrl,
-      status: res.statusCode,
-      duration: `${duration}ms`,
-    };
-
-    if (res.statusCode >= 400) {
-      logger.error("Request Error", logData);
-    } else {
-      logger.info("Request completed", logData);
-    }
-  });
-
+  // No-op: request logging handled solely by morgan concise line above
   next();
 };
 

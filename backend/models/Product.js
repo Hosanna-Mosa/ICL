@@ -7,6 +7,10 @@ const sizeSchema = new mongoose.Schema(
       required: true,
       enum: ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
     },
+    colors: {
+      type: [String],
+      default: ["black"],
+    },
     stock: {
       type: Number,
       required: true,
