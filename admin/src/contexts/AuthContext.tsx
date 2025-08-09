@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AdminUser } from '@/types';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { AdminUser } from "@/types";
+import api from "@/utils/api";
 
 interface AuthContextType {
   user: AdminUser | null;
@@ -13,7 +14,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -27,67 +28,70 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored token on mount
-    const token = localStorage.getItem('admin_token');
-    const userData = localStorage.getItem('admin_user');
-    
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser({ ...parsedUser, token });
-      } catch (error) {
-        console.error('Error parsing stored user data:', error);
-        localStorage.removeItem('admin_token');
-        localStorage.removeItem('admin_user');
-      }
+    // Load persisted admin session using API utils
+    const token = api.utils.getAdminAuthToken();
+    const stored = api.utils.getAdminUser();
+
+    if (token && stored && stored.role === "admin") {
+      const displayName =
+        stored.fullName ||
+        stored.name ||
+        `${stored.firstName || ""} ${stored.lastName || ""}`.trim();
+      const adminUser: AdminUser = {
+        id: stored.id || stored._id,
+        email: stored.email,
+        name: displayName,
+        role: "admin",
+        token,
+      };
+      setUser(adminUser);
+    } else {
+      api.auth.logout();
     }
-    
+
     setLoading(false);
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/admin/login', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ email, password }),
-      // });
-      
-      // Mock login for demo purposes
-      if (email === 'admin@iclstreetwear.com' && password === 'admin123') {
-        const mockUser: AdminUser = {
-          id: '1',
-          email: 'admin@iclstreetwear.com',
-          name: 'ICL Admin',
-          role: 'admin',
-          token: 'mock-jwt-token-123',
-        };
-        
-        localStorage.setItem('admin_token', mockUser.token);
-        localStorage.setItem('admin_user', JSON.stringify({
-          id: mockUser.id,
-          email: mockUser.email,
-          name: mockUser.name,
-          role: mockUser.role,
-        }));
-        
-        setUser(mockUser);
-        return true;
+      const res: any = await api.auth.login({ email, password });
+      if (
+        !res ||
+        !res.success ||
+        !res.data ||
+        !res.data.user ||
+        !res.data.token
+      )
+        return false;
+
+      const { user: u, token } = res.data;
+      if (u.role !== "admin") {
+        // Not an admin; clear any stored data
+        api.auth.logout();
+        return false;
       }
-      
-      return false;
+
+      const displayName =
+        u.fullName ||
+        `${u.firstName || ""} ${u.lastName || ""}`.trim() ||
+        u.email;
+      const adminUser: AdminUser = {
+        id: u.id || u._id,
+        email: u.email,
+        name: displayName,
+        role: "admin",
+        token,
+      };
+      setUser(adminUser);
+      return true;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       return false;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_user');
+    api.auth.logout();
     setUser(null);
   };
 
@@ -98,9 +102,5 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loading,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

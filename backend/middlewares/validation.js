@@ -3,10 +3,16 @@ import { body, param, query, validationResult } from "express-validator";
 export const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    const errorMessages = errors.array().map((error) => ({
+      field: error.path,
+      message: error.msg,
+      value: error.value,
+    }));
+
     return res.status(400).json({
       success: false,
       message: "Validation failed",
-      errors: errors.array(),
+      errors: errorMessages,
     });
   }
   next();
@@ -66,6 +72,10 @@ export const validateProduct = [
     .optional()
     .isFloat({ min: 0 })
     .withMessage("Sale price must be a positive number"),
+  body("images")
+    .isArray({ min: 1 })
+    .withMessage("At least one image is required"),
+  body("images.*.url").isURL().withMessage("Image URL must be valid"),
   body("sizes")
     .isArray({ min: 1 })
     .withMessage("At least one size is required"),
@@ -78,6 +88,57 @@ export const validateProduct = [
   body("sizes.*.price")
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
+  body("brand")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage("Brand must be between 1 and 50 characters"),
+  body("subcategory")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage("Subcategory must be between 1 and 50 characters"),
+  body("coinsEarned")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Coins earned must be a non-negative number"),
+  body("coinsRequired")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Coins required must be a non-negative number"),
+  body("fabric")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Fabric must be between 1 and 100 characters"),
+  body("gsm")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 20 })
+    .withMessage("GSM must be between 1 and 20 characters"),
+  body("fit")
+    .optional()
+    .isIn(["regular", "oversized", "slim", "relaxed"])
+    .withMessage("Invalid fit"),
+  body("washCare")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 200 })
+    .withMessage("Wash care must be between 1 and 200 characters"),
+  body("tags").optional().isArray().withMessage("Tags must be an array"),
+  body("tags.*")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 30 })
+    .withMessage("Each tag must be between 1 and 30 characters"),
+  body("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage("isActive must be a boolean"),
+  body("isFeatured")
+    .optional()
+    .isBoolean()
+    .withMessage("isFeatured must be a boolean"),
   validate,
 ];
 
@@ -182,11 +243,13 @@ export const validateId = [
       // Accept MongoDB ObjectIds (24 hex chars) or simple numeric strings
       const mongoIdRegex = /^[0-9a-fA-F]{24}$/;
       const numericRegex = /^[0-9]+$/;
-      
+
       if (mongoIdRegex.test(value) || numericRegex.test(value)) {
         return true;
       }
-      throw new Error("Invalid ID format - must be MongoDB ObjectId or numeric ID");
+      throw new Error(
+        "Invalid ID format - must be MongoDB ObjectId or numeric ID"
+      );
     }),
   validate,
 ];
@@ -202,7 +265,9 @@ export const validateProductIdParam = [
       if (mongoIdRegex.test(value) || numericRegex.test(value)) {
         return true;
       }
-      throw new Error("Invalid product ID format - must be MongoDB ObjectId or numeric ID");
+      throw new Error(
+        "Invalid product ID format - must be MongoDB ObjectId or numeric ID"
+      );
     }),
   validate,
 ];

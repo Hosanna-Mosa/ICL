@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import connectDB from "../config/database.js";
 import seedUsers from "./userSeeder.js";
+import seedAdmin from "./adminSeeder.js";
 import seedProducts from "./productSeeder.js";
 
 // Load environment variables
@@ -15,6 +16,10 @@ const runSeeders = async () => {
     console.log("Connected to database");
 
     // Run seeders
+    console.log("Seeding admin user...");
+    const admin = await seedAdmin();
+    console.log(`Admin ready: ${admin.email}`);
+
     console.log("Seeding users...");
     const users = await seedUsers();
     console.log(`Seeded ${users.length} users`);
@@ -25,8 +30,10 @@ const runSeeders = async () => {
 
     console.log("Database seeding completed successfully!");
     console.log("Sample admin credentials:");
-    console.log("Email: admin@icl.com");
-    console.log("Password: admin123");
+    console.log(
+      `Email: ${process.env.ADMIN_EMAIL || "admin@iclstreetwear.com"}`
+    );
+    console.log(`Password: ${process.env.ADMIN_PASSWORD || "admin123"}`);
 
     process.exit(0);
   } catch (error) {

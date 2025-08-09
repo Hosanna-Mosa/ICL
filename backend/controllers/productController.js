@@ -109,7 +109,9 @@ export const getProduct = asyncHandler(async (req, res) => {
     const numericId = parseInt(id);
     if (!isNaN(numericId)) {
       // Try to find product by position in database (for demo purposes)
-      const products = await Product.find({ isActive: true }).sort({ createdAt: 1 });
+      const products = await Product.find({ isActive: true }).sort({
+        createdAt: 1,
+      });
       if (numericId > 0 && numericId <= products.length) {
         product = products[numericId - 1];
       }
@@ -147,6 +149,11 @@ export const getProduct = asyncHandler(async (req, res) => {
 export const createProduct = asyncHandler(async (req, res) => {
   const productData = req.body;
 
+  console.log(
+    "Creating product with data:",
+    JSON.stringify(productData, null, 2)
+  );
+
   // Generate SKU if not provided
   if (!productData.sku) {
     productData.sku = Product.generateSKU(
@@ -174,6 +181,8 @@ export const createProduct = asyncHandler(async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 export const updateProduct = asyncHandler(async (req, res) => {
+  console.log("Updating product with data:", JSON.stringify(req.body, null, 2));
+
   const product = await Product.findById(req.params.id);
 
   if (!product) {
