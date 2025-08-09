@@ -36,16 +36,11 @@ const About: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
+      <div className="pt-32 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6">
-              ABOUT ICL
-            </h1>
-            <p className="text-xl text-primary font-medium tracking-wide">
-              Urban Spirit. Elite Streetwear.
-            </p>
+          {/* Section Header */}
+          <div className="mb-12 text-center">
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">ABOUT ICL</h1>
           </div>
           
           {/* Two Column Layout */}
@@ -114,7 +109,7 @@ const About: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Timeline Section */}
       <section className="py-20 px-4 bg-muted/30">
