@@ -28,32 +28,55 @@ export interface Product {
 }
 
 export interface Order {
-  id: string;
-  userId: string;
-  userEmail: string;
-  userName: string;
-  products: OrderItem[];
+  _id: string;
+  orderNumber: string;
+  user: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  items: OrderItem[];
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
+  payment: {
+    method: 'cod' | 'upi' | 'card' | 'wallet';
+    status: 'pending' | 'completed' | 'failed' | 'refunded';
+    amount: number;
+  };
+  subtotal: number;
+  shippingCost: number;
+  discountAmount: number;
+  coinsUsed: number;
+  coinsEarned: number;
   total: number;
-  paymentMethod: 'cod' | 'online';
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
   shippingAddress: {
+    firstName: string;
+    lastName: string;
+    phone: string;
     street: string;
     city: string;
     state: string;
     zipCode: string;
-    phone: string;
+    country: string;
   };
+  notes?: string;
+  trackingNumber?: string;
+  estimatedDelivery?: string;
+  deliveredAt?: string;
+  cancelledAt?: string;
+  cancelledBy?: 'customer' | 'admin' | 'system';
+  cancellationReason?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface OrderItem {
-  productId: string;
-  productName: string;
+  product: string;
+  name: string;
+  size: string;
   quantity: number;
   price: number;
-  size: string;
-  color: string;
+  total: number;
 }
 
 export interface AdminUser {
