@@ -61,20 +61,7 @@ const Account: React.FC = () => {
     }
   };
 
-  const handleViewOrderDetails = async (orderId: string) => {
-    try {
-      const response = await ordersAPI.getOrderById(orderId);
-      if (response.success) {
-        // For now, just show the order details in a toast
-        // In the future, this could open a modal or navigate to a detailed view
-        toast({
-          title: `Order #${response.data.order.orderNumber}`,
-          description: `Status: ${response.data.order.statusDisplay || response.data.order.status}`,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to load order details",
+
           variant: "destructive",
         });
       }
