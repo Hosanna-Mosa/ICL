@@ -147,10 +147,12 @@ export const adminProductsAPI = {
 
 // ----- Orders (admin) -----
 export const adminOrdersAPI = {
-  list: async (params = {}) => apiRequest(`/orders${buildQueryString(params)}`),
+  list: async (params = {}) => apiRequest(`/orders/admin/all${buildQueryString(params)}`),
   getById: async (id) => apiRequest(`/orders/${id}`),
-  updateStatus: async (id, status) =>
-    apiRequest(`/orders/${id}/status`, { method: "PUT", body: { status } }),
+  updateStatus: async (id, status, notes) =>
+    apiRequest(`/orders/${id}/status`, { method: "PUT", body: { status, notes } }),
+  getRecent: async () => apiRequest(`/orders/admin/recent`),
+  getDashboardStats: async () => apiRequest(`/admin/dashboard/stats`),
 };
 
 // ----- Users (admin) -----

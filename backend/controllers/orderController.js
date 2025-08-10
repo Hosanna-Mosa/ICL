@@ -367,3 +367,33 @@ export const getAllOrders = asyncHandler(async (req, res) => {
     },
   });
 });
+
+// @desc    Get recent orders for dashboard (Admin only)
+// @route   GET /api/orders/admin/recent
+// @access  Private/Admin
+export const getRecentOrders = asyncHandler(async (req, res) => {
+  try {
+    // Simple query without populate to test
+    const orders = await Order.find({})
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean(); // Use lean() for better performance
+
+    console.log("Recent orders fetched for dashboard", {
+      adminId: req.user.id,
+      count: orders.length,
+    });
+
+    res.json({
+      success: true,
+      data: { orders },
+    });
+  } catch (error) {
+    console.error("Error in getRecentOrders:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch recent orders",
+      error: error.message,
+    });
+  }
+});

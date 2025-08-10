@@ -6,13 +6,15 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
+
   Plus,
   Edit,
   Trash2,
   MapPin,
   Loader2,
+
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 import Button from "@/components/UI/ICLButton";
@@ -20,18 +22,21 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { ordersAPI, userAPI } from "@/utils/api";
 import productHoodie from "@/assets/product-hoodie.jpg";
 import productTee from "@/assets/product-tee.jpg";
 
 const Account: React.FC = () => {
   const { user, isAuthenticated, login, register, logout, loading } = useAuth();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Authentication form states
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
 
   // Address management states
   const [addresses, setAddresses] = useState([]);
@@ -64,6 +69,7 @@ const Account: React.FC = () => {
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState(null);
 
+
   // Login form data
   const [loginData, setLoginData] = useState({
     email: "",
@@ -78,6 +84,7 @@ const Account: React.FC = () => {
     password: "",
     confirmPassword: "",
   });
+
 
   // Fetch user addresses when component mounts
   useEffect(() => {
@@ -178,11 +185,14 @@ const Account: React.FC = () => {
           title: "Success",
           description: "Address added successfully",
         });
+
       }
     } catch (error: any) {
       toast({
         title: "Error",
+
         description: error.message || "Failed to add address",
+
         variant: "destructive",
       });
     }
@@ -217,6 +227,7 @@ const Account: React.FC = () => {
         toast({
           title: "Error",
           description: response.message || "Failed to update address",
+
           variant: "destructive",
         });
       }
@@ -315,6 +326,7 @@ const Account: React.FC = () => {
       toast({
         title: "Error",
         description: "Failed to update profile",
+
         variant: "destructive",
       });
     }
@@ -340,6 +352,7 @@ const Account: React.FC = () => {
       [name]: value
     }));
   };
+
 
   const handleLogout = () => {
     logout();
@@ -687,6 +700,7 @@ const Account: React.FC = () => {
     );
   }
 
+
   // Show account page content if user is authenticated
   const orders = [
     {
@@ -721,6 +735,7 @@ const Account: React.FC = () => {
 
 
 
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -740,6 +755,8 @@ const Account: React.FC = () => {
             </Button>
           </div>
 
+          <Tabs defaultValue={searchParams.get('tab') || "orders"} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
 
               <TabsTrigger value="orders" className="flex items-center gap-2">
                 <Package className="w-4 h-4" />
@@ -753,39 +770,90 @@ const Account: React.FC = () => {
 
             <TabsContent value="orders" className="mt-8">
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-foreground">
-                  Order History
-                </h2>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">
+                      Order History
+                    </h2>
+                    {orders.length > 0 && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {orders.length} order{orders.length !== 1 ? 's' : ''} found
+                      </p>
+                    )}
+                  </div>
+                  <Button 
+                    onClick={fetchOrders} 
+                    variant="outline" 
+                    size="sm"
+                    disabled={ordersLoading}
+                  >
+                    {ordersLoading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : null}
+                    Refresh
+                  </Button>
+                </div>
 
-                {orders.length === 0 ? (
+                {ordersLoading ? (
+                  <div className="text-center py-12">
+                    <Loader2 className="w-16 h-16 text-muted-foreground mx-auto mb-4 animate-spin" />
+                    <p className="text-muted-foreground">Loading orders...</p>
+                  </div>
+                ) : ordersError ? (
+                  <div className="text-center py-12 text-red-500">
+                    <p>{ordersError}</p>
+                    <Button onClick={fetchOrders} className="mt-4">
+                      Retry
+                    </Button>
+                  </div>
+                ) : orders.length === 0 ? (
                   <div className="text-center py-12">
                     <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No orders yet</p>
+                    <p className="text-muted-foreground mb-4">No orders yet</p>
+                    <p className="text-sm text-muted-foreground">Start shopping to see your order history here</p>
+                    <Link to="/shop" className="inline-block mt-4">
+                      <Button className="btn-hero">Start Shopping</Button>
+                    </Link>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {orders.map((order) => (
-                      <div key={order.id} className="bg-card p-6 shadow-soft">
+                      <div key={order._id} className="bg-card p-6 shadow-soft">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                           <div>
                             <h3 className="font-bold text-foreground">
-                              Order #{order.id}
+                              Order #{order.orderNumber}
                             </h3>
                             <p className="text-sm text-muted-foreground">
                               Placed on{" "}
-                              {new Date(order.date).toLocaleDateString()}
+                              {new Date(order.createdAt).toLocaleDateString()}
                             </p>
                           </div>
                           <div className="mt-2 md:mt-0">
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                order.status === "Delivered"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-blue-100 text-blue-800"
-                              }`}
-                            >
-                              {order.status}
-                            </span>
+                            <div className="text-right">
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                  order.status === "delivered"
+                                    ? "bg-green-100 text-green-800"
+                                    : order.status === "cancelled"
+                                    ? "bg-red-100 text-red-800"
+                                    : order.status === "shipped"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : order.status === "processing"
+                                    ? "bg-purple-100 text-purple-800"
+                                    : order.status === "confirmed"
+                                    ? "bg-indigo-100 text-indigo-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                }`}
+                              >
+                                {order.statusDisplay || order.status}
+                              </span>
+                              {order.trackingNumber && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Track: {order.trackingNumber}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -794,7 +862,7 @@ const Account: React.FC = () => {
                             <div key={index} className="flex gap-3">
                               <div className="w-16 h-16 bg-muted overflow-hidden">
                                 <img
-                                  src={item.image}
+                                  src={item.product?.images?.[0]?.url || '/placeholder.svg'}
                                   alt={item.name}
                                   className="w-full h-full object-cover"
                                 />
@@ -806,19 +874,64 @@ const Account: React.FC = () => {
                                 <p className="text-sm text-muted-foreground">
                                   Size: {item.size} • Qty: {item.quantity}
                                 </p>
+                                <p className="text-sm text-muted-foreground">
+                                  Price: ₹{item.price.toLocaleString()}
+                                </p>
                               </div>
                             </div>
                           ))}
                         </div>
 
                         <div className="mt-4 pt-4 border-t border-border">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium text-foreground">
-                              Total
-                            </span>
-                            <span className="font-bold text-foreground">
-                              ₹{order.total.toLocaleString()}
-                            </span>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">Subtotal</span>
+                              <span className="text-sm text-foreground">₹{order.subtotal.toLocaleString()}</span>
+                            </div>
+                            {order.shippingCost > 0 && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-muted-foreground">Shipping</span>
+                                <span className="text-sm text-foreground">₹{order.shippingCost}</span>
+                              </div>
+                            )}
+                            {order.coinsUsed > 0 && (
+                              <div className="flex justify-between items-center text-primary">
+                                <span className="text-sm">Coins Used</span>
+                                <span className="text-sm">-₹{order.coinsUsed}</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center pt-2 border-t border-border">
+                              <span className="font-medium text-foreground">Total</span>
+                              <span className="font-bold text-foreground">₹{order.total.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-2">
+                              <span className="text-xs text-muted-foreground">Payment Method</span>
+                              <span className="text-xs text-foreground capitalize">
+                                {order.payment?.method === 'cod' ? 'Cash on Delivery' : order.payment?.method?.toUpperCase()}
+                              </span>
+                            </div>
+                            
+                            {/* Order Actions */}
+                            <div className="pt-3 border-t border-border space-y-2">
+                              {["pending", "confirmed"].includes(order.status) && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => handleCancelOrder(order._id)}
+                                >
+                                  Cancel Order
+                                </Button>
+                              )}
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="w-full"
+                                onClick={() => handleViewOrderDetails(order._id)}
+                              >
+                                View Details
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>

@@ -25,12 +25,17 @@ import {
   createProductAdmin,
   updateProductAdmin,
   deleteProductAdmin,
+  // Dashboard
+  getDashboardStats,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
 
 // All admin routes are protected and require admin role
 router.use(protect, authorize("admin"));
+
+// ----- Dashboard -----
+router.get("/dashboard/stats", getDashboardStats);
 
 // ----- Users -----
 router.get("/users", validatePagination, listUsers);
