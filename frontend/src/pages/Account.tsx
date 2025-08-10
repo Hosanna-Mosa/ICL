@@ -50,26 +50,7 @@ const Account: React.FC = () => {
   });
 
  
-  const handleCancelOrder = async (orderId: string) => {
-    if (!confirm('Are you sure you want to cancel this order?')) {
-      return;
-    }
-    
-    try {
-      const response = await ordersAPI.cancelOrder(orderId);
-      if (response.success) {
-        toast({
-          title: "Order cancelled",
-          description: "Your order has been cancelled successfully",
-        });
-        // Refresh orders to show updated status
-        fetchOrders();
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to cancel order",
-          variant: "destructive",
-        });
+         });
       }
     } catch (error: any) {
       toast({
