@@ -59,6 +59,11 @@ const Account: React.FC = () => {
     phone: "",
   });
 
+   // Orders state
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState(null);
+
   // Login form data
   const [loginData, setLoginData] = useState({
     email: "",
