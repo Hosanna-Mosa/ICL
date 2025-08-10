@@ -50,7 +50,7 @@ const Account: React.FC = () => {
   });
 
  
-         });
+         
       }
     } catch (error: any) {
       toast({
