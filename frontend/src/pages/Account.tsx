@@ -740,8 +740,7 @@ const Account: React.FC = () => {
             </Button>
           </div>
 
-          <Tabs defaultValue="orders" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+
               <TabsTrigger value="orders" className="flex items-center gap-2">
                 <Package className="w-4 h-4" />
                 Orders
