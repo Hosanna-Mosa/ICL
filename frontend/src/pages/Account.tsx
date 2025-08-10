@@ -49,48 +49,7 @@ const Account: React.FC = () => {
     confirmPassword: "",
   });
 
-  // Set default tab to orders if coming from checkout
-  useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'orders') {
-      // Show success message if coming from checkout
-      toast({
-        title: "Order placed successfully!",
-        description: "Your order has been placed and will appear in your order history.",
-      });
-    }
-  }, [searchParams, toast]);
-
-  // Fetch user orders when authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchOrders();
-    }
-  }, [isAuthenticated]);
-
-  const fetchOrders = async () => {
-    setOrdersLoading(true);
-    setOrdersError(null);
-    try {
-      const response = await ordersAPI.getOrders();
-      if (response.success) {
-        setOrders(response.data.orders || []);
-        if (response.data.orders && response.data.orders.length > 0) {
-          toast({
-            title: "Orders loaded",
-            description: `Found ${response.data.orders.length} order(s)`,
-          });
-        }
-      } else {
-        setOrdersError(response.message || 'Failed to fetch orders');
-      }
-    } catch (error) {
-      setOrdersError(error?.message || 'Failed to fetch orders');
-    } finally {
-      setOrdersLoading(false);
-    }
-  };
-
+ 
   const handleCancelOrder = async (orderId: string) => {
     if (!confirm('Are you sure you want to cancel this order?')) {
       return;
