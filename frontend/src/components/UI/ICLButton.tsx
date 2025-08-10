@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'hero' | 'accent' | 'ghost' | 'outline' | 'minimal';
+  variant?: 'hero' | 'accent' | 'ghost' | 'outline' | 'minimal' | 'destructive' | 'secondary';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   children: React.ReactNode;
 }
@@ -14,14 +14,16 @@ const Button: React.FC<ButtonProps> = ({
   children, 
   ...props 
 }) => {
-  const baseStyles = "inline-flex items-center justify-center font-medium tracking-wide transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+  const baseStyles = "inline-flex items-center justify-center font-medium tracking-wide transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-md";
   
   const variants = {
     hero: "btn-hero",
     accent: "btn-accent", 
     ghost: "btn-ghost",
-    outline: "border border-current bg-transparent hover:bg-current hover:text-background",
-    minimal: "bg-transparent hover:bg-muted transition-colors duration-300"
+    outline: "btn-outline",
+    minimal: "btn-minimal",
+    destructive: "btn-destructive",
+    secondary: "btn-secondary"
   };
 
   const sizes = {

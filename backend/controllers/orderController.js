@@ -2,6 +2,7 @@ import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
 import User from "../models/User.js";
+import CoinTransaction from "../models/CoinTransaction.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
 
 // @desc    Create order (checkout)
@@ -86,6 +87,15 @@ export const createOrder = asyncHandler(async (req, res) => {
   // Update user coins if coins were used
   if (cart.coinsUsed > 0) {
     await req.user.redeemCoins(cart.coinsUsed);
+    
+    // Create coin transaction record
+    await CoinTransaction.createRedeemedTransaction(
+      req.user.id,
+      cart.coinsUsed,
+      "Applied to order",
+      order.orderNumber,
+      order._id
+    );
   }
 
   // Clear cart
@@ -208,6 +218,15 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   if (status === "delivered" && order.coinsEarned > 0) {
     const user = await User.findById(order.user);
     await user.addCoins(order.coinsEarned);
+    
+    // Create coin transaction record
+    await CoinTransaction.createEarnedTransaction(
+      order.user,
+      order.coinsEarned,
+      "Purchase completed",
+      order.orderNumber,
+      order._id
+    );
   }
 
   console.log("Order status updated", {
@@ -279,6 +298,15 @@ export const cancelOrder = asyncHandler(async (req, res) => {
   if (order.coinsUsed > 0) {
     const user = await User.findById(order.user);
     await user.addCoins(order.coinsUsed);
+    
+    // Create coin transaction record for refund
+    await CoinTransaction.createEarnedTransaction(
+      order.user,
+      order.coinsUsed,
+      "Order cancelled - coins refunded",
+      order.orderNumber,
+      order._id
+    );
   }
 
   console.log("Order cancelled", {

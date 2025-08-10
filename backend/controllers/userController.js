@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import Product from "../models/Product.js";
+import CoinTransaction from "../models/CoinTransaction.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
 
 // @desc    Get user profile
@@ -387,5 +388,45 @@ export const updateUser = asyncHandler(async (req, res) => {
     success: true,
     message: "User updated successfully",
     data: { user },
+  });
+});
+
+// @desc    Get user coin transactions
+// @route   GET /api/user/coins/transactions
+// @access  Private
+export const getCoinTransactions = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 20 } = req.query;
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const [transactions, total] = await Promise.all([
+    CoinTransaction.find({ user: req.user.id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit)),
+    CoinTransaction.countDocuments({ user: req.user.id }),
+  ]);
+
+  const totalPages = Math.ceil(total / parseInt(limit));
+
+  console.log("Coin transactions fetched", {
+    userId: req.user.id,
+    count: transactions.length,
+    total,
+  });
+
+  res.json({
+    success: true,
+    data: {
+      transactions,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages,
+        hasNext: parseInt(page) < totalPages,
+        hasPrev: parseInt(page) > 1,
+      },
+    },
   });
 });
