@@ -7,7 +7,7 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
-  Loader2,
+
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Header from "@/components/Layout/Header";
