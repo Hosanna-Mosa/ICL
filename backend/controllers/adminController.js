@@ -256,3 +256,136 @@ export const getProductByIdAdmin = asyncHandler(async (req, res) => {
 export const createProductAdmin = createProductController;
 export const updateProductAdmin = updateProductController;
 export const deleteProductAdmin = deleteProductController;
+
+// ----- Dashboard Statistics -----
+export const getDashboardStats = asyncHandler(async (req, res) => {
+  try {
+    // Get total sales breakdown by status
+    const salesStats = await Order.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          totalSales: { $sum: "$total" },
+          orderCount: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Initialize sales breakdown
+    let deliveredSales = 0;
+    let notDeliveredSales = 0;
+    let cancelledSales = 0;
+    let totalSales = 0;
+
+    // Process sales stats
+    salesStats.forEach(stat => {
+      totalSales += stat.totalSales;
+      
+      if (stat._id === "delivered") {
+        deliveredSales = stat.totalSales;
+      } else if (stat._id === "cancelled") {
+        cancelledSales = stat.totalSales;
+      } else {
+        // All other statuses (pending, confirmed, processing, shipped, returned)
+        notDeliveredSales += stat.totalSales;
+      }
+    });
+
+    // Get total counts
+    const [totalOrders, totalUsers, totalProducts] = await Promise.all([
+      Order.countDocuments(),
+      User.countDocuments({ role: "user" }), // Only count regular users, not admins
+      Product.countDocuments({ isActive: true }) // Only count active products
+    ]);
+
+    // Get recent sales trend (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const recentSales = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sevenDaysAgo },
+          status: { $ne: "cancelled" } // Exclude cancelled orders
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          dailySales: { $sum: "$total" },
+          orderCount: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    // Get top selling products
+    const topProducts = await Order.aggregate([
+      {
+        $unwind: "$items"
+      },
+      {
+        $group: {
+          _id: "$items.product",
+          totalSold: { $sum: "$items.quantity" },
+          totalRevenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+        }
+      },
+      {
+        $sort: { totalSold: -1 }
+      },
+      {
+        $limit: 5
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "productInfo"
+        }
+      },
+      {
+        $unwind: "$productInfo"
+      },
+      {
+        $project: {
+          productId: "$_id",
+          productName: "$productInfo.name",
+          totalSold: 1,
+          totalRevenue: 1
+        }
+      }
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        sales: {
+          total: totalSales,
+          delivered: deliveredSales,
+          notDelivered: notDeliveredSales,
+          cancelled: cancelledSales
+        },
+        counts: {
+          orders: totalOrders,
+          users: totalUsers,
+          products: totalProducts
+        },
+        trends: {
+          recentSales,
+          topProducts
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error getting dashboard stats:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch dashboard statistics",
+      error: error.message
+    });
+  }
+});
