@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User,
   Package,
@@ -7,8 +7,9 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 import Button from "@/components/UI/ICLButton";
@@ -16,18 +17,25 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { ordersAPI, userAPI } from "@/utils/api";
 import productHoodie from "@/assets/product-hoodie.jpg";
 import productTee from "@/assets/product-tee.jpg";
 
 const Account: React.FC = () => {
   const { user, isAuthenticated, login, register, logout, loading } = useAuth();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Authentication form states
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Orders state
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState(null);
 
   // Login form data
   const [loginData, setLoginData] = useState({
@@ -43,6 +51,104 @@ const Account: React.FC = () => {
     password: "",
     confirmPassword: "",
   });
+
+  // Set default tab to orders if coming from checkout
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'orders') {
+      // Show success message if coming from checkout
+      toast({
+        title: "Order placed successfully!",
+        description: "Your order has been placed and will appear in your order history.",
+      });
+    }
+  }, [searchParams, toast]);
+
+  // Fetch user orders when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchOrders();
+    }
+  }, [isAuthenticated]);
+
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    setOrdersError(null);
+    try {
+      const response = await ordersAPI.getOrders();
+      if (response.success) {
+        setOrders(response.data.orders || []);
+        if (response.data.orders && response.data.orders.length > 0) {
+          toast({
+            title: "Orders loaded",
+            description: `Found ${response.data.orders.length} order(s)`,
+          });
+        }
+      } else {
+        setOrdersError(response.message || 'Failed to fetch orders');
+      }
+    } catch (error) {
+      setOrdersError(error?.message || 'Failed to fetch orders');
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!confirm('Are you sure you want to cancel this order?')) {
+      return;
+    }
+    
+    try {
+      const response = await ordersAPI.cancelOrder(orderId);
+      if (response.success) {
+        toast({
+          title: "Order cancelled",
+          description: "Your order has been cancelled successfully",
+        });
+        // Refresh orders to show updated status
+        fetchOrders();
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to cancel order",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to cancel order",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewOrderDetails = async (orderId: string) => {
+    try {
+      const response = await ordersAPI.getOrderById(orderId);
+      if (response.success) {
+        // For now, just show the order details in a toast
+        // In the future, this could open a modal or navigate to a detailed view
+        toast({
+          title: `Order #${response.data.order.orderNumber}`,
+          description: `Status: ${response.data.order.statusDisplay || response.data.order.status}`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to load order details",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to load order details",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -391,37 +497,6 @@ const Account: React.FC = () => {
   }
 
   // Show account page content if user is authenticated
-  const orders = [
-    {
-      id: "ICL001",
-      date: "2024-01-15",
-      status: "Delivered",
-      total: 2499,
-      items: [
-        {
-          name: "Oversized Black Hoodie",
-          size: "L",
-          quantity: 1,
-          image: productHoodie,
-        },
-      ],
-    },
-    {
-      id: "ICL002",
-      date: "2024-01-10",
-      status: "Shipped",
-      total: 2598,
-      items: [
-        {
-          name: "Essential White Tee",
-          size: "M",
-          quantity: 2,
-          image: productTee,
-        },
-      ],
-    },
-  ];
-
   const wishlistItems = [
     {
       id: 1,
@@ -456,7 +531,7 @@ const Account: React.FC = () => {
             </Button>
           </div>
 
-          <Tabs defaultValue="orders" className="w-full">
+          <Tabs defaultValue={searchParams.get('tab') || "orders"} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="orders" className="flex items-center gap-2">
                 <Package className="w-4 h-4" />
@@ -474,39 +549,90 @@ const Account: React.FC = () => {
 
             <TabsContent value="orders" className="mt-8">
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-foreground">
-                  Order History
-                </h2>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">
+                      Order History
+                    </h2>
+                    {orders.length > 0 && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {orders.length} order{orders.length !== 1 ? 's' : ''} found
+                      </p>
+                    )}
+                  </div>
+                  <Button 
+                    onClick={fetchOrders} 
+                    variant="outline" 
+                    size="sm"
+                    disabled={ordersLoading}
+                  >
+                    {ordersLoading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : null}
+                    Refresh
+                  </Button>
+                </div>
 
-                {orders.length === 0 ? (
+                {ordersLoading ? (
+                  <div className="text-center py-12">
+                    <Loader2 className="w-16 h-16 text-muted-foreground mx-auto mb-4 animate-spin" />
+                    <p className="text-muted-foreground">Loading orders...</p>
+                  </div>
+                ) : ordersError ? (
+                  <div className="text-center py-12 text-red-500">
+                    <p>{ordersError}</p>
+                    <Button onClick={fetchOrders} className="mt-4">
+                      Retry
+                    </Button>
+                  </div>
+                ) : orders.length === 0 ? (
                   <div className="text-center py-12">
                     <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No orders yet</p>
+                    <p className="text-muted-foreground mb-4">No orders yet</p>
+                    <p className="text-sm text-muted-foreground">Start shopping to see your order history here</p>
+                    <Link to="/shop" className="inline-block mt-4">
+                      <Button className="btn-hero">Start Shopping</Button>
+                    </Link>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {orders.map((order) => (
-                      <div key={order.id} className="bg-card p-6 shadow-soft">
+                      <div key={order._id} className="bg-card p-6 shadow-soft">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                           <div>
                             <h3 className="font-bold text-foreground">
-                              Order #{order.id}
+                              Order #{order.orderNumber}
                             </h3>
                             <p className="text-sm text-muted-foreground">
                               Placed on{" "}
-                              {new Date(order.date).toLocaleDateString()}
+                              {new Date(order.createdAt).toLocaleDateString()}
                             </p>
                           </div>
                           <div className="mt-2 md:mt-0">
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                order.status === "Delivered"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-blue-100 text-blue-800"
-                              }`}
-                            >
-                              {order.status}
-                            </span>
+                            <div className="text-right">
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                  order.status === "delivered"
+                                    ? "bg-green-100 text-green-800"
+                                    : order.status === "cancelled"
+                                    ? "bg-red-100 text-red-800"
+                                    : order.status === "shipped"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : order.status === "processing"
+                                    ? "bg-purple-100 text-purple-800"
+                                    : order.status === "confirmed"
+                                    ? "bg-indigo-100 text-indigo-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                }`}
+                              >
+                                {order.statusDisplay || order.status}
+                              </span>
+                              {order.trackingNumber && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Track: {order.trackingNumber}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -515,7 +641,7 @@ const Account: React.FC = () => {
                             <div key={index} className="flex gap-3">
                               <div className="w-16 h-16 bg-muted overflow-hidden">
                                 <img
-                                  src={item.image}
+                                  src={item.product?.images?.[0]?.url || '/placeholder.svg'}
                                   alt={item.name}
                                   className="w-full h-full object-cover"
                                 />
@@ -527,19 +653,64 @@ const Account: React.FC = () => {
                                 <p className="text-sm text-muted-foreground">
                                   Size: {item.size} • Qty: {item.quantity}
                                 </p>
+                                <p className="text-sm text-muted-foreground">
+                                  Price: ₹{item.price.toLocaleString()}
+                                </p>
                               </div>
                             </div>
                           ))}
                         </div>
 
                         <div className="mt-4 pt-4 border-t border-border">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium text-foreground">
-                              Total
-                            </span>
-                            <span className="font-bold text-foreground">
-                              ₹{order.total.toLocaleString()}
-                            </span>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">Subtotal</span>
+                              <span className="text-sm text-foreground">₹{order.subtotal.toLocaleString()}</span>
+                            </div>
+                            {order.shippingCost > 0 && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-muted-foreground">Shipping</span>
+                                <span className="text-sm text-foreground">₹{order.shippingCost}</span>
+                              </div>
+                            )}
+                            {order.coinsUsed > 0 && (
+                              <div className="flex justify-between items-center text-primary">
+                                <span className="text-sm">Coins Used</span>
+                                <span className="text-sm">-₹{order.coinsUsed}</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center pt-2 border-t border-border">
+                              <span className="font-medium text-foreground">Total</span>
+                              <span className="font-bold text-foreground">₹{order.total.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-2">
+                              <span className="text-xs text-muted-foreground">Payment Method</span>
+                              <span className="text-xs text-foreground capitalize">
+                                {order.payment?.method === 'cod' ? 'Cash on Delivery' : order.payment?.method?.toUpperCase()}
+                              </span>
+                            </div>
+                            
+                            {/* Order Actions */}
+                            <div className="pt-3 border-t border-border space-y-2">
+                              {["pending", "confirmed"].includes(order.status) && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                                  onClick={() => handleCancelOrder(order._id)}
+                                >
+                                  Cancel Order
+                                </Button>
+                              )}
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="w-full"
+                                onClick={() => handleViewOrderDetails(order._id)}
+                              >
+                                View Details
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>

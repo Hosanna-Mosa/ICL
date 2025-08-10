@@ -15,6 +15,8 @@ const Checkout: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cod'>('upi');
   const [useCoins, setUseCoins] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [placedOrder, setPlacedOrder] = useState(null);
   const { cart, loading, applyCoinsDiscount, removeCoinsDiscount, refreshCart } = useCart();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -32,6 +34,7 @@ const Checkout: React.FC = () => {
   const [addresses, setAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [showAddAddressForm, setShowAddAddressForm] = useState(false);
 
   // Keep coins toggle in sync with cart state
   useEffect(() => {
@@ -89,6 +92,16 @@ const Checkout: React.FC = () => {
       return;
     }
 
+    // Validate that user has selected an address or filled in the form
+    if (!selectedAddressId && (!formData.firstName || !formData.lastName || !formData.phone || !formData.address || !formData.city || !formData.state || !formData.pincode)) {
+      toast({
+        title: 'Address required',
+        description: 'Please select a saved address or fill in the shipping details',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setPlacingOrder(true);
     try {
       const shippingAddress = selectedAddressId
@@ -109,9 +122,17 @@ const Checkout: React.FC = () => {
       });
 
       if (response.success) {
-        toast({ title: 'Order placed', description: 'Your order has been placed successfully' });
+        setPlacedOrder(response.data.order);
+        setOrderPlaced(true);
+        toast({ 
+          title: 'Order placed successfully! 🎉', 
+          description: `Order #${response.data.order.orderNumber} has been placed. You will receive a confirmation email shortly.` 
+        });
         await refreshCart();
-        navigate('/account');
+        // Redirect after a short delay to show the success message
+        setTimeout(() => {
+          navigate('/account?tab=orders');
+        }, 2000);
       } else {
         toast({
           title: 'Error',
@@ -146,6 +167,7 @@ const Checkout: React.FC = () => {
         const last = res.data.addresses[res.data.addresses.length - 1];
         setSelectedAddressId(editingAddressId || (last && last._id) || null);
         setEditingAddressId(null);
+        setShowAddAddressForm(false);
         toast({ title: 'Address saved' });
       }
     } catch (e: any) {
@@ -159,6 +181,10 @@ const Checkout: React.FC = () => {
       if (res.success) {
         setAddresses(res.data.addresses);
         if (selectedAddressId === addressId) setSelectedAddressId(null);
+        // If no addresses left, show the add address form
+        if (res.data.addresses.length === 0) {
+          setShowAddAddressForm(true);
+        }
         toast({ title: 'Address deleted' });
       }
     } catch (e: any) {
@@ -271,7 +297,13 @@ const Checkout: React.FC = () => {
                         {addresses.map((a) => (
                           <div key={a._id} className={`border rounded p-3 flex items-start justify-between ${selectedAddressId === a._id ? 'border-primary bg-primary/5' : 'border-border'}`}>
                             <label className="flex items-start gap-3 cursor-pointer w-full">
-                              <input type="radio" name="selectedAddress" checked={selectedAddressId === a._id} onChange={() => setSelectedAddressId(a._id)} />
+                              <input 
+                                type="radio" 
+                                name="selectedAddress" 
+                                checked={selectedAddressId === a._id} 
+                                onChange={() => !placingOrder && setSelectedAddressId(a._id)} 
+                                disabled={placingOrder}
+                              />
                               <div className="text-sm">
                                 <div className="font-medium text-foreground">{a.firstName} {a.lastName} • {a.phone}</div>
                                 <div className="text-muted-foreground">
@@ -280,18 +312,79 @@ const Checkout: React.FC = () => {
                               </div>
                             </label>
                             <div className="flex gap-2 ml-3">
-                              <Button type="button" variant="outline" size="sm" onClick={() => handleUpdateAddress(a._id, { isDefault: !a.isDefault })}>{a.isDefault ? 'Default' : 'Make Default'}</Button>
-                              <Button type="button" variant="outline" size="sm" onClick={() => { setEditingAddressId(a._id); setFormData({ firstName: a.firstName, lastName: a.lastName, email: formData.email, phone: a.phone, address: a.street, city: a.city, state: a.state, pincode: a.zipCode }); }}>Edit</Button>
-                              <Button type="button" variant="destructive" size="sm" onClick={() => handleDeleteAddress(a._id)}>Delete</Button>
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => !placingOrder && handleUpdateAddress(a._id, { isDefault: !a.isDefault })}
+                                disabled={placingOrder}
+                              >
+                                {a.isDefault ? 'Default' : 'Make Default'}
+                              </Button>
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => !placingOrder && (() => { setEditingAddressId(a._id); setFormData({ firstName: a.firstName, lastName: a.lastName, email: formData.email, phone: a.phone, address: a.street, city: a.city, state: a.state, pincode: a.zipCode }); })()}
+                                disabled={placingOrder}
+                              >
+                                Edit
+                              </Button>
+                              <Button 
+                                type="button" 
+                                variant="destructive" 
+                                size="sm" 
+                                onClick={() => !placingOrder && handleDeleteAddress(a._id)}
+                                disabled={placingOrder}
+                              >
+                                Delete
+                              </Button>
                             </div>
                           </div>
                         ))}
                       </div>
-                      <div className="text-sm text-muted-foreground">Or enter a new address below:</div>
+                      
+                      {/* Add new address button */}
+                      <div className="pt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => !placingOrder && setShowAddAddressForm(true)}
+                          disabled={placingOrder}
+                          className="flex items-center gap-2 text-primary border-primary hover:bg-primary/5 hover:border-primary/80 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          Add New Address
+                        </Button>
+                      </div>
                     </div>
                   )}
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Show message when no saved addresses */}
+                  {addresses.length === 0 && (
+                    <div className="mb-6 p-4 bg-muted/30 rounded-lg text-center">
+                      <p className="text-sm text-muted-foreground mb-2">No saved addresses found</p>
+                      <p className="text-xs text-muted-foreground">Please add your shipping address below</p>
+                    </div>
+                  )}
+                  
+                  {/* Address form - only show if no saved addresses or if user wants to add new */}
+                  {(addresses.length === 0 || editingAddressId || showAddAddressForm) && (
+                    <div>
+                      {(addresses.length === 0 || showAddAddressForm) && (
+                        <h3 className="text-lg font-semibold text-foreground mb-4">
+                          {addresses.length === 0 ? 'Add Shipping Address' : 'Add New Address'}
+                        </h3>
+                      )}
+                      {editingAddressId && (
+                        <h3 className="text-lg font-semibold text-foreground mb-4">
+                          Edit Address
+                        </h3>
+                      )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">
                         First Name *
@@ -302,6 +395,7 @@ const Checkout: React.FC = () => {
                         value={formData.firstName}
                         onChange={handleInputChange}
                         required
+                        disabled={placingOrder}
                       />
                     </div>
                     <div>
@@ -314,6 +408,7 @@ const Checkout: React.FC = () => {
                         value={formData.lastName}
                         onChange={handleInputChange}
                         required
+                        disabled={placingOrder}
                       />
                     </div>
                   </div>
@@ -329,6 +424,7 @@ const Checkout: React.FC = () => {
                         value={formData.email}
                         onChange={handleInputChange}
                         required
+                        disabled={placingOrder}
                       />
                     </div>
                     
@@ -342,6 +438,7 @@ const Checkout: React.FC = () => {
                         value={formData.phone}
                         onChange={handleInputChange}
                         required
+                        disabled={placingOrder}
                       />
                     </div>
                     
@@ -356,6 +453,7 @@ const Checkout: React.FC = () => {
                         onChange={handleInputChange}
                         placeholder="Street address, building, apartment"
                         required
+                        disabled={placingOrder}
                       />
                     </div>
                     
@@ -370,6 +468,7 @@ const Checkout: React.FC = () => {
                           value={formData.city}
                           onChange={handleInputChange}
                           required
+                          disabled={placingOrder}
                         />
                       </div>
                       <div>
@@ -382,6 +481,7 @@ const Checkout: React.FC = () => {
                           value={formData.state}
                           onChange={handleInputChange}
                           required
+                          disabled={placingOrder}
                         />
                       </div>
                       <div>
@@ -394,13 +494,37 @@ const Checkout: React.FC = () => {
                           value={formData.pincode}
                           onChange={handleInputChange}
                           required
+                          disabled={placingOrder}
                         />
                       </div>
                     </div>
                   </div>
-                  <div className="mt-4">
-                    <Button type="button" variant="outline" onClick={handleSaveAddress}>Save Address</Button>
+                  <div className="mt-4 flex gap-3">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleSaveAddress}
+                      disabled={placingOrder}
+                    >
+                      Save Address
+                    </Button>
+                    {(editingAddressId || showAddAddressForm) && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => {
+                          setEditingAddressId(null);
+                          setShowAddAddressForm(false);
+                          setFormData({ firstName: '', lastName: '', email: formData.email, phone: '', address: '', city: '', state: '', pincode: '' });
+                        }}
+                        disabled={placingOrder}
+                      >
+                        Cancel
+                      </Button>
+                    )}
                   </div>
+                </div>
+                  )}
                 </div>
                 
                 {/* Payment Method */}
@@ -412,12 +536,12 @@ const Checkout: React.FC = () => {
                   <div className="space-y-4">
                     {/* UPI Payment */}
                     <div 
-                      className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                      className={`border-2 rounded-lg p-4 transition-colors ${
                         paymentMethod === 'upi' 
                           ? 'border-primary bg-primary/5' 
                           : 'border-border hover:border-border/60'
-                      }`}
-                      onClick={() => setPaymentMethod('upi')}
+                      } ${placingOrder ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      onClick={() => !placingOrder && setPaymentMethod('upi')}
                     >
                       <div className="flex items-center gap-3">
                         <input
@@ -427,6 +551,7 @@ const Checkout: React.FC = () => {
                           checked={paymentMethod === 'upi'}
                           onChange={() => setPaymentMethod('upi')}
                           className="text-primary"
+                          disabled={placingOrder}
                         />
                         <Smartphone className="w-5 h-5 text-primary" />
                         <div>
@@ -456,12 +581,12 @@ const Checkout: React.FC = () => {
                     
                     {/* COD Payment */}
                     <div 
-                      className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                      className={`border-2 rounded-lg p-4 transition-colors ${
                         paymentMethod === 'cod' 
                           ? 'border-primary bg-primary/5' 
                           : 'border-border hover:border-border/60'
-                      }`}
-                      onClick={() => setPaymentMethod('cod')}
+                      } ${placingOrder ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      onClick={() => !placingOrder && setPaymentMethod('cod')}
                     >
                       <div className="flex items-center gap-3">
                         <input
@@ -471,6 +596,7 @@ const Checkout: React.FC = () => {
                           checked={paymentMethod === 'cod'}
                           onChange={() => setPaymentMethod('cod')}
                           className="text-primary"
+                          disabled={placingOrder}
                         />
                         <CreditCard className="w-5 h-5 text-primary" />
                         <div>
@@ -487,7 +613,12 @@ const Checkout: React.FC = () => {
                 {/* Coin Discount */}
                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                   <div className="flex items-center gap-3 mb-3">
-                    <Checkbox id="useCoins" checked={useCoins} onCheckedChange={(checked) => handleCoinsToggle(!!checked)} />
+                    <Checkbox 
+                      id="useCoins" 
+                      checked={useCoins} 
+                      onCheckedChange={(checked) => !placingOrder && handleCoinsToggle(!!checked)}
+                      disabled={placingOrder}
+                    />
                     <label htmlFor="useCoins" className="flex items-center gap-2 cursor-pointer">
                       <Coins className="w-5 h-5 text-primary" />
                       <span className="font-medium text-foreground">Use 100 Coins (₹100 off)</span>
@@ -501,7 +632,7 @@ const Checkout: React.FC = () => {
               
               {/* Order Summary */}
               <div>
-                <div className="bg-card p-6 shadow-soft sticky top-32">
+                <div className={`bg-card p-6 shadow-soft sticky top-32 ${placingOrder ? 'opacity-75' : ''}`}>
                   <h2 className="text-xl font-bold text-foreground mb-6">
                     Order Summary
                   </h2>
@@ -565,9 +696,12 @@ const Checkout: React.FC = () => {
                   
                   <Button type="submit" className="w-full btn-hero" disabled={placingOrder}>
                     {placingOrder ? (
-                      <span className="inline-flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Placing Order...</span>
+                      <span className="inline-flex items-center">
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" /> 
+                        Placing Order...
+                      </span>
                     ) : (
-                      'Place Order'
+                      'PLACE ORDER'
                     )}
                   </Button>
                   
@@ -582,6 +716,35 @@ const Checkout: React.FC = () => {
       </div>
       
       <Footer />
+      
+      {/* Order Success Overlay */}
+      {orderPlaced && placedOrder && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card p-8 rounded-lg shadow-soft max-w-md mx-4 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Order Placed!</h2>
+            <p className="text-muted-foreground mb-4">
+              Your order #{placedOrder.orderNumber} has been successfully placed.
+            </p>
+            <div className="bg-muted/30 rounded-lg p-4 mb-6 text-left">
+              <p className="text-sm font-medium text-foreground mb-2">Order Details:</p>
+              <p className="text-sm text-muted-foreground">Total: ₹{placedOrder.total.toLocaleString()}</p>
+              <p className="text-sm text-muted-foreground">Payment: {placedOrder.payment.method.toUpperCase()}</p>
+              <p className="text-sm text-muted-foreground">Items: {placedOrder.items.length}</p>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Redirecting to your account page to view order details...
+            </p>
+            <div className="w-full bg-muted rounded-full h-2">
+              <div className="bg-primary h-2 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
