@@ -55,7 +55,7 @@ const Account: React.FC = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error?.message || "Failed to cancel order",
+
         variant: "destructive",
       });
     }
