@@ -418,21 +418,7 @@ const Account: React.FC = () => {
     );
   }
 
-  // Show account page content if user is authenticated
-  const wishlistItems = [
-    {
-      id: 1,
-      name: "Oversized Black Hoodie",
-      price: 2499,
-      image: productHoodie,
-    },
-    {
-      id: 2,
-      name: "Essential White Tee",
-      price: 1299,
-      image: productTee,
-    },
-  ];
+
 
   return (
     <div className="min-h-screen bg-background">
