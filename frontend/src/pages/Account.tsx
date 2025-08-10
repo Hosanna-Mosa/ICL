@@ -20,7 +20,6 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { userAPI } from "@/utils/api";
 import productHoodie from "@/assets/product-hoodie.jpg";
 import productTee from "@/assets/product-tee.jpg";
 
