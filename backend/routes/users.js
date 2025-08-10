@@ -8,6 +8,7 @@ import {
   getUserCoins,
   addCoinsToUser,
   redeemCoins,
+  getCoinTransactions,
   getAllUsers,
   getUserById,
   updateUser,
@@ -30,6 +31,7 @@ router.get("/wishlist", getWishlist);
 router.post("/wishlist", addToWishlist);
 router.delete("/wishlist/:productId", validateProductIdParam, removeFromWishlist);
 router.get("/coins", getUserCoins);
+router.get("/coins/transactions", getCoinTransactions);
 router.post("/coins/redeem", validateCoins, redeemCoins);
 // Address book
 router.get("/addresses", getAddresses);

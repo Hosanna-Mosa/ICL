@@ -299,6 +299,24 @@ export const userAPI = {
     });
   },
 
+  // Get user coins
+  getUserCoins: async () => {
+    return await apiRequest("/user/coins");
+  },
+
+  // Redeem coins
+  redeemCoins: async (amount) => {
+    return await apiRequest("/user/coins/redeem", {
+      method: "POST",
+      body: JSON.stringify({ amount }),
+    });
+  },
+
+  // Get coin transactions
+  getCoinTransactions: async (page = 1, limit = 20) => {
+    return await apiRequest(`/user/coins/transactions?page=${page}&limit=${limit}`);
+  },
+
   // Address book
   getAddresses: async () => {
     return await apiRequest("/user/addresses");

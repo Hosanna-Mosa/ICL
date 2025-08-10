@@ -151,6 +151,38 @@
            hover:bg-current hover:text-background transition-all duration-300
            focus:outline-none focus:ring-2 focus:ring-current focus:ring-offset-2;
   }
+
+  /* Enhanced Outline Button with Better Hover */
+  .btn-outline {
+    @apply border border-primary bg-transparent text-primary px-6 py-3 text-sm font-medium tracking-wide
+           hover:bg-primary hover:text-primary-foreground transition-all duration-300
+           focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+           shadow-sm hover:shadow-md;
+  }
+
+  /* Minimal Button with Subtle Hover */
+  .btn-minimal {
+    @apply bg-transparent text-foreground px-6 py-3 text-sm font-medium tracking-wide
+           hover:bg-muted hover:text-foreground transition-all duration-300
+           focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
+           border border-transparent hover:border-border;
+  }
+
+  /* Destructive Button for Delete Actions */
+  .btn-destructive {
+    @apply bg-destructive text-destructive-foreground px-6 py-3 text-sm font-medium tracking-wide
+           hover:bg-destructive/90 transition-all duration-300
+           focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2
+           shadow-sm hover:shadow-md;
+  }
+
+  /* Secondary Button for Less Important Actions */
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground px-6 py-3 text-sm font-medium tracking-wide
+           hover:bg-secondary/80 transition-all duration-300
+           focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2
+           shadow-sm hover:shadow-md;
+  }
   
   /* Premium Text Styles */
   .text-hero {
@@ -195,6 +227,19 @@
   
   .hover-scale {
     @apply transition-transform duration-300 hover:scale-105;
+  }
+
+  /* Enhanced Button Hover Effects */
+  .btn-hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .btn-hover-scale {
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-md;
+  }
+
+  .btn-hover-glow {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/20;
   }
 }
 

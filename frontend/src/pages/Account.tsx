@@ -2,11 +2,16 @@ import React, { useState, useEffect } from "react";
 import {
   User,
   Package,
-  Heart,
   LogOut,
   Eye,
   EyeOff,
   ArrowLeft,
+
+  Plus,
+  Edit,
+  Trash2,
+  MapPin,
+  Loader2,
 
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -32,7 +37,38 @@ const Account: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
- 
+
+  // Address management states
+  const [addresses, setAddresses] = useState([]);
+  const [loadingAddresses, setLoadingAddresses] = useState(false);
+  const [showAddAddress, setShowAddAddress] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState(null);
+  const [newAddress, setNewAddress] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "India",
+    isDefault: false,
+  });
+
+  // Profile editing states
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  });
+
+   // Orders state
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState(null);
+
 
   // Login form data
   const [loginData, setLoginData] = useState({
@@ -49,28 +85,274 @@ const Account: React.FC = () => {
     confirmPassword: "",
   });
 
- 
-         
+
+  // Fetch user addresses when component mounts
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchAddresses();
+    }
+  }, [isAuthenticated]);
+
+  // Populate profile data when user data changes
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+    }
+  }, [user]);
+
+
+ // Set default tab to orders if coming from checkout
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'orders') {
+      // Show success message if coming from checkout
+      toast({
+        title: "Order placed successfully!",
+        description: "Your order has been placed and will appear in your order history.",
+      });
+    }
+  }, [searchParams, toast]);
+
+  // Fetch user orders when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchOrders();
+    }
+  }, [isAuthenticated]);
+
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    setOrdersError(null);
+    try {
+      const response = await ordersAPI.getOrders();
+      if (response.success) {
+        setOrders(response.data.orders || []);
+        if (response.data.orders && response.data.orders.length > 0) {
+          toast({
+            title: "Orders loaded",
+            description: `Found ${response.data.orders.length} order(s)`,
+          });
+        }
+      } else {
+        setOrdersError(response.message || 'Failed to fetch orders');
+      }
+    } catch (error) {
+      setOrdersError(error?.message || 'Failed to fetch orders');
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  
+
+  const fetchAddresses = async () => {
+    try {
+      setLoadingAddresses(true);
+      const response = await userAPI.getAddresses();
+      if (response.success) {
+        setAddresses(response.data.addresses);
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+    } finally {
+      setLoadingAddresses(false);
+    }
+  };
+
+  const handleAddAddress = async () => {
+    try {
+      const response = await userAPI.addAddress(newAddress);
+      if (response.success) {
+        setAddresses(response.data.addresses);
+        setNewAddress({
+          firstName: "",
+          lastName: "",
+          phone: "",
+          street: "",
+          city: "",
+          state: "",
+          zipCode: "",
+          country: "India",
+          isDefault: false,
+        });
+        setShowAddAddress(false);
+        toast({
+          title: "Success",
+          description: "Address added successfully",
+        });
+
       }
     } catch (error: any) {
       toast({
         title: "Error",
 
+        description: error.message || "Failed to add address",
+
         variant: "destructive",
       });
     }
   };
 
+  const handleUpdateAddress = async (addressId: string, updatedAddress: any) => {
+    try {
+      console.log('Updating address:', { addressId, updatedAddress });
+      const response = await userAPI.updateAddress(addressId, updatedAddress);
+      console.log('Update response:', response);
+      if (response.success) {
+        setAddresses(response.data.addresses);
+        setEditingAddressId(null);
+        setShowAddAddress(false);
+        setNewAddress({
+          firstName: "",
+          lastName: "",
+          phone: "",
+          street: "",
+          city: "",
+          state: "",
+          zipCode: "",
+          country: "India",
+          isDefault: false,
+        });
+        toast({
+          title: "Success",
+          description: "Address updated successfully",
+        });
+      } else {
+        console.error('Update failed:', response);
+        toast({
+          title: "Error",
+          description: response.message || "Failed to update address",
 
           variant: "destructive",
         });
       }
     } catch (error: any) {
+      console.error('Update error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update address",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: string) => {
+    try {
+      const response = await userAPI.deleteAddress(addressId);
+      if (response.success) {
+        setAddresses(response.data.addresses);
+        toast({
+          title: "Success",
+          description: "Address deleted successfully",
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete address",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Address editing functions
+  const handleStartEditAddress = (address: any) => {
+    setNewAddress({
+      firstName: address.firstName || "",
+      lastName: address.lastName || "",
+      phone: address.phone || "",
+      street: address.street || "",
+      city: address.city || "",
+      state: address.state || "",
+      zipCode: address.zipCode || "",
+      country: address.country || "India",
+      isDefault: address.isDefault || false,
+    });
+    setEditingAddressId(address._id);
+    setShowAddAddress(true);
+  };
+
+  const handleCancelAddressEdit = () => {
+    setNewAddress({
+      firstName: "",
+      lastName: "",
+      phone: "",
+      street: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "India",
+      isDefault: false,
+    });
+    setEditingAddressId(null);
+    setShowAddAddress(false);
+  };
+
+  const handleSubmitAddress = async () => {
+    console.log('Submit address called:', { editingAddressId, newAddress });
+    if (editingAddressId) {
+      // Update existing address
+      console.log('Updating existing address with ID:', editingAddressId);
+      await handleUpdateAddress(editingAddressId, newAddress);
+    } else {
+      // Add new address
+      console.log('Adding new address');
+      await handleAddAddress();
+    }
+  };
+
+  // Profile management functions
+  const handleEditProfile = () => {
+    setIsEditingProfile(true);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      // Here you would typically call an API to update the profile
+      // For now, we'll just update the local state
+      setIsEditingProfile(false);
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
 
         variant: "destructive",
       });
     }
   };
+
+  const handleCancelProfileEdit = () => {
+    // Reset profile data to original user data
+    if (user) {
+      setProfileData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+    }
+    setIsEditingProfile(false);
+  };
+
+  const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
 
   const handleLogout = () => {
     logout();
@@ -419,6 +701,40 @@ const Account: React.FC = () => {
   }
 
 
+  // Show account page content if user is authenticated
+  const orders = [
+    {
+      id: "ICL001",
+      date: "2024-01-15",
+      status: "Delivered",
+      total: 2499,
+      items: [
+        {
+          name: "Oversized Black Hoodie",
+          size: "L",
+          quantity: 1,
+          image: productHoodie,
+        },
+      ],
+    },
+    {
+      id: "ICL002",
+      date: "2024-01-10",
+      status: "Shipped",
+      total: 2598,
+      items: [
+        {
+          name: "Essential White Tee",
+          size: "M",
+          quantity: 2,
+          image: productTee,
+        },
+      ],
+    },
+  ];
+
+
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -432,7 +748,7 @@ const Account: React.FC = () => {
             <Button
               onClick={handleLogout}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 btn-hover-lift"
             >
               <LogOut className="w-4 h-4" />
               Logout
@@ -441,13 +757,10 @@ const Account: React.FC = () => {
 
           <Tabs defaultValue={searchParams.get('tab') || "orders"} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
+
               <TabsTrigger value="orders" className="flex items-center gap-2">
                 <Package className="w-4 h-4" />
                 Orders
-              </TabsTrigger>
-              <TabsTrigger value="wishlist" className="flex items-center gap-2">
-                <Heart className="w-4 h-4" />
-                Wishlist
               </TabsTrigger>
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="w-4 h-4" />
@@ -628,91 +941,350 @@ const Account: React.FC = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="wishlist" className="mt-8">
-              <div className="space-y-6">
-                <h2 className="text-xl font-bold text-foreground">
-                  My Wishlist
-                </h2>
-
-                {wishlistItems.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      No items in wishlist
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {wishlistItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="bg-card shadow-soft overflow-hidden group"
-                      >
-                        <div className="aspect-square overflow-hidden">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h3 className="font-medium text-foreground mb-2">
-                            {item.name}
-                          </h3>
-                          <p className="text-lg font-bold text-foreground mb-4">
-                            ₹{item.price.toLocaleString()}
-                          </p>
-                          <Button className="w-full btn-hero">
-                            Add to Cart
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
             <TabsContent value="profile" className="mt-8">
-              <div className="max-w-2xl">
-                <h2 className="text-xl font-bold text-foreground mb-6">
-                  Profile Information
-                </h2>
+              <div className="max-w-7xl">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Profile Information Section */}
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground mb-6">
+                      Profile Information
+                    </h2>
 
-                <div className="bg-card p-6 shadow-soft">
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          First Name
-                        </label>
-                        <Input defaultValue={user?.firstName || ""} />
+                    <div className="bg-card p-6 shadow-soft">
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                              First Name
+                            </label>
+                            {isEditingProfile ? (
+                              <Input
+                                name="firstName"
+                                value={profileData.firstName}
+                                onChange={handleProfileInputChange}
+                              />
+                            ) : (
+                              <div className="p-3 bg-muted rounded-md text-foreground">
+                                {profileData.firstName || "Not provided"}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                              Last Name
+                            </label>
+                            {isEditingProfile ? (
+                              <Input
+                                name="lastName"
+                                value={profileData.lastName}
+                                onChange={handleProfileInputChange}
+                              />
+                            ) : (
+                              <div className="p-3 bg-muted rounded-md text-foreground">
+                                {profileData.lastName || "Not provided"}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">
+                            Email
+                          </label>
+                          {isEditingProfile ? (
+                            <Input
+                              name="email"
+                              value={profileData.email}
+                              onChange={handleProfileInputChange}
+                              type="email"
+                            />
+                          ) : (
+                            <div className="p-3 bg-muted rounded-md text-foreground">
+                              {profileData.email || "Not provided"}
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">
+                            Phone
+                          </label>
+                          {isEditingProfile ? (
+                            <Input
+                              name="phone"
+                              value={profileData.phone}
+                              onChange={handleProfileInputChange}
+                              type="tel"
+                            />
+                          ) : (
+                            <div className="p-3 bg-muted rounded-md text-foreground">
+                              {profileData.phone || "Not provided"}
+                            </div>
+                          )}
+                        </div>
+
+                        {isEditingProfile ? (
+                          <div className="flex gap-2">
+                            <Button onClick={handleSaveProfile} className="btn-hero btn-hover-lift">
+                              Save Changes
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={handleCancelProfileEdit}
+                              className="btn-hover-lift"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            onClick={handleEditProfile}
+                            variant="outline"
+                            className="flex items-center gap-2 btn-hover-lift"
+                          >
+                            <Edit className="w-4 h-4" />
+                            Edit Profile
+                          </Button>
+                        )}
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Last Name
-                        </label>
-                        <Input defaultValue={user?.lastName || ""} />
+                    </div>
+                  </div>
+
+                  {/* Address Information Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-xl font-bold text-foreground">
+                        Delivery Addresses
+                      </h2>
+                      <Button
+                        onClick={() => {
+                          setEditingAddressId(null);
+                          setNewAddress({
+                            firstName: "",
+                            lastName: "",
+                            phone: "",
+                            street: "",
+                            city: "",
+                            state: "",
+                            zipCode: "",
+                            country: "India",
+                            isDefault: false,
+                          });
+                          setShowAddAddress(true);
+                        }}
+                        className="flex items-center gap-2 btn-hover-lift"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Address
+                      </Button>
+                    </div>
+
+                    {loadingAddresses ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                        <p className="mt-4 text-muted-foreground">Loading addresses...</p>
                       </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        Email
-                      </label>
-                      <Input defaultValue={user?.email || ""} type="email" />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        Phone
-                      </label>
-                      <Input defaultValue={user?.phone || ""} type="tel" />
-                    </div>
-
-                    <Button className="btn-hero">Update Profile</Button>
+                    ) : addresses.length === 0 ? (
+                      <div className="text-center py-12 bg-card rounded-lg border-2 border-dashed border-border">
+                        <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-foreground mb-2">No addresses yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Add your first delivery address to get started
+                        </p>
+                        <Button 
+                          onClick={() => {
+                            setEditingAddressId(null);
+                            setNewAddress({
+                              firstName: "",
+                              lastName: "",
+                              phone: "",
+                              street: "",
+                              city: "",
+                              state: "",
+                              zipCode: "",
+                              country: "India",
+                              isDefault: false,
+                            });
+                            setShowAddAddress(true);
+                          }} 
+                          className="btn-hero"
+                        >
+                          Add First Address
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {addresses.map((address) => (
+                          <div key={address._id} className="bg-card p-6 shadow-soft border-l-4 border-primary">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="font-semibold text-foreground">
+                                    {address.firstName} {address.lastName}
+                                  </h3>
+                                  {address.isDefault && (
+                                    <span className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded-full">
+                                      Default
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-muted-foreground mb-1">{address.phone}</p>
+                                <p className="text-foreground mb-1">{address.street}</p>
+                                <p className="text-foreground">
+                                  {address.city}, {address.state} {address.zipCode}
+                                </p>
+                                <p className="text-muted-foreground">{address.country}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleStartEditAddress(address)}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Edit className="w-3 h-3" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteAddress(address._id)}
+                                  className="flex items-center gap-1 text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {/* Add/Edit Address Form (Modal) */}
+                {showAddAddress && (
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-background rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+                      <h3 className="text-lg font-semibold mb-4">
+                        {editingAddressId ? "Edit Address" : "Add New Address"}
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                              First Name
+                            </label>
+                            <Input
+                              value={newAddress.firstName}
+                              onChange={(e) => setNewAddress({...newAddress, firstName: e.target.value})}
+                              placeholder="First name"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                              Last Name
+                            </label>
+                            <Input
+                              value={newAddress.lastName}
+                              onChange={(e) => setNewAddress({...newAddress, lastName: e.target.value})}
+                              placeholder="Last name"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">
+                            Phone
+                          </label>
+                          <Input
+                            value={newAddress.phone}
+                            onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
+                            placeholder="Phone number"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">
+                            Street Address
+                          </label>
+                          <Input
+                            value={newAddress.street}
+                            onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
+                            placeholder="Street address"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                              City
+                            </label>
+                            <Input
+                              value={newAddress.city}
+                              onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                              placeholder="City"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                              State
+                            </label>
+                            <Input
+                              value={newAddress.state}
+                              onChange={(e) => setNewAddress({...newAddress, state: e.target.value})}
+                              placeholder="State"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                              ZIP Code
+                            </label>
+                            <Input
+                              value={newAddress.zipCode}
+                              onChange={(e) => setNewAddress({...newAddress, zipCode: e.target.value})}
+                              placeholder="ZIP code"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                              Country
+                            </label>
+                            <Input
+                              value={newAddress.country}
+                              onChange={(e) => setNewAddress({...newAddress, country: e.target.value})}
+                              placeholder="Country"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="isDefault"
+                            checked={newAddress.isDefault}
+                            onChange={(e) => setNewAddress({...newAddress, isDefault: e.target.checked})}
+                            className="rounded border-gray-300"
+                          />
+                          <label htmlFor="isDefault" className="text-sm text-foreground">
+                            Set as default address
+                          </label>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-6">
+                        <Button onClick={handleSubmitAddress} className="flex-1">
+                          {editingAddressId ? "Update Address" : "Add Address"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={handleCancelAddressEdit}
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingBag, User, Heart } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, Heart, Pocket, Coins } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { userAPI } from '@/utils/api';
+import { Separator } from '@/components/UI/separator';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -144,6 +145,16 @@ const Header: React.FC = () => {
                 </span>
               )}
             </Link>
+            <Link 
+              to="/pocket" 
+              className="relative p-2 hover:text-accent transition-colors duration-300"
+              aria-label="Pocket"
+            >
+              <div className="relative">
+                <Coins size={14} className="absolute -top-2 -right-1 text-yellow-500 animate-bounce" />
+                <Pocket size={20} />
+              </div>
+            </Link>
             {/* TODO: Add authentication state management */}
             <Link 
               to="/account" 
@@ -183,6 +194,30 @@ const Header: React.FC = () => {
                   {item.label}
                 </Link>
               ))}
+              <Separator />
+              <Link
+                to="/pocket"
+                onClick={() => setIsMenuOpen(false)}
+                className={`text-sm font-medium tracking-widest py-2 transition-colors duration-300 flex items-center gap-2 ${
+                  isActivePath('/pocket') ? 'text-primary' : 'text-foreground hover:text-primary'
+                }`}
+              >
+                <div className="relative">
+                  <Coins size={12} className="absolute -top-1 -right-1 text-yellow-500 animate-bounce" />
+                  <Pocket size={16} />
+                </div>
+                POCKET
+              </Link>
+              <Link
+                to="/wishlist"
+                onClick={() => setIsMenuOpen(false)}
+                className={`text-sm font-medium tracking-widest py-2 transition-colors duration-300 flex items-center gap-2 ${
+                  isActivePath('/wishlist') ? 'text-primary' : 'text-foreground hover:text-primary'
+                }`}
+              >
+                <Heart size={16} />
+                WISHLIST
+              </Link>
             </nav>
           </div>
         )}
