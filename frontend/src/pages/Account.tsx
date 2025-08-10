@@ -66,9 +66,7 @@ const Account: React.FC = () => {
         });
       }
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error?.message || "Failed to load order details",
+
         variant: "destructive",
       });
     }
