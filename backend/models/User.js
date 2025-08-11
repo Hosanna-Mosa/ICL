@@ -95,6 +95,10 @@ const userSchema = new mongoose.Schema(
         ref: "Product",
       },
     ],
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
+    resetPasswordOtp: String, // OTP for password reset
+    resetPasswordOtpExpire: Date, // OTP expiry
   },
   {
     timestamps: true,

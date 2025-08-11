@@ -120,6 +120,27 @@ export const adminAuthAPI = {
   },
   isAuthenticated: () => Boolean(getAdminAuthToken()),
   getCurrentUser: () => getAdminUser(),
+
+  // Request password reset OTP
+  requestResetOtp: async (email) =>
+    apiRequest("/auth/request-reset-otp", {
+      method: "POST",
+      body: { email },
+    }),
+
+  // Verify OTP
+  verifyResetOtp: async (email, otp) =>
+    apiRequest("/auth/verify-reset-otp", {
+      method: "POST",
+      body: { email, otp },
+    }),
+
+  // Reset password via OTP
+  resetPasswordOtp: async (email, otp, password) =>
+    apiRequest("/auth/reset-password-otp", {
+      method: "POST",
+      body: { email, otp, password },
+    }),
 };
 
 // ----- Upload (admin) -----
