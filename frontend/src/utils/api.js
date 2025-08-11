@@ -1,6 +1,6 @@
 // API Configuration
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://icl-zsbu.onrender.com/api";
+  import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 // Helper function to get auth token from localStorage
 const getAuthToken = () => {
@@ -131,6 +131,30 @@ export const authAPI = {
   // Check if user is authenticated
   isAuthenticated: () => {
     return !!getAuthToken();
+  },
+
+  // Request password reset OTP
+  requestResetOtp: async (email) => {
+    return await apiRequest("/auth/request-reset-otp", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  // Verify password reset OTP
+  verifyResetOtp: async (email, otp) => {
+    return await apiRequest("/auth/verify-reset-otp", {
+      method: "POST",
+      body: JSON.stringify({ email, otp }),
+    });
+  },
+
+  // Reset password with OTP
+  resetPasswordOtp: async (email, otp, password) => {
+    return await apiRequest("/auth/reset-password-otp", {
+      method: "POST",
+      body: JSON.stringify({ email, otp, password }),
+    });
   },
 };
 

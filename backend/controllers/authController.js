@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import { generateToken } from "../middlewares/auth.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
+import { sendEmail } from "../utils/emailService.js";
+import crypto from "crypto";
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -208,4 +210,125 @@ export const changePassword = asyncHandler(async (req, res) => {
     success: true,
     message: "Password changed successfully",
   });
+});
+
+// @desc    Forgot password
+// @route   POST /api/auth/forgot-password
+// @access  Public
+export const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+  // Generate reset token
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+  user.resetPasswordExpire = Date.now() + 1000 * 60 * 30; // 30 minutes
+  await user.save();
+  // Send email
+  const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password/${resetToken}`;
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: "Password Reset Request",
+      html: `<h2>Password Reset</h2><p>Click <a href='${resetUrl}'>here</a> to reset your password. This link will expire in 30 minutes.</p>`
+    });
+    res.json({ success: true, message: "Password reset email sent" });
+  } catch (e) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    res.status(500).json({ success: false, message: "Failed to send email" });
+  }
+});
+
+// @desc    Reset password
+// @route   POST /api/auth/reset-password/:token
+// @access  Public
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+  if (!user) {
+    return res.status(400).json({ success: false, message: "Invalid or expired token" });
+  }
+  user.password = password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  await user.save();
+  res.json({ success: true, message: "Password reset successful" });
+});
+
+// @desc    Request OTP for password reset
+// @route   POST /api/auth/request-reset-otp
+// @access  Public
+export const requestResetOtp = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+  // Generate 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  user.resetPasswordOtp = otp;
+  user.resetPasswordOtpExpire = Date.now() + 1000 * 60 * 10; // 10 minutes
+  await user.save();
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: "Your OTP for Password Reset",
+      html: `<h2>Password Reset OTP</h2><p>Your OTP is <b>${otp}</b>. It will expire in 10 minutes.</p>`
+    });
+    res.json({ success: true, message: "OTP sent to your email" });
+  } catch (e) {
+    user.resetPasswordOtp = undefined;
+    user.resetPasswordOtpExpire = undefined;
+    await user.save();
+    res.status(500).json({ success: false, message: "Failed to send OTP email" });
+  }
+});
+
+// @desc    Verify OTP for password reset
+// @route   POST /api/auth/verify-reset-otp
+// @access  Public
+export const verifyResetOtp = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+  const user = await User.findOne({ email });
+  if (!user || !user.resetPasswordOtp || !user.resetPasswordOtpExpire) {
+    return res.status(400).json({ success: false, message: "OTP not requested or expired" });
+  }
+  if (user.resetPasswordOtp !== otp) {
+    return res.status(400).json({ success: false, message: "Invalid OTP" });
+  }
+  if (user.resetPasswordOtpExpire < Date.now()) {
+    return res.status(400).json({ success: false, message: "OTP expired" });
+  }
+  res.json({ success: true, message: "OTP verified" });
+});
+
+// @desc    Reset password with OTP
+// @route   POST /api/auth/reset-password-otp
+// @access  Public
+export const resetPasswordWithOtp = asyncHandler(async (req, res) => {
+  const { email, otp, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user || !user.resetPasswordOtp || !user.resetPasswordOtpExpire) {
+    return res.status(400).json({ success: false, message: "OTP not requested or expired" });
+  }
+  if (user.resetPasswordOtp !== otp) {
+    return res.status(400).json({ success: false, message: "Invalid OTP" });
+  }
+  if (user.resetPasswordOtpExpire < Date.now()) {
+    return res.status(400).json({ success: false, message: "OTP expired" });
+  }
+  user.password = password;
+  user.resetPasswordOtp = undefined;
+  user.resetPasswordOtpExpire = undefined;
+  await user.save();
+  res.json({ success: true, message: "Password reset successful" });
 });
