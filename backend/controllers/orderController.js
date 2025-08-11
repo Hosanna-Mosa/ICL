@@ -4,6 +4,7 @@ import Product from "../models/Product.js";
 import User from "../models/User.js";
 import CoinTransaction from "../models/CoinTransaction.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
+import { sendEmail } from "../utils/emailService.js";
 
 // @desc    Create order (checkout)
 // @route   POST /api/orders
@@ -123,6 +124,17 @@ export const createOrder = asyncHandler(async (req, res) => {
     message: "Order placed successfully",
     data: { order },
   });
+
+  // Send order confirmation email
+  try {
+    await sendEmail({
+      to: req.user.email,
+      subject: `Order Confirmation - ${order.orderNumber}`,
+      html: `<h2>Thank you for your order!</h2><p>Your order <b>${order.orderNumber}</b> has been placed successfully.</p>`
+    });
+  } catch (e) {
+    console.error("Failed to send order confirmation email", e);
+  }
 });
 
 // @desc    Get user orders
@@ -281,6 +293,18 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     message: "Order status updated successfully",
     data: { order },
   });
+
+  // Send order status update email
+  try {
+    const user = await User.findById(order.user);
+    await sendEmail({
+      to: user.email,
+      subject: `Order Status Updated - ${order.orderNumber}`,
+      html: `<h2>Your order status has been updated</h2><p>Order <b>${order.orderNumber}</b> is now <b>${status}</b>.</p>`
+    });
+  } catch (e) {
+    console.error("Failed to send order status update email", e);
+  }
 });
 
 // @desc    Cancel order
