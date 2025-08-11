@@ -23,8 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ordersAPI, userAPI } from "@/utils/api";
-import productHoodie from "@/assets/product-hoodie.jpg";
-import productTee from "@/assets/product-tee.jpg";
+
 
 const Account: React.FC = () => {
   const { user, isAuthenticated, login, register, logout, loading } = useAuth();
@@ -702,36 +701,6 @@ const Account: React.FC = () => {
 
 
   // Show account page content if user is authenticated
-  const orders = [
-    {
-      id: "ICL001",
-      date: "2024-01-15",
-      status: "Delivered",
-      total: 2499,
-      items: [
-        {
-          name: "Oversized Black Hoodie",
-          size: "L",
-          quantity: 1,
-          image: productHoodie,
-        },
-      ],
-    },
-    {
-      id: "ICL002",
-      date: "2024-01-10",
-      status: "Shipped",
-      total: 2598,
-      items: [
-        {
-          name: "Essential White Tee",
-          size: "M",
-          quantity: 2,
-          image: productTee,
-        },
-      ],
-    },
-  ];
 
 
 
