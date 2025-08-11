@@ -3,7 +3,7 @@ import { Trash2, ShoppingBag, Loader2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/UI/button';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';

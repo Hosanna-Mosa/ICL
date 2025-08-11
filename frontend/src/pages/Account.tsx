@@ -18,7 +18,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 import Button from "@/components/UI/ICLButton";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/UI/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/UI/dialog";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/UI/input-otp";
