@@ -1,6 +1,8 @@
 // API Configuration
 const API_BASE_URL =
+
   import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+
 
 // Helper function to get auth token from localStorage
 const getAuthToken = () => {
@@ -275,6 +277,13 @@ export const ordersAPI = {
   // Cancel order
   cancelOrder: async (orderId) => {
     return await apiRequest(`/orders/${orderId}/cancel`, {
+      method: "PUT",
+    });
+  },
+
+  // Request return
+  requestReturn: async (orderId) => {
+    return await apiRequest(`/orders/${orderId}/return`, {
       method: "PUT",
     });
   },

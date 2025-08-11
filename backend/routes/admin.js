@@ -63,7 +63,16 @@ router.put(
   [
     validateId,
     body("status")
-      .isIn(["pending", "confirmed", "shipped", "delivered", "cancelled"])
+        .isIn([
+          "pending",
+          "confirmed",
+          "processing",
+          "shipped",
+          "delivered",
+          "return_pending",
+          "cancelled",
+          "returned",
+        ])
       .withMessage("Invalid status"),
     validate,
   ],

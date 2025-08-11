@@ -61,6 +61,13 @@ export const createOrder = asyncHandler(async (req, res) => {
     total: item.price * item.quantity,
   }));
 
+  // Calculate coins to be earned from assigned product coins
+  // Sum of each product's coinsEarned multiplied by quantity
+  const coinsEarnedFromProducts = cart.items.reduce((sum, item) => {
+    const productCoins = (item.product && item.product.coinsEarned) || 0;
+    return sum + productCoins * item.quantity;
+  }, 0);
+
   // Create order
   const order = await Order.create({
     orderNumber: Order.generateOrderNumber(),
@@ -77,6 +84,9 @@ export const createOrder = asyncHandler(async (req, res) => {
     discountAmount: cart.discountAmount,
     coinsUsed: cart.coinsUsed,
     total: cart.total + shippingCost,
+    // If product-assigned coins exist, use them; otherwise the Order pre-save
+    // hook will fallback to percentage-based calculation.
+    ...(coinsEarnedFromProducts > 0 ? { coinsEarned: coinsEarnedFromProducts } : {}),
   });
 
   // Update product stock
@@ -223,19 +233,49 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     });
   }
 
+  const previousStatus = order.status;
+
   // Update status
   await order.updateStatus(status, notes);
 
-  // If order is delivered, add coins to user
-  if (status === "delivered" && order.coinsEarned > 0) {
+  // If order is delivered, add coins to user (only if not already credited)
+  if (
+    status === "delivered" &&
+    previousStatus !== "delivered" &&
+    order.coinsEarned > 0 &&
+    !order.coinsCredited
+  ) {
     const user = await User.findById(order.user);
     await user.addCoins(order.coinsEarned);
-    
+    order.coinsCredited = true;
+    await order.save();
     // Create coin transaction record
     await CoinTransaction.createEarnedTransaction(
       order.user,
       order.coinsEarned,
       "Purchase completed",
+      order.orderNumber,
+      order._id
+    );
+  }
+
+  // If order is returned, debit coins from user (only if previously credited and not already debited)
+  if (
+    status === "returned" &&
+    previousStatus !== "returned" &&
+    order.coinsEarned > 0 &&
+    order.coinsCredited &&
+    !order.coinsDebited
+  ) {
+    const user = await User.findById(order.user);
+    await user.redeemCoins(order.coinsEarned);
+    order.coinsDebited = true;
+    await order.save();
+    // Create coin transaction record for debit
+    await CoinTransaction.createRedeemedTransaction(
+      order.user,
+      order.coinsEarned,
+      "Order returned - coins debited",
       order.orderNumber,
       order._id
     );
@@ -345,6 +385,25 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     message: "Order cancelled successfully",
     data: { order },
   });
+});
+
+// @desc    Request return (user)
+// @route   PUT /api/orders/:id/return
+// @access  Private
+export const requestReturn = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  if (!order) {
+    return res.status(404).json({ success: false, message: 'Order not found' });
+  }
+  if (order.user.toString() !== req.user.id) {
+    return res.status(403).json({ success: false, message: 'Access denied' });
+  }
+  if (order.status !== 'delivered') {
+    return res.status(400).json({ success: false, message: 'Only delivered orders can be returned' });
+  }
+  order.status = 'return_pending';
+  await order.save();
+  res.json({ success: true, message: 'Return requested. Awaiting admin approval.', data: { order } });
 });
 
 // @desc    Get all orders (Admin only)

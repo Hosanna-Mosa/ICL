@@ -37,7 +37,7 @@ export interface Order {
     email: string;
   };
   items: OrderItem[];
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'return_pending' | 'cancelled' | 'returned';
   payment: {
     method: 'cod' | 'upi' | 'card' | 'wallet';
     status: 'pending' | 'completed' | 'failed' | 'refunded';

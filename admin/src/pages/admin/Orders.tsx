@@ -19,7 +19,8 @@ const statusColors = {
   shipped: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
   delivered: 'bg-green-500/10 text-green-500 border-green-500/20',
   cancelled: 'bg-red-500/10 text-red-500 border-red-500/20',
-  returned: 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+  returned: 'bg-gray-500/10 text-gray-500 border-gray-500/20',
+  return_pending: 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
 };
 
 const statusIcons = {
@@ -29,7 +30,8 @@ const statusIcons = {
   shipped: Truck,
   delivered: CheckCircle,
   cancelled: XCircle,
-  returned: XCircle
+  returned: XCircle,
+  return_pending: Package
 };
 
 const Orders = () => {
@@ -251,6 +253,7 @@ const Orders = () => {
                 <SelectItem value="delivered">Delivered</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
                 <SelectItem value="returned">Returned</SelectItem>
+                <SelectItem value="return_pending">Return Pending</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -370,6 +373,17 @@ const Orders = () => {
                                 <CheckCircle className="mr-2 h-4 w-4" />
                               )}
                               Mark Delivered
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => updateOrderStatus(order._id, 'returned')}
+                              disabled={updatingStatus === order._id || order.status !== 'return_pending'}
+                            >
+                              {updatingStatus === order._id ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                              )}
+                              Mark Returned
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
