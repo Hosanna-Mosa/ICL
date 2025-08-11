@@ -7,6 +7,7 @@ import {
   cancelOrder,
   getAllOrders,
   getRecentOrders,
+  requestReturn,
 } from "../controllers/orderController.js";
 import { protect, authorize } from "../middlewares/auth.js";
 import { validateOrder, validateId } from "../middlewares/validation.js";
@@ -20,6 +21,7 @@ router.post("/", validateOrder, createOrder);
 router.get("/", getUserOrders);
 router.get("/:id", validateId, getOrder);
 router.put("/:id/cancel", validateId, cancelOrder);
+router.put("/:id/return", validateId, requestReturn);
 
 // Admin routes
 router.put("/:id/status", validateId, authorize("admin"), updateOrderStatus);

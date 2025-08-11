@@ -135,6 +135,7 @@ const orderSchema = new mongoose.Schema(
         "processing",
         "shipped",
         "delivered",
+        "return_pending",
         "cancelled",
         "returned",
       ],
@@ -165,6 +166,14 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: [0, "Coins earned cannot be negative"],
+    },
+    coinsCredited: {
+      type: Boolean,
+      default: false,
+    },
+    coinsDebited: {
+      type: Boolean,
+      default: false,
     },
     total: {
       type: Number,
@@ -213,6 +222,7 @@ orderSchema.virtual("statusDisplay").get(function () {
     processing: "Processing",
     shipped: "Shipped",
     delivered: "Delivered",
+    return_pending: "Return Pending",
     cancelled: "Cancelled",
     returned: "Returned",
   };

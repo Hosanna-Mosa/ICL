@@ -147,6 +147,21 @@ const Account: React.FC = () => {
     }
   };
 
+  // Handle return request
+  const handleRequestReturn = async (orderId) => {
+    try {
+      const response = await ordersAPI.requestReturn(orderId);
+      if (response.success) {
+        toast({ title: 'Return Requested', description: 'Return is pending admin approval.' });
+        fetchOrders();
+      } else {
+        toast({ title: 'Error', description: response.message || 'Failed to request return', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: error.message || 'Failed to request return', variant: 'destructive' });
+    }
+  };
+
   
 
   const fetchAddresses = async () => {
@@ -900,6 +915,22 @@ const Account: React.FC = () => {
                               >
                                 View Details
                               </Button>
+                              {order.status === "delivered" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full text-yellow-600 border-yellow-200 hover:bg-yellow-50"
+                                  onClick={() => handleRequestReturn(order._id)}
+                                >
+                                  Return Product
+                                </Button>
+                              )}
+                              {order.status === "return_pending" && (
+                                <div className="w-full text-center text-yellow-700 text-xs font-semibold py-2">Return Pending</div>
+                              )}
+                              {order.status === "returned" && (
+                                <div className="w-full text-center text-gray-700 text-xs font-semibold py-2">Returned</div>
+                              )}
                             </div>
                           </div>
                         </div>

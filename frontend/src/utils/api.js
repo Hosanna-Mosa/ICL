@@ -1,6 +1,6 @@
 // API Configuration
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://icl-zsbu.onrender.com/api";
+  import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:8000/api" : "https://icl-zsbu.onrender.com/api");
 
 // Helper function to get auth token from localStorage
 const getAuthToken = () => {
@@ -251,6 +251,13 @@ export const ordersAPI = {
   // Cancel order
   cancelOrder: async (orderId) => {
     return await apiRequest(`/orders/${orderId}/cancel`, {
+      method: "PUT",
+    });
+  },
+
+  // Request return
+  requestReturn: async (orderId) => {
+    return await apiRequest(`/orders/${orderId}/return`, {
       method: "PUT",
     });
   },
