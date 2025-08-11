@@ -1,7 +1,7 @@
 // API Configuration
 const API_BASE_URL =
 
-  import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  import.meta.env.VITE_API_URL || "https://icl-zsbu.onrender.com/api";
 
 
 // Helper function to get auth token from localStorage
