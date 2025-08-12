@@ -1,7 +1,6 @@
 // API Configuration
 const API_BASE_URL =
-
-  import.meta.env.VITE_API_URL || "https://icl-zsbu.onrender.com/api";
+  import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 
 // Helper function to get auth token from localStorage
@@ -289,6 +288,64 @@ export const ordersAPI = {
   },
 };
 
+// Lookbook API functions
+export const lookbookAPI = {
+  // Get all lookbook items
+  getAll: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return await apiRequest(`/lookbook${queryString ? `?${queryString}` : ""}`);
+  },
+
+  // Get lookbook item by ID
+  getById: async (id) => {
+    return await apiRequest(`/lookbook/${id}`);
+  },
+
+  // Get lookbook items by category
+  getByCategory: async (category, params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return await apiRequest(`/lookbook/category/${category}${queryString ? `?${queryString}` : ""}`);
+  },
+
+  // Get lookbook categories
+  getCategories: async () => {
+    return await apiRequest("/lookbook/categories");
+  },
+
+  // Search lookbook items
+  search: async (query, params = {}) => {
+    const searchParams = new URLSearchParams({ q: query, ...params });
+    return await apiRequest(`/lookbook/search?${searchParams}`);
+  },
+
+  // Admin functions
+  create: async (lookbookData) => {
+    return await apiRequest("/lookbook", {
+      method: "POST",
+      body: JSON.stringify(lookbookData),
+    });
+  },
+
+  update: async (id, lookbookData) => {
+    return await apiRequest(`/lookbook/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(lookbookData),
+    });
+  },
+
+  delete: async (id) => {
+    return await apiRequest(`/lookbook/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  toggleStatus: async (id) => {
+    return await apiRequest(`/lookbook/${id}/toggle`, {
+      method: "PATCH",
+    });
+  },
+};
+
 // User API functions
 export const userAPI = {
   // Get user profile
@@ -391,5 +448,6 @@ export default {
   cart: cartAPI,
   orders: ordersAPI,
   user: userAPI,
+  lookbook: lookbookAPI,
   utils: apiUtils,
 };

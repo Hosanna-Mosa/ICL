@@ -3,7 +3,7 @@
 const API_BASE_URL =
   import.meta.env.VITE_ADMIN_API_URL ||
   import.meta.env.VITE_API_URL ||
-  "https://icl-zsbu.onrender.com/api";
+  "http://localhost:8000/api";  // Use localhost for development
 //local host : "http://localhost:8000/api"
 //render host : "https://icl-zsbu.onrender.com/api"
 // ----- LocalStorage keys (admin-specific) -----
@@ -192,6 +192,20 @@ export const adminUsersAPI = {
     }),
 };
 
+// ----- Lookbook (admin) -----
+export const adminLookbookAPI = {
+  list: async (params = {}) => apiRequest(`/lookbook${buildQueryString(params)}`),
+  getById: async (id) => apiRequest(`/lookbook/${id}`),
+  create: async (lookbookData) =>
+    apiRequest(`/lookbook`, { method: "POST", body: lookbookData }),
+  update: async (id, updates) =>
+    apiRequest(`/lookbook/${id}`, { method: "PUT", body: updates }),
+  remove: async (id) => apiRequest(`/lookbook/${id}`, { method: "DELETE" }),
+  toggleStatus: async (id) =>
+    apiRequest(`/lookbook/${id}/toggle`, { method: "PATCH" }),
+  getCategories: async () => apiRequest(`/lookbook/categories`),
+};
+
 // ----- Expose common utilities -----
 export const adminApiUtils = {
   getAdminAuthToken,
@@ -209,6 +223,7 @@ const adminApi = {
   products: adminProductsAPI,
   orders: adminOrdersAPI,
   users: adminUsersAPI,
+  lookbook: adminLookbookAPI,
   utils: adminApiUtils,
   request: apiRequest,
   baseUrl: API_BASE_URL,
