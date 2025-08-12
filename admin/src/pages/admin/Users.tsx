@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Filter, User, Coins, Plus, Minus, MoreHorizontal, Trash2, Eye, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Filter, User, Coins, Plus, Minus, MoreHorizontal, Trash2, Eye, Calendar, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,77 +11,85 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { User as UserType, CoinsTransaction } from '@/types';
+import { adminUsersAPI } from '@/utils/api';
 
-// Mock data for demonstration
-const mockUsers: UserType[] = [
-  {
-    id: 'user1',
-    email: 'john@example.com',
-    name: 'John Smith',
-    role: 'user',
-    coinsBalance: 250,
-    registeredDate: '2024-01-15T10:30:00Z'
-  },
-  {
-    id: 'user2',
-    email: 'sarah@example.com',
-    name: 'Sarah Wilson',
-    role: 'user',
-    coinsBalance: 180,
-    registeredDate: '2024-01-18T14:22:00Z'
-  },
-  {
-    id: 'user3',
-    email: 'mike@example.com',
-    name: 'Mike Johnson',
-    role: 'user',
-    coinsBalance: 75,
-    registeredDate: '2024-02-01T09:15:00Z'
-  },
-  {
-    id: 'admin1',
-    email: 'admin@iclstreetwear.com',
-    name: 'ICL Admin',
-    role: 'admin',
-    coinsBalance: 0,
-    registeredDate: '2024-01-01T00:00:00Z'
-  }
-];
+interface UserType {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  role: 'user' | 'admin';
+  coins: number;
+  isActive: boolean;
+  createdAt: string;
+  lastLogin?: string;
+}
 
-const mockTransactions: CoinsTransaction[] = [
-  {
-    id: 'txn1',
-    userId: 'user1',
-    amount: 50,
-    type: 'earned',
-    description: 'Purchase reward - Order ORD-2024-001',
-    orderId: 'ORD-2024-001',
-    createdAt: '2024-01-15T10:35:00Z'
-  },
-  {
-    id: 'txn2',
-    userId: 'user1',
-    amount: 100,
-    type: 'admin_added',
-    description: 'Welcome bonus',
-    createdAt: '2024-01-15T10:30:00Z'
-  }
-];
+interface CoinsTransaction {
+  id: string;
+  userId: string;
+  amount: number;
+  type: 'earned' | 'admin_added' | 'admin_removed' | 'redeemed';
+  description: string;
+  orderId?: string;
+  createdAt: string;
+}
 
 const Users = () => {
-  const [users] = useState<UserType[]>(mockUsers);
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [viewUserProfile, setViewUserProfile] = useState<UserType | null>(null);
   const [coinsAmount, setCoinsAmount] = useState<number>(0);
   const [coinsAction, setCoinsAction] = useState<'add' | 'remove'>('add');
+  const [updatingCoins, setUpdatingCoins] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Fetch users on component mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await adminUsersAPI.list({
+        limit: 100, // Get more users for better stats
+        role: roleFilter !== 'all' ? roleFilter : undefined,
+        search: searchTerm || undefined,
+      });
+      
+      if (response.success && response.data?.users) {
+        setUsers(response.data.users);
+      } else {
+        throw new Error('Failed to fetch users');
+      }
+    } catch (error: any) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to fetch users",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Refetch users when filters change
+  useEffect(() => {
+    if (!loading) {
+      fetchUsers();
+    }
+  }, [roleFilter, searchTerm]);
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
@@ -89,22 +97,65 @@ const Users = () => {
     return matchesSearch && matchesRole;
   });
 
-  const updateCoinsBalance = (userId: string, amount: number, action: 'add' | 'remove') => {
-    const actionText = action === 'add' ? 'added to' : 'removed from';
-    toast({
-      title: "Coins Updated",
-      description: `${amount} coins ${actionText} user account`,
-    });
-    setSelectedUser(null);
-    setCoinsAmount(0);
+  const updateCoinsBalance = async (userId: string, amount: number, action: 'add' | 'remove') => {
+    try {
+      setUpdatingCoins(true);
+      const response = await adminUsersAPI.adjustCoins(userId, { amount, action });
+      
+      if (response.success) {
+        const actionText = action === 'add' ? 'added to' : 'removed from';
+        toast({
+          title: "Coins Updated",
+          description: `${amount} coins ${actionText} user account`,
+        });
+        
+        // Refresh users list to get updated coins
+        await fetchUsers();
+        
+        setSelectedUser(null);
+        setCoinsAmount(0);
+      } else {
+        throw new Error(response.message || 'Failed to update coins');
+      }
+    } catch (error: any) {
+      console.error('Error updating coins:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update coins",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingCoins(false);
+    }
   };
 
-  const deleteUser = (userId: string, userName: string) => {
-    toast({
-      title: "User Deleted",
-      description: `User ${userName} has been removed from the system`,
-      variant: "destructive"
-    });
+  const deleteUser = async (userId: string, userName: string) => {
+    try {
+      setDeletingUser(userId);
+      const response = await adminUsersAPI.remove(userId);
+      
+      if (response.success) {
+        toast({
+          title: "User Deleted",
+          description: `User ${userName} has been removed from the system`,
+          variant: "destructive"
+        });
+        
+        // Refresh users list
+        await fetchUsers();
+      } else {
+        throw new Error(response.message || 'Failed to delete user');
+      }
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingUser(null);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -116,8 +167,34 @@ const Users = () => {
   };
 
   const getUserTransactions = (userId: string) => {
-    return mockTransactions.filter(txn => txn.userId === userId);
+    // For now, return empty array since we don't have transaction history endpoint
+    // This can be implemented later when backend supports it
+    return [];
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              Users Management
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Manage customers and their accounts
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-lg text-muted-foreground">Loading users...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -154,7 +231,7 @@ const Users = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {users.reduce((sum, user) => sum + user.coinsBalance, 0).toLocaleString()}
+              {users.reduce((sum, user) => sum + user.coins, 0).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
               Coins in circulation
@@ -169,7 +246,10 @@ const Users = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {Math.round(users.filter(u => u.role === 'user').reduce((sum, user) => sum + user.coinsBalance, 0) / users.filter(u => u.role === 'user').length)}
+              {users.filter(u => u.role === 'user').length > 0 
+                ? Math.round(users.filter(u => u.role === 'user').reduce((sum, user) => sum + user.coins, 0) / users.filter(u => u.role === 'user').length)
+                : 0
+              }
             </div>
             <p className="text-xs text-muted-foreground">
               Per user
@@ -226,21 +306,22 @@ const Users = () => {
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Coins Balance</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Registered</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="border-border/50">
+                  <TableRow key={user._id} className="border-border/50">
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
                           <span className="text-primary-foreground font-semibold text-sm">
-                            {user.name.charAt(0).toUpperCase()}
+                            {user.firstName.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <span className="font-medium">{user.name}</span>
+                        <span className="font-medium">{user.firstName} {user.lastName}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -254,11 +335,16 @@ const Users = () => {
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <Coins className="h-4 w-4 text-yellow-500" />
-                        <span className="font-semibold">{user.coinsBalance.toLocaleString()}</span>
+                        <span className="font-semibold">{user.coins.toLocaleString()}</span>
                       </div>
                     </TableCell>
+                    <TableCell>
+                      <Badge variant={user.isActive ? 'default' : 'secondary'}>
+                        {user.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {formatDate(user.registeredDate)}
+                      {formatDate(user.createdAt)}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -319,16 +405,24 @@ const Users = () => {
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Delete User</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to delete {user.name}? This action cannot be undone.
+                                      Are you sure you want to delete {user.firstName} {user.lastName}? This action cannot be undone.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
-                                      onClick={() => deleteUser(user.id, user.name)}
+                                      onClick={() => deleteUser(user._id, `${user.firstName} ${user.lastName}`)}
                                       className="bg-destructive hover:bg-destructive/90"
+                                      disabled={deletingUser === user._id}
                                     >
-                                      Delete
+                                      {deletingUser === user._id ? (
+                                        <>
+                                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                          Deleting...
+                                        </>
+                                      ) : (
+                                        'Delete'
+                                      )}
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -367,11 +461,15 @@ const Users = () => {
                   <CardContent className="space-y-2">
                     <div>
                       <Label className="text-xs text-muted-foreground">Name</Label>
-                      <p className="font-medium">{viewUserProfile.name}</p>
+                      <p className="font-medium">{viewUserProfile.firstName} {viewUserProfile.lastName}</p>
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">Email</Label>
                       <p className="font-medium">{viewUserProfile.email}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Phone</Label>
+                      <p className="font-medium">{viewUserProfile.phone || 'Not provided'}</p>
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">Role</Label>
@@ -391,16 +489,25 @@ const Users = () => {
                       <Label className="text-xs text-muted-foreground">Coins Balance</Label>
                       <div className="flex items-center space-x-2 mt-1">
                         <Coins className="h-4 w-4 text-yellow-500" />
-                        <span className="font-bold text-lg">{viewUserProfile.coinsBalance.toLocaleString()}</span>
+                        <span className="font-bold text-lg">{viewUserProfile.coins.toLocaleString()}</span>
                       </div>
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">Member Since</Label>
                       <div className="flex items-center space-x-2 mt-1">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>{formatDate(viewUserProfile.registeredDate)}</span>
+                        <span>{formatDate(viewUserProfile.createdAt)}</span>
                       </div>
                     </div>
+                    {viewUserProfile.lastLogin && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Last Login</Label>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>{formatDate(viewUserProfile.lastLogin)}</span>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -412,24 +519,31 @@ const Users = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {getUserTransactions(viewUserProfile.id).map((transaction) => (
-                      <div key={transaction.id} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
-                        <div>
-                          <p className="font-medium text-sm">{transaction.description}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(transaction.createdAt)}
-                          </p>
+                    {getUserTransactions(viewUserProfile._id).length > 0 ? (
+                      getUserTransactions(viewUserProfile._id).map((transaction) => (
+                        <div key={transaction.id} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
+                          <div>
+                            <p className="font-medium text-sm">{transaction.description}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDate(transaction.createdAt)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className={`font-semibold ${transaction.type === 'earned' || transaction.type === 'admin_added' ? 'text-green-500' : 'text-red-500'}`}>
+                              {transaction.type === 'earned' || transaction.type === 'admin_added' ? '+' : '-'}{transaction.amount}
+                            </p>
+                            <Badge variant="outline" className="text-xs">
+                              {transaction.type.replace('_', ' ')}
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className={`font-semibold ${transaction.type === 'earned' || transaction.type === 'admin_added' ? 'text-green-500' : 'text-red-500'}`}>
-                            {transaction.type === 'earned' || transaction.type === 'admin_added' ? '+' : '-'}{transaction.amount}
-                          </p>
-                          <Badge variant="outline" className="text-xs">
-                            {transaction.type.replace('_', ' ')}
-                          </Badge>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Coins className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p>No transaction history available</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -446,7 +560,7 @@ const Users = () => {
               {coinsAction === 'add' ? 'Add' : 'Remove'} Coins
             </DialogTitle>
             <DialogDescription>
-              {coinsAction === 'add' ? 'Add' : 'Remove'} coins {coinsAction === 'add' ? 'to' : 'from'} {selectedUser?.name}'s account
+              {coinsAction === 'add' ? 'Add' : 'Remove'} coins {coinsAction === 'add' ? 'to' : 'from'} {selectedUser?.firstName} {selectedUser?.lastName}'s account
             </DialogDescription>
           </DialogHeader>
           
@@ -466,16 +580,24 @@ const Users = () => {
             
             <div className="flex space-x-2">
               <Button
-                onClick={() => selectedUser && updateCoinsBalance(selectedUser.id, coinsAmount, coinsAction)}
-                disabled={!coinsAmount || coinsAmount <= 0}
+                onClick={() => selectedUser && updateCoinsBalance(selectedUser._id, coinsAmount, coinsAction)}
+                disabled={!coinsAmount || coinsAmount <= 0 || updatingCoins}
                 className="flex-1"
               >
-                {coinsAction === 'add' ? 'Add' : 'Remove'} Coins
+                {updatingCoins ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  `${coinsAction === 'add' ? 'Add' : 'Remove'} Coins`
+                )}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setSelectedUser(null)}
                 className="flex-1"
+                disabled={updatingCoins}
               >
                 Cancel
               </Button>

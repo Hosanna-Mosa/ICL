@@ -56,6 +56,8 @@ const ProductDetail = () => {
   const [addToCartLoading, setAddToCartLoading] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [relatedProductsLoading, setRelatedProductsLoading] = useState(false);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -102,6 +104,8 @@ const ProductDetail = () => {
           if (isAuthenticated) {
             checkWishlistStatus(response.data.product._id);
           }
+          // Fetch related products
+          fetchRelatedProducts(id);
         } else {
           throw new Error("Product not found or invalid response");
         }
@@ -119,6 +123,23 @@ const ProductDetail = () => {
 
     fetchProduct();
   }, [id, isAuthenticated]);
+
+  // Fetch related products
+  const fetchRelatedProducts = async (productId: string) => {
+    try {
+      setRelatedProductsLoading(true);
+      const response = await productsAPI.getRelatedProducts(productId, 4);
+      if (response.success && response.data?.relatedProducts) {
+        setRelatedProducts(response.data.relatedProducts);
+      }
+    } catch (error) {
+      console.error('Error fetching related products:', error);
+      // Fallback to empty array if API fails
+      setRelatedProducts([]);
+    } finally {
+      setRelatedProductsLoading(false);
+    }
+  };
 
   // Check if product is in user's wishlist
   const checkWishlistStatus = async (productId: string) => {
@@ -256,12 +277,6 @@ const ProductDetail = () => {
   const handleGoToCart = () => {
     navigate('/cart');
   };
-
-  const relatedProducts = [
-    { id: 1, name: "Urban Cargo Pants", price: 3299, image: productPants },
-    { id: 2, name: "Classic Oversized Tee", price: 1899, image: productTee },
-    { id: 3, name: "Street Essential Hoodie", price: 4199, image: productHoodie }
-  ];
 
   const sizeChart = {
     'S': { chest: '40-42', length: '27', shoulder: '20' },
@@ -583,23 +598,48 @@ const ProductDetail = () => {
             <h2 className="text-section font-bold mb-8 text-center">You May Also Like</h2>
             <Carousel className="w-full">
               <CarouselContent>
-                {relatedProducts.map((relatedProduct) => (
-                  <CarouselItem key={relatedProduct.id} className="md:basis-1/2 lg:basis-1/3">
-                    <div className="group card-product p-0 overflow-hidden">
-                      <AspectRatio ratio={1}>
-                        <img
-                          src={relatedProduct.image}
-                          alt={relatedProduct.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </AspectRatio>
-                      <div className="p-4">
-                        <h3 className="font-medium mb-2">{relatedProduct.name}</h3>
-                        <p className="text-lg font-bold">₹{relatedProduct.price.toLocaleString()}</p>
+                {relatedProductsLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4 text-muted-foreground">Loading related products...</p>
+                  </div>
+                ) : relatedProducts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">No related products found.</p>
+                  </div>
+                ) : (
+                  relatedProducts.map((relatedProduct) => (
+                    <CarouselItem key={relatedProduct._id} className="md:basis-1/3 lg:basis-1/4">
+                      <div 
+                        className="group card-product p-0 overflow-hidden cursor-pointer max-w-[280px] mx-auto"
+                        onClick={() => navigate(`/product/${relatedProduct._id}`)}
+                      >
+                        <AspectRatio ratio={1} className="w-full max-w-[200px] mx-auto">
+                          <img
+                            src={relatedProduct.images && relatedProduct.images.length > 0 ? relatedProduct.images[0].url : '/placeholder.svg'}
+                            alt={relatedProduct.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </AspectRatio>
+                        <div className="p-3">
+                          <h3 className="font-medium mb-1 text-sm line-clamp-2">{relatedProduct.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <p className="text-base font-bold">₹{(relatedProduct.salePrice || relatedProduct.basePrice).toLocaleString()}</p>
+                            {relatedProduct.salePrice && (
+                              <span className="text-xs text-muted-foreground line-through">₹{relatedProduct.basePrice.toLocaleString()}</span>
+                            )}
+                          </div>
+                          {relatedProduct.rating && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <Star className="w-3 h-3 fill-accent text-accent" />
+                              <span className="text-xs text-muted-foreground">{relatedProduct.rating} ({relatedProduct.reviewCount || 0})</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CarouselItem>
-                ))}
+                    </CarouselItem>
+                  ))
+                )}
               </CarouselContent>
               <CarouselPrevious />
               <CarouselNext />

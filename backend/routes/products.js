@@ -8,6 +8,7 @@ import {
   getFeaturedProducts,
   getProductsByCategory,
   searchProducts,
+  getRelatedProducts,
 } from "../controllers/productController.js";
 import { protect, authorize } from "../middlewares/auth.js";
 import {
@@ -25,6 +26,7 @@ router.get("/featured", getFeaturedProducts);
 router.get("/category/:category", validatePagination, getProductsByCategory);
 router.get("/search", validateProductSearch, searchProducts);
 router.get("/:id", validateId, getProduct);
+router.get("/:id/related", validateId, getRelatedProducts);
 
 // Admin routes
 router.post("/", protect, authorize("admin"), validateProduct, createProduct);
