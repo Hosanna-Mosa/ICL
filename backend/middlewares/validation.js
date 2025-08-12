@@ -313,3 +313,46 @@ export const validateCoins = [
     .withMessage("Amount must be a positive integer"),
   validate,
 ];
+
+// Lookbook validation
+export const validateLookbook = [
+  body("title")
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Title must be between 2 and 100 characters"),
+  body("description")
+    .trim()
+    .isLength({ min: 5, max: 500 })
+    .withMessage("Description must be between 5 and 500 characters"),
+  body("image")
+    .isURL()
+    .withMessage("Image must be a valid URL"),
+  body("products")
+    .isArray({ min: 1 })
+    .withMessage("At least one product is required"),
+  body("products.*")
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage("Product name must be between 1 and 50 characters"),
+  body("category")
+    .isIn(["Street Inspirations", "Urban Fits", "Seasonal", "Featured"])
+    .withMessage("Invalid category"),
+  body("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage("isActive must be a boolean"),
+  body("sortOrder")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Sort order must be a non-negative integer"),
+  body("tags")
+    .optional()
+    .isArray()
+    .withMessage("Tags must be an array"),
+  body("tags.*")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 30 })
+    .withMessage("Tag must be between 1 and 30 characters"),
+  validate,
+];

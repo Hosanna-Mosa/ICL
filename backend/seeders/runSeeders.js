@@ -3,6 +3,7 @@ import connectDB from "../config/database.js";
 import seedUsers from "./userSeeder.js";
 import seedAdmin from "./adminSeeder.js";
 import seedProducts from "./productSeeder.js";
+import seedLookbook from "./lookbookSeeder.js";
 
 // Load environment variables
 dotenv.config();
@@ -27,6 +28,10 @@ const runSeeders = async () => {
     console.log("Seeding products...");
     const products = await seedProducts();
     console.log(`Seeded ${products.length} products`);
+
+    console.log("Seeding lookbook...");
+    const lookbookItems = await seedLookbook();
+    console.log(`Seeded ${lookbookItems.length} lookbook items`);
 
     console.log("Database seeding completed successfully!");
     console.log("Sample admin credentials:");

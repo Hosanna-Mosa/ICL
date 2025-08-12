@@ -7,7 +7,8 @@ import {
   Users, 
   Coins,
   Settings,
-  LogOut
+  LogOut,
+  BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Logo } from '@/components/ui/logo';
@@ -44,6 +45,11 @@ const navigationItems = [
     title: 'Users',
     url: '/admin/users',
     icon: Users,
+  },
+  {
+    title: 'Lookbook',
+    url: '/admin/lookbook',
+    icon: BookOpen,
   },
   {
     title: 'Coins',
