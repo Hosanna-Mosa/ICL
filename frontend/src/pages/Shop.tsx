@@ -17,9 +17,17 @@ interface Product {
   category: string;
   isFeatured?: boolean;
   isNew?: boolean;
+  sizes?: Array<{ size: string; colors: string[]; stock: number; price: number }>;
 }
 
-const categories = ['All', 'New Drops', 'Hoodies', 'Tees', 'Bottoms', 'Accessories'];
+const categories = [
+  { label: 'All', value: 'All' },
+  { label: 'New Drops', value: 'new' },
+  { label: 'Hoodies', value: 'hoodies' },
+  { label: 'Tees', value: 'tshirts' },
+  { label: 'Bottoms', value: 'pants' },
+  { label: 'Accessories', value: 'accessories' }
+];
 const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const colors = ['Black', 'White', 'Grey', 'Beige', 'Navy'];
 const priceRanges = [
@@ -36,6 +44,7 @@ const Shop: React.FC = () => {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('featured');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [wishlistItems, setWishlistItems] = useState<string[]>([]);
@@ -156,9 +165,50 @@ const Shop: React.FC = () => {
   };
 
   const filteredProducts = products.filter(product => {
-    if (selectedCategory !== 'All' && product.category !== selectedCategory) return false;
-    // Add more filter logic here
+    // Category filter
+    if (selectedCategory !== 'All') {
+      if (selectedCategory === 'new') {
+        // Show only new products
+        if (!product.isNew) return false;
+      } else if (product.category !== selectedCategory) {
+        return false;
+      }
+    }
+    
+    // Size filter - check if product has any of the selected sizes
+    if (selectedSizes.length > 0) {
+      const productSizes = product.sizes?.map(s => s.size) || [];
+      const hasMatchingSize = selectedSizes.some(size => productSizes.includes(size));
+      if (!hasMatchingSize) return false;
+    }
+    
+    // Price range filter
+    if (selectedPriceRange) {
+      const range = priceRanges.find(r => r.label === selectedPriceRange);
+      if (range) {
+        const productPrice = product.salePrice || product.basePrice;
+        if (productPrice < range.min || productPrice > range.max) return false;
+      }
+    }
+    
     return true;
+  }).sort((a, b) => {
+    // Sort products based on selected option
+    switch (sortBy) {
+      case 'price_low_high':
+        return (a.salePrice || a.basePrice) - (b.salePrice || b.basePrice);
+      case 'price_high_low':
+        return (b.salePrice || b.basePrice) - (a.salePrice || a.basePrice);
+      case 'newest':
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      case 'featured':
+        // Featured products first, then by creation date
+        if (a.isFeatured && !b.isFeatured) return -1;
+        if (!a.isFeatured && b.isFeatured) return 1;
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      default:
+        return 0;
+    }
   });
 
   return (
@@ -195,13 +245,13 @@ const Shop: React.FC = () => {
                       <div className="space-y-2">
                         {categories.map(category => (
                           <button
-                            key={category}
-                            onClick={() => setSelectedCategory(category)}
+                            key={category.value}
+                            onClick={() => setSelectedCategory(category.value)}
                             className={`block w-full text-left text-sm py-2 px-3 rounded transition-colors duration-300 ${
-                              selectedCategory === category ? 'text-accent font-medium bg-accent/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                              selectedCategory === category.value ? 'text-accent font-medium bg-accent/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                             }`}
                           >
-                            {category}
+                            {category.label}
                           </button>
                         ))}
                       </div>
@@ -262,6 +312,7 @@ const Shop: React.FC = () => {
                         setSelectedSizes([]);
                         setSelectedColors([]);
                         setSelectedPriceRange('');
+                        setSortBy('featured');
                       }}
                     >
                       CLEAR FILTERS
@@ -282,13 +333,13 @@ const Shop: React.FC = () => {
                   <div className="space-y-2">
                     {categories.map(category => (
                       <button
-                        key={category}
-                        onClick={() => setSelectedCategory(category)}
+                        key={category.value}
+                        onClick={() => setSelectedCategory(category.value)}
                         className={`block w-full text-left text-sm py-1 transition-colors duration-300 ${
-                          selectedCategory === category ? 'text-accent font-medium' : 'text-muted-foreground hover:text-foreground'
+                          selectedCategory === category.value ? 'text-accent font-medium' : 'text-muted-foreground hover:text-foreground'
                         }`}
                       >
-                        {category}
+                        {category.label}
                       </button>
                     ))}
                   </div>
@@ -349,6 +400,7 @@ const Shop: React.FC = () => {
                     setSelectedSizes([]);
                     setSelectedColors([]);
                     setSelectedPriceRange('');
+                    setSortBy('featured');
                   }}
                 >
                   CLEAR FILTERS
@@ -371,11 +423,15 @@ const Shop: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <select className="text-sm border border-border px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-accent rounded">
-                    <option>SORT BY: FEATURED</option>
-                    <option>PRICE: LOW TO HIGH</option>
-                    <option>PRICE: HIGH TO LOW</option>
-                    <option>NEWEST FIRST</option>
+                  <select 
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="text-sm border border-border px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-accent rounded"
+                  >
+                    <option value="featured">SORT BY: FEATURED</option>
+                    <option value="price_low_high">PRICE: LOW TO HIGH</option>
+                    <option value="price_high_low">PRICE: HIGH TO LOW</option>
+                    <option value="newest">NEWEST FIRST</option>
                   </select>
 
                   <div className="flex border border-border rounded overflow-hidden">
@@ -395,12 +451,60 @@ const Shop: React.FC = () => {
                 </div>
               </div>
 
+              {/* Filter Summary */}
+              {(selectedCategory !== 'All' || selectedSizes.length > 0 || selectedPriceRange) && (
+                <div className="mb-4 p-3 bg-muted/50 rounded-lg border border-border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-sm">
+                      <span className="text-muted-foreground">Active filters:</span>
+                      {selectedCategory !== 'All' && (
+                        <span className="px-2 py-1 bg-accent/20 text-accent rounded text-xs">
+                          {categories.find(c => c.value === selectedCategory)?.label}
+                        </span>
+                      )}
+                      {selectedSizes.map(size => (
+                        <span key={size} className="px-2 py-1 bg-accent/20 text-accent rounded text-xs">
+                          Size: {size}
+                        </span>
+                      ))}
+                      {selectedPriceRange && (
+                        <span className="px-2 py-1 bg-accent/20 text-accent rounded text-xs">
+                          {selectedPriceRange}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {filteredProducts.length} of {products.length} products
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Products Grid */}
 
               {loading ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                   <p className="mt-4 text-muted-foreground">Loading products...</p>
+                </div>
+              ) : filteredProducts.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground mb-4">
+                    <p className="text-lg font-medium mb-2">No products found</p>
+                    <p className="text-sm">Try adjusting your filters or browse all products</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSelectedCategory('All');
+                      setSelectedSizes([]);
+                      setSelectedColors([]);
+                      setSelectedPriceRange('');
+                      setSortBy('featured');
+                    }}
+                  >
+                    Clear All Filters
+                  </Button>
                 </div>
               ) : (
                 <div className={`grid gap-2 lg:gap-3 ${

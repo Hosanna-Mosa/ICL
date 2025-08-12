@@ -5,7 +5,6 @@ const API_BASE_URL =
 // Local host: http://localhost:8000/api
 // Render host: https://icl-zsbu.onrender.com/api
 
-
 // Helper function to get auth token from localStorage
 const getAuthToken = () => {
   return localStorage.getItem("authToken");
