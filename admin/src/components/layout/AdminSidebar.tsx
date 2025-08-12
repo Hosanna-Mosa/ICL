@@ -8,7 +8,8 @@ import {
   Coins,
   Settings,
   LogOut,
-  BookOpen
+  BookOpen,
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Logo } from '@/components/ui/logo';
@@ -30,6 +31,11 @@ const navigationItems = [
     title: 'Dashboard',
     url: '/admin',
     icon: LayoutDashboard,
+  },
+  {
+    title: 'Analytics',
+    url: '/admin/analytics',
+    icon: BarChart3,
   },
   {
     title: 'Products',

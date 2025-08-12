@@ -175,20 +175,20 @@ export const adminOrdersAPI = {
     apiRequest(`/orders/${id}/status`, { method: "PUT", body: { status, notes } }),
   getRecent: async () => apiRequest(`/orders/admin/recent`),
   getDashboardStats: async () => apiRequest(`/admin/dashboard/stats`),
+  getAnalytics: async (timeRange = '30d') => apiRequest(`/admin/analytics?timeRange=${timeRange}`),
 };
 
 // ----- Users (admin) -----
 export const adminUsersAPI = {
-  list: async (params = {}) => apiRequest(`/users${buildQueryString(params)}`),
-  getById: async (id) => apiRequest(`/users/${id}`),
-  updateRole: async (id, role) =>
-    apiRequest(`/users/${id}/role`, { method: "PUT", body: { role } }),
-  remove: async (id) => apiRequest(`/users/${id}`, { method: "DELETE" }),
-  // Optional coins adjustment (if backend supports it)
-  adjustCoins: async (id, { amount, action, reason, orderId }) =>
-    apiRequest(`/users/${id}/coins`, {
+  list: async (params = {}) => apiRequest(`/admin/users${buildQueryString(params)}`),
+  getById: async (id) => apiRequest(`/admin/users/${id}`),
+  update: async (id, updates) =>
+    apiRequest(`/admin/users/${id}`, { method: "PUT", body: updates }),
+  remove: async (id) => apiRequest(`/admin/users/${id}`, { method: "DELETE" }),
+  adjustCoins: async (id, { amount, action }) =>
+    apiRequest(`/admin/users/${id}/coins`, {
       method: "POST",
-      body: { amount, action, reason, orderId },
+      body: { amount, action },
     }),
 };
 

@@ -27,6 +27,8 @@ import {
   deleteProductAdmin,
   // Dashboard
   getDashboardStats,
+  // Analytics
+  getAnalytics,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -36,6 +38,9 @@ router.use(protect, authorize("admin"));
 
 // ----- Dashboard -----
 router.get("/dashboard/stats", getDashboardStats);
+
+// ----- Analytics -----
+router.get("/analytics", getAnalytics);
 
 // ----- Users -----
 router.get("/users", validatePagination, listUsers);

@@ -389,3 +389,257 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
     });
   }
 });
+
+// ----- Analytics -----
+export const getAnalytics = asyncHandler(async (req, res) => {
+  try {
+    const { timeRange = '30d' } = req.query;
+    
+    // Calculate date range based on timeRange parameter
+    const endDate = new Date();
+    const startDate = new Date();
+    
+    switch (timeRange) {
+      case '7d':
+        startDate.setDate(endDate.getDate() - 7);
+        break;
+      case '30d':
+        startDate.setDate(endDate.getDate() - 30);
+        break;
+      case '90d':
+        startDate.setDate(endDate.getDate() - 90);
+        break;
+      case '1y':
+        startDate.setFullYear(endDate.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(endDate.getDate() - 30);
+    }
+
+    // Get sales data for the time range
+    const salesData = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: endDate },
+          status: { $ne: "cancelled" }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          sales: { $sum: "$total" },
+          orders: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    // Get total sales breakdown by status
+    const salesStats = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: "$status",
+          totalSales: { $sum: "$total" },
+          orderCount: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Initialize sales breakdown
+    let deliveredSales = 0;
+    let notDeliveredSales = 0;
+    let cancelledSales = 0;
+    let totalSales = 0;
+
+    // Process sales stats
+    salesStats.forEach(stat => {
+      totalSales += stat.totalSales;
+      
+      if (stat._id === "delivered") {
+        deliveredSales = stat.totalSales;
+      } else if (stat._id === "cancelled") {
+        cancelledSales = stat.totalSales;
+      } else {
+        // All other statuses (pending, confirmed, processing, shipped, returned)
+        notDeliveredSales += stat.totalSales;
+      }
+    });
+
+    // Get user analytics
+    const userStats = await User.aggregate([
+      {
+        $match: {
+          role: "user",
+          createdAt: { $gte: startDate, $lte: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    // Get total user counts
+    const [totalUsers, activeUsers] = await Promise.all([
+      User.countDocuments({ role: "user" }),
+      User.countDocuments({ 
+        role: "user", 
+        lastLogin: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // Last 30 days
+      })
+    ]);
+
+    // Get product analytics
+    const productStats = await Product.aggregate([
+      {
+        $match: { isActive: true }
+      },
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    // Calculate category percentages
+    const totalProducts = productStats.reduce((sum, cat) => sum + cat.count, 0);
+    const categoryBreakdown = productStats.map(cat => ({
+      category: cat._id,
+      count: cat.count,
+      percentage: Math.round((cat.count / totalProducts) * 100)
+    }));
+
+    // Get top selling products
+    const topProducts = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: endDate },
+          status: { $ne: "cancelled" }
+        }
+      },
+      {
+        $unwind: "$items"
+      },
+      {
+        $group: {
+          _id: "$items.product",
+          sold: { $sum: "$items.quantity" },
+          revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+        }
+      },
+      {
+        $sort: { sold: -1 }
+      },
+      {
+        $limit: 10
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "productInfo"
+        }
+      },
+      {
+        $unwind: "$productInfo"
+      },
+      {
+        $project: {
+          name: "$productInfo.name",
+          sold: 1,
+          revenue: 1
+        }
+      }
+    ]);
+
+    // Get order status breakdown
+    const orderStatusStats = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Calculate order status percentages
+    const totalOrders = orderStatusStats.reduce((sum, status) => sum + status.count, 0);
+    const statusBreakdown = orderStatusStats.map(status => ({
+      status: status._id,
+      count: status.count,
+      percentage: Math.round((status.count / totalOrders) * 100)
+    }));
+
+    // Calculate average order value
+    const averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
+
+    // Format daily sales data
+    const dailySales = salesData.map(item => ({
+      date: item._id,
+      sales: item.sales,
+      orders: item.orders
+    }));
+
+    // Format new users data
+    const newUsers = userStats.map(item => ({
+      date: item._id,
+      count: item.count
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        sales: {
+          total: totalSales,
+          delivered: deliveredSales,
+          notDelivered: notDeliveredSales,
+          cancelled: cancelledSales,
+          daily: dailySales
+        },
+        users: {
+          total: totalUsers,
+          activeUsers: activeUsers,
+          newUsers: newUsers
+        },
+        products: {
+          total: totalProducts,
+          categoryBreakdown: categoryBreakdown,
+          topSelling: topProducts
+        },
+        orders: {
+          total: totalOrders,
+          statusBreakdown: statusBreakdown,
+          averageOrderValue: averageOrderValue
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error getting analytics:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch analytics data",
+      error: error.message
+    });
+  }
+});

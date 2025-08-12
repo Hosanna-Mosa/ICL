@@ -179,6 +179,11 @@ export const productsAPI = {
     return await apiRequest(`/products/category/${category}`);
   },
 
+  // Get related products
+  getRelatedProducts: async (id, limit = 4) => {
+    return await apiRequest(`/products/${id}/related?limit=${limit}`);
+  },
+
   // Search products
   search: async (query) => {
     return await apiRequest(`/products/search?q=${encodeURIComponent(query)}`);

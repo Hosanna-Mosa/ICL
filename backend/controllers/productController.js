@@ -379,3 +379,48 @@ export const searchProducts = asyncHandler(async (req, res) => {
     },
   });
 });
+
+// @desc    Get related products (same category, high sold count)
+// @route   GET /api/products/:id/related
+// @access  Public
+export const getRelatedProducts = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { limit = 4 } = req.query;
+
+  // Get the current product to find its category
+  const currentProduct = await Product.findById(id).select('category');
+  
+  if (!currentProduct) {
+    return res.status(404).json({
+      success: false,
+      message: "Product not found",
+    });
+  }
+
+  // Find related products from the same category, excluding current product
+  // Sort by totalSold (highest first) and limit results
+  const relatedProducts = await Product.find({
+    _id: { $ne: id }, // Exclude current product
+    category: currentProduct.category,
+    isActive: true,
+  })
+    .sort({ totalSold: -1, rating: -1 }) // Sort by sold count first, then rating
+    .limit(parseInt(limit))
+    .select('name basePrice salePrice images rating reviewCount totalSold category')
+    .lean(); // Use lean() to avoid virtual fields and improve performance
+
+  console.log("Related products fetched", {
+    productId: id,
+    category: currentProduct.category,
+    count: relatedProducts.length,
+    limit: parseInt(limit),
+  });
+
+  res.json({
+    success: true,
+    data: {
+      relatedProducts,
+      category: currentProduct.category,
+    },
+  });
+});
