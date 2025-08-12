@@ -156,9 +156,14 @@ const FeaturedProducts: React.FC = () => {
           <h2 className="text-section mb-4">
             FEATURED DROPS
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
             Hand-picked pieces that define the ICL aesthetic. Limited quantities, maximum impact.
           </p>
+          <Link to="/shop?category=New%20Drops">
+            <button className="bg-accent text-accent-foreground px-6 py-2 text-sm font-medium tracking-widest uppercase hover:bg-accent/90 transition-colors rounded">
+              VIEW ALL NEW DROPS
+            </button>
+          </Link>
         </div>
 
         {/* Products Grid - Updated to match image style */}

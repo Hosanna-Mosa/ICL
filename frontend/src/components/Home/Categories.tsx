@@ -4,10 +4,18 @@ import { ArrowRight } from 'lucide-react';
 
 const categories = [
   {
+    id: 'new-drops',
+    name: 'NEW DROPS',
+    description: 'Latest releases and newest additions',
+    href: '/shop?category=New%20Drops',
+    count: '8 pieces',
+    backgroundImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=600&fit=crop'
+  },
+  {
     id: 'hoodies',
     name: 'HOODIES',
     description: 'Oversized comfort meets premium design',
-    href: '/shop?category=hoodies',
+    href: '/shop?category=Hoodies',
     count: '24 pieces',
     backgroundImage: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&h=600&fit=crop'
   },
@@ -15,7 +23,7 @@ const categories = [
     id: 'tees',
     name: 'OVERSIZED TEES',
     description: 'Essential basics with elevated details',
-    href: '/shop?category=tshirts',
+    href: '/shop?category=Tees',
     count: '18 pieces',
     backgroundImage: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&h=600&fit=crop'
   },
@@ -23,7 +31,7 @@ const categories = [
     id: 'bottoms',
     name: 'BOTTOMS',
     description: 'From joggers to cargos, street-ready fits',
-    href: '/shop?category=pants',
+    href: '/shop?category=Bottoms',
     count: '16 pieces',
     backgroundImage: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&h=600&fit=crop'
   },
@@ -31,7 +39,7 @@ const categories = [
     id: 'accessories',
     name: 'ACCESSORIES',
     description: 'Complete your look with premium add-ons',
-    href: '/shop?category=accessories',
+    href: '/shop?category=Accessories',
     count: '12 pieces',
     backgroundImage: 'https://images.unsplash.com/photo-1556306535-38febf6782e7?w=800&h=600&fit=crop'
   }

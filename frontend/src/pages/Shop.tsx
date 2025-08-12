@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Filter, Grid, List, Heart, Loader2, X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import Button from '@/components/UI/ICLButton';
@@ -30,6 +31,7 @@ const priceRanges = [
 ];
 
 const Shop: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -42,6 +44,25 @@ const Shop: React.FC = () => {
   const [wishlistLoading, setWishlistLoading] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
+
+  // Handle URL parameters on component mount
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category');
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl);
+    }
+  }, [searchParams]);
+
+  // Update URL when category changes
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    if (category === 'All') {
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', category);
+    }
+    setSearchParams(searchParams);
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -156,10 +177,27 @@ const Shop: React.FC = () => {
   };
 
   const filteredProducts = products.filter(product => {
+    // Handle "New Drops" category - show products that are marked as new
+    if (selectedCategory === 'New Drops') {
+      return product.isNew === true;
+    }
+    
+    // Handle other categories
     if (selectedCategory !== 'All' && product.category !== selectedCategory) return false;
+    
     // Add more filter logic here
     return true;
   });
+
+  // Sort products - for "New Drops" category, show newest first
+  const sortedProducts = selectedCategory === 'New Drops' 
+    ? [...filteredProducts].sort((a, b) => {
+        // Sort by isNew first (true products first), then by creation date
+        if (a.isNew && !b.isNew) return -1;
+        if (!a.isNew && b.isNew) return 1;
+        return 0;
+      })
+    : filteredProducts;
 
   return (
     <div className="min-h-screen">
@@ -169,7 +207,14 @@ const Shop: React.FC = () => {
         <div className="container mx-auto px-4 lg:px-8 py-8 lg:py-12">
           {/* Section Header */}
           <div className="mb-8">
-            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">SHOP ALL</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+              {selectedCategory === 'All' ? 'SHOP ALL' : selectedCategory.toUpperCase()}
+            </h1>
+            {selectedCategory === 'New Drops' && (
+              <p className="text-muted-foreground mt-2">
+                Discover our latest releases and newest additions to the collection
+              </p>
+            )}
           </div>
           
           <div className="flex flex-col lg:flex-row gap-8">
@@ -196,7 +241,7 @@ const Shop: React.FC = () => {
                         {categories.map(category => (
                           <button
                             key={category}
-                            onClick={() => setSelectedCategory(category)}
+                            onClick={() => handleCategoryChange(category)}
                             className={`block w-full text-left text-sm py-2 px-3 rounded transition-colors duration-300 ${
                               selectedCategory === category ? 'text-accent font-medium bg-accent/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                             }`}
@@ -258,7 +303,7 @@ const Shop: React.FC = () => {
                       size="sm" 
                       className="w-full"
                       onClick={() => {
-                        setSelectedCategory('All');
+                        handleCategoryChange('All');
                         setSelectedSizes([]);
                         setSelectedColors([]);
                         setSelectedPriceRange('');
@@ -283,7 +328,7 @@ const Shop: React.FC = () => {
                     {categories.map(category => (
                       <button
                         key={category}
-                        onClick={() => setSelectedCategory(category)}
+                        onClick={() => handleCategoryChange(category)}
                         className={`block w-full text-left text-sm py-1 transition-colors duration-300 ${
                           selectedCategory === category ? 'text-accent font-medium' : 'text-muted-foreground hover:text-foreground'
                         }`}
@@ -345,7 +390,7 @@ const Shop: React.FC = () => {
                   size="sm" 
                   className="w-full mt-6"
                   onClick={() => {
-                    setSelectedCategory('All');
+                    handleCategoryChange('All');
                     setSelectedSizes([]);
                     setSelectedColors([]);
                     setSelectedPriceRange('');
@@ -371,11 +416,17 @@ const Shop: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <select className="text-sm border border-border px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-accent rounded">
-                    <option>SORT BY: FEATURED</option>
-                    <option>PRICE: LOW TO HIGH</option>
-                    <option>PRICE: HIGH TO LOW</option>
-                    <option>NEWEST FIRST</option>
+                  <select 
+                    className="text-sm border border-border px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-accent rounded"
+                    value={selectedCategory === 'New Drops' ? 'NEWEST FIRST' : 'FEATURED'}
+                    onChange={(e) => {
+                      // Handle sort changes here if needed
+                    }}
+                  >
+                    <option value="FEATURED">SORT BY: FEATURED</option>
+                    <option value="PRICE: LOW TO HIGH">PRICE: LOW TO HIGH</option>
+                    <option value="PRICE: HIGH TO LOW">PRICE: HIGH TO LOW</option>
+                    <option value="NEWEST FIRST">NEWEST FIRST</option>
                   </select>
 
                   <div className="flex border border-border rounded overflow-hidden">
@@ -408,7 +459,7 @@ const Shop: React.FC = () => {
                     ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' 
                     : 'grid-cols-1'
                 }`}>
-                  {filteredProducts.map(product => (
+                  {sortedProducts.map(product => (
                     <Link key={product._id} to={`/product/${product._id}`} className="group block">
                       {/* Product Image */}
                       <div className="relative overflow-hidden aspect-[4/5] bg-muted mb-1">

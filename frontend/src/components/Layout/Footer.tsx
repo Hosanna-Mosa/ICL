@@ -48,11 +48,11 @@ const Footer: React.FC = () => {
           <div className="space-y-4">
             <h3 className="text-sm font-medium tracking-widest uppercase">SHOP</h3>
             <ul className="space-y-2 text-sm text-primary-foreground/80">
-              <li><Link to="/shop/new-drops" className="hover:text-primary-foreground transition-colors duration-300">New Drops</Link></li>
-              <li><Link to="/shop/hoodies" className="hover:text-primary-foreground transition-colors duration-300">Hoodies</Link></li>
-              <li><Link to="/shop/tees" className="hover:text-primary-foreground transition-colors duration-300">Oversized Tees</Link></li>
-              <li><Link to="/shop/bottoms" className="hover:text-primary-foreground transition-colors duration-300">Bottoms</Link></li>
-              <li><Link to="/shop/accessories" className="hover:text-primary-foreground transition-colors duration-300">Accessories</Link></li>
+              <li><Link to="/shop?category=New%20Drops" className="hover:text-primary-foreground transition-colors duration-300">New Drops</Link></li>
+              <li><Link to="/shop?category=Hoodies" className="hover:text-primary-foreground transition-colors duration-300">Hoodies</Link></li>
+              <li><Link to="/shop?category=Tees" className="hover:text-primary-foreground transition-colors duration-300">Oversized Tees</Link></li>
+              <li><Link to="/shop?category=Bottoms" className="hover:text-primary-foreground transition-colors duration-300">Bottoms</Link></li>
+              <li><Link to="/shop?category=Accessories" className="hover:text-primary-foreground transition-colors duration-300">Accessories</Link></li>
             </ul>
           </div>
 
