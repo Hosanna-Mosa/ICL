@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { productsAPI, userAPI } from '@/utils/api';
 import { useToast } from '@/hooks/use-toast';
+import Reviews from '@/components/Reviews/Reviews';
 
 // Mock product images
 import heroImage from '@/assets/hero-image.jpg';
@@ -571,6 +572,11 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+
+          {/* Reviews Section */}
+          <section className="mt-16">
+            <Reviews productId={currentProduct._id} />
+          </section>
 
           {/* Related Products */}
           <section className="mt-16">

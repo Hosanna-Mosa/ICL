@@ -22,23 +22,39 @@ export const validate = (req, res, next) => {
 export const validateRegister = [
   body("firstName")
     .trim()
+    .notEmpty()
+    .withMessage("First name is required")
     .isLength({ min: 2, max: 50 })
     .withMessage("First name must be between 2 and 50 characters"),
   body("lastName")
     .trim()
+    .notEmpty()
+    .withMessage("Last name is required")
     .isLength({ min: 2, max: 50 })
     .withMessage("Last name must be between 2 and 50 characters"),
   body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
     .isEmail()
     .normalizeEmail()
     .withMessage("Please provide a valid email"),
   body("password")
+    .notEmpty()
+    .withMessage("Password is required")
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters long"),
   body("phone")
-    .optional()
-    .matches(/^[0-9]{10}$/)
-    .withMessage("Please provide a valid 10-digit phone number"),
+    .optional({ nullable: true, checkFalsy: false })
+    .trim()
+    .custom((value) => {
+      if (value && value !== '') {
+        if (!/^[0-9]{10}$/.test(value)) {
+          throw new Error("Please provide a valid 10-digit phone number");
+        }
+      }
+      return true;
+    }),
   validate,
 ];
 
@@ -267,6 +283,24 @@ export const validateProductIdParam = [
       }
       throw new Error(
         "Invalid product ID format - must be MongoDB ObjectId or numeric ID"
+      );
+    }),
+  validate,
+];
+
+// ReviewId parameter validation for routes using :reviewId
+export const validateReviewIdParam = [
+  param("reviewId")
+    .notEmpty()
+    .withMessage("Review ID is required")
+    .custom((value) => {
+      const mongoIdRegex = /^[0-9a-fA-F]{24}$/;
+      const numericRegex = /^[0-9]+$/;
+      if (mongoIdRegex.test(value) || numericRegex.test(value)) {
+        return true;
+      }
+      throw new Error(
+        "Invalid review ID format - must be MongoDB ObjectId or numeric ID"
       );
     }),
   validate,
