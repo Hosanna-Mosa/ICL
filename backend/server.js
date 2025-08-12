@@ -21,6 +21,8 @@ import userRoutes from "./routes/users.js";
 import adminRoutes from "./routes/admin.js";
 import uploadRoutes from "./routes/upload.js";
 import lookbookRoutes from "./routes/lookbook.js";
+import reviewRoutes from "./routes/reviews.js";
+
 
 // Load environment variables
 dotenv.config();
@@ -88,6 +90,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/lookbook", lookbookRoutes);
+app.use("/api/reviews", reviewRoutes);
+
 
 // 404 handler
 app.use(notFound);

@@ -98,6 +98,7 @@ const Account: React.FC = () => {
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -723,6 +724,20 @@ const Account: React.FC = () => {
                       value={registerData.email}
                       onChange={handleRegisterInputChange}
                       required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Phone Number (Optional)
+                    </label>
+                    <Input
+                      type="tel"
+                      name="phone"
+                      value={registerData.phone || ""}
+                      onChange={handleRegisterInputChange}
+                      placeholder="10-digit phone number"
                       disabled={isLoading}
                     />
                   </div>

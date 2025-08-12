@@ -3,7 +3,7 @@
 const API_BASE_URL =
   import.meta.env.VITE_ADMIN_API_URL ||
   import.meta.env.VITE_API_URL ||
-  "http://localhost:8000/api";  // Use localhost for development
+  "http://localhost:8000/api";
 //local host : "http://localhost:8000/api"
 //render host : "https://icl-zsbu.onrender.com/api"
 // ----- LocalStorage keys (admin-specific) -----
