@@ -1,8 +1,9 @@
 // API Configuration
 const API_BASE_URL =
 
-  import.meta.env.VITE_API_URL || "https://icl-zsbu.onrender.com/api";
-
+  import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+//local host : "http://localhost:8000/api"
+//render host : "https://icl-zsbu.onrender.com/api"
 
 // Helper function to get auth token from localStorage
 const getAuthToken = () => {
@@ -373,6 +374,47 @@ export const userAPI = {
   },
 };
 
+// Reviews API functions
+export const reviewsAPI = {
+  // Get reviews for a product
+  getProductReviews: async (productId, page = 1, limit = 10, sort = "newest") => {
+    return await apiRequest(`/reviews/product/${productId}?page=${page}&limit=${limit}&sort=${sort}`);
+  },
+
+  // Get review statistics for a product
+  getReviewStats: async (productId) => {
+    return await apiRequest(`/reviews/product/${productId}/stats`);
+  },
+
+  // Get user's reviews for a product
+  getUserReviews: async (productId) => {
+    return await apiRequest(`/reviews/product/${productId}/user`);
+  },
+
+  // Create a new review
+  createReview: async (productId, reviewData) => {
+    return await apiRequest(`/reviews/product/${productId}`, {
+      method: "POST",
+      body: JSON.stringify(reviewData),
+    });
+  },
+
+  // Update a review
+  updateReview: async (reviewId, reviewData) => {
+    return await apiRequest(`/reviews/${reviewId}`, {
+      method: "PUT",
+      body: JSON.stringify(reviewData),
+    });
+  },
+
+  // Delete a review
+  deleteReview: async (reviewId) => {
+    return await apiRequest(`/reviews/${reviewId}`, {
+      method: "DELETE",
+    });
+  },
+};
+
 // Export utility functions
 export const apiUtils = {
   getAuthToken,
@@ -391,5 +433,6 @@ export default {
   cart: cartAPI,
   orders: ordersAPI,
   user: userAPI,
+  reviews: reviewsAPI,
   utils: apiUtils,
 };
