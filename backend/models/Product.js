@@ -128,6 +128,12 @@ const productSchema = new mongoose.Schema(
       default: 0,
       min: [0, "Review count cannot be negative"],
     },
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
     totalSold: {
       type: Number,
       default: 0,

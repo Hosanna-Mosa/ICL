@@ -35,8 +35,19 @@ const createReview = asyncHandler(async (req, res) => {
   // Populate user details
   await review.populate("user", "firstName lastName");
 
+  // Verify that the review was properly linked to the product
+  const updatedProduct = await Product.findById(productId).populate("reviews");
+
   res.status(201).json(
-    new ApiResponse(201, review, "Review created successfully")
+    new ApiResponse(
+      201,
+      {
+        review,
+        productReviews: updatedProduct.reviews.length,
+        productRating: updatedProduct.rating,
+      },
+      "Review created successfully"
+    )
   );
 });
 
@@ -90,17 +101,21 @@ const getProductReviews = asyncHandler(async (req, res) => {
   const hasPrevPage = page > 1;
 
   res.status(200).json(
-    new ApiResponse(200, {
-      reviews,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages,
-        totalReviews,
-        hasNextPage,
-        hasPrevPage,
-        limit: limitNum,
+    new ApiResponse(
+      200,
+      {
+        reviews,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          totalReviews,
+          hasNextPage,
+          hasPrevPage,
+          limit: limitNum,
+        },
       },
-    }, "Reviews fetched successfully")
+      "Reviews fetched successfully"
+    )
   );
 });
 
@@ -135,9 +150,9 @@ const updateReview = asyncHandler(async (req, res) => {
     { new: true, runValidators: true }
   ).populate("user", "firstName lastName");
 
-  res.status(200).json(
-    new ApiResponse(200, updatedReview, "Review updated successfully")
-  );
+  res
+    .status(200)
+    .json(new ApiResponse(200, updatedReview, "Review updated successfully"));
 });
 
 // Delete user's own review
@@ -155,11 +170,25 @@ const deleteReview = asyncHandler(async (req, res) => {
     throw new ApiError(403, "You can only delete your own reviews");
   }
 
+  // Store product ID before deletion for verification
+  const productId = review.product;
+
   // Delete review
   await Review.findByIdAndDelete(reviewId);
 
+  // Verify that the review was properly removed from the product
+  const updatedProduct = await Product.findById(productId);
+
   res.status(200).json(
-    new ApiResponse(200, {}, "Review deleted successfully")
+    new ApiResponse(
+      200,
+      {
+        message: "Review deleted successfully",
+        productReviews: updatedProduct.reviews.length,
+        productRating: updatedProduct.rating,
+      },
+      "Review deleted successfully"
+    )
   );
 });
 
@@ -172,9 +201,11 @@ const getUserReviews = asyncHandler(async (req, res) => {
     .populate("user", "firstName lastName")
     .sort({ createdAt: -1 });
 
-  res.status(200).json(
-    new ApiResponse(200, { reviews }, "User reviews fetched successfully")
-  );
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, { reviews }, "User reviews fetched successfully")
+    );
 });
 
 // Get review statistics for a product
@@ -206,19 +237,80 @@ const getReviewStats = asyncHandler(async (req, res) => {
   // Calculate rating distribution percentages
   const ratingDistribution = {};
   for (let i = 5; i >= 1; i--) {
-    const ratingCount = ratingStats.find(stat => stat._id === i)?.count || 0;
+    const ratingCount = ratingStats.find((stat) => stat._id === i)?.count || 0;
     ratingDistribution[i] = {
       count: ratingCount,
-      percentage: totalReviews > 0 ? Math.round((ratingCount / totalReviews) * 100) : 0,
+      percentage:
+        totalReviews > 0 ? Math.round((ratingCount / totalReviews) * 100) : 0,
     };
   }
 
   res.status(200).json(
-    new ApiResponse(200, {
-      totalReviews,
-      averageRating,
-      ratingDistribution,
-    }, "Review statistics fetched successfully")
+    new ApiResponse(
+      200,
+      {
+        totalReviews,
+        averageRating,
+        ratingDistribution,
+      },
+      "Review statistics fetched successfully"
+    )
+  );
+});
+
+// Get product with reviews (useful for product detail pages)
+const getProductWithReviews = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  const { page = 1, limit = 5, sort = "newest" } = req.query;
+
+  // Check if product exists
+  const product = await Product.findById(productId).populate({
+    path: "reviews",
+    populate: {
+      path: "user",
+      select: "firstName lastName",
+    },
+    options: {
+      sort:
+        sort === "newest"
+          ? { createdAt: -1 }
+          : sort === "oldest"
+          ? { createdAt: 1 }
+          : sort === "highest"
+          ? { rating: -1 }
+          : sort === "lowest"
+          ? { rating: 1 }
+          : { createdAt: -1 },
+      skip: (parseInt(page) - 1) * parseInt(limit),
+      limit: parseInt(limit),
+    },
+  });
+
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  // Get total reviews count for pagination
+  const totalReviews = await Review.countDocuments({ product: productId });
+  const totalPages = Math.ceil(totalReviews / parseInt(limit));
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        product: {
+          _id: product._id,
+          name: product.name,
+          rating: product.rating,
+          reviewCount: product.reviewCount,
+          reviews: product.reviews,
+          totalReviews,
+          totalPages,
+          currentPage: parseInt(page),
+        },
+      },
+      "Product with reviews fetched successfully"
+    )
   );
 });
 
@@ -229,4 +321,5 @@ export {
   deleteReview,
   getUserReviews,
   getReviewStats,
+  getProductWithReviews,
 };

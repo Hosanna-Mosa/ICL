@@ -434,6 +434,212 @@ Authorization: Bearer <admin-token>
 
 ---
 
+## Review Endpoints
+
+### Create Review
+
+```http
+POST /reviews/product/:productId
+Authorization: Bearer <user-token>
+```
+
+**Request Body:**
+
+```json
+{
+  "rating": 5,
+  "comment": "Great product! Love the quality and fit."
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Review created successfully",
+  "data": {
+    "review": {
+      "_id": "review-id-here",
+      "user": {
+        "_id": "user-id-here",
+        "firstName": "John",
+        "lastName": "Doe"
+      },
+      "product": "product-id-here",
+      "rating": 5,
+      "comment": "Great product! Love the quality and fit.",
+      "isVerified": false,
+      "helpful": 0,
+      "reported": false,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    "productReviews": 15,
+    "productRating": 4.2
+  }
+}
+```
+
+### Get Product Reviews
+
+```http
+GET /reviews/product/:productId?page=1&limit=10&sort=newest
+```
+
+**Query Parameters:**
+
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Reviews per page (default: 10)
+- `sort` (optional): Sort order - "newest", "oldest", "highest", "lowest" (default: "newest")
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Reviews fetched successfully",
+  "data": {
+    "reviews": [
+      {
+        "_id": "review-id-here",
+        "user": {
+          "_id": "user-id-here",
+          "firstName": "John",
+          "lastName": "Doe"
+        },
+        "product": "product-id-here",
+        "rating": 5,
+        "comment": "Great product!",
+        "isVerified": false,
+        "helpful": 0,
+        "reported": false,
+        "createdAt": "2024-01-01T00:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 3,
+      "totalReviews": 25,
+      "hasNextPage": true,
+      "hasPrevPage": false,
+      "limit": 10
+    }
+  }
+}
+```
+
+### Get Product with Reviews
+
+```http
+GET /reviews/product/:productId/with-reviews?page=1&limit=5&sort=newest
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Product with reviews fetched successfully",
+  "data": {
+    "product": {
+      "_id": "product-id-here",
+      "name": "ICL Streetwear Hoodie",
+      "rating": 4.2,
+      "reviewCount": 15,
+      "reviews": [
+        {
+          "_id": "review-id-here",
+          "user": {
+            "_id": "user-id-here",
+            "firstName": "John",
+            "lastName": "Doe"
+          },
+          "rating": 5,
+          "comment": "Great product!",
+          "createdAt": "2024-01-01T00:00:00.000Z"
+        }
+      ],
+      "totalReviews": 15,
+      "totalPages": 3,
+      "currentPage": 1
+    }
+  }
+}
+```
+
+### Get Review Statistics
+
+```http
+GET /reviews/product/:productId/stats
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Review statistics fetched successfully",
+  "data": {
+    "totalReviews": 25,
+    "averageRating": 4.2,
+    "ratingDistribution": {
+      "5": { "count": 10, "percentage": 40 },
+      "4": { "count": 8, "percentage": 32 },
+      "3": { "count": 4, "percentage": 16 },
+      "2": { "count": 2, "percentage": 8 },
+      "1": { "count": 1, "percentage": 4 }
+    }
+  }
+}
+```
+
+### Update Review
+
+```http
+PUT /reviews/:reviewId
+Authorization: Bearer <user-token>
+```
+
+**Request Body:**
+
+```json
+{
+  "rating": 4,
+  "comment": "Updated comment about the product."
+}
+```
+
+### Delete Review
+
+```http
+DELETE /reviews/:reviewId
+Authorization: Bearer <user-token>
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Review deleted successfully",
+  "data": {
+    "message": "Review deleted successfully",
+    "productReviews": 14,
+    "productRating": 4.1
+  }
+}
+```
+
+### Get User Reviews for Product
+
+```http
+GET /reviews/product/:productId/user
+Authorization: Bearer <user-token>
+```
+
+---
+
 ## Error Responses
 
 ### Validation Error
