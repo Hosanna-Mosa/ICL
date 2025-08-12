@@ -26,27 +26,36 @@ interface Review {
   helpful: number;
 }
 
-interface ReviewStats {
+interface ProductWithReviews {
+  _id: string;
+  name: string;
+  rating: number;
+  reviewCount: number;
+  reviews: Review[];
   totalReviews: number;
-  averageRating: number;
-  ratingDistribution: {
-    [key: number]: {
-      count: number;
-      percentage: number;
-    };
+  totalPages: number;
+  currentPage: number;
+}
+
+interface ProductReviewsProps {
+  productId: string;
+  initialProductData?: {
+    name: string;
+    rating: number;
+    reviewCount: number;
   };
 }
 
-interface ReviewsProps {
-  productId: string;
-}
-
-const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
+const ProductReviews: React.FC<ProductReviewsProps> = ({
+  productId,
+  initialProductData,
+}) => {
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
 
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
+  const [productData, setProductData] = useState<ProductWithReviews | null>(
+    null
+  );
   const [userReviews, setUserReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -59,33 +68,30 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [sortBy, setSortBy] = useState("newest");
 
-  // Fetch reviews and stats
+  // Fetch product with reviews
   useEffect(() => {
-    fetchReviews();
-    fetchReviewStats();
+    fetchProductWithReviews();
     if (isAuthenticated) {
       fetchUserReviews();
     }
   }, [productId, currentPage, sortBy, isAuthenticated]);
 
-  const fetchReviews = async () => {
+  const fetchProductWithReviews = async () => {
     try {
       setLoading(true);
-      const response = await reviewsAPI.getProductReviews(
+      const response = await reviewsAPI.getProductWithReviews(
         productId,
         currentPage,
-        10,
+        5,
         sortBy
       );
       if (response.success) {
-        setReviews(response.data.reviews);
-        setTotalPages(response.data.pagination.totalPages);
+        setProductData(response.data.product);
       }
     } catch (error: any) {
-      console.error("Error fetching reviews:", error);
+      console.error("Error fetching product with reviews:", error);
       toast({
         title: "Error",
         description: "Failed to load reviews",
@@ -93,17 +99,6 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchReviewStats = async () => {
-    try {
-      const response = await reviewsAPI.getReviewStats(productId);
-      if (response.success) {
-        setReviewStats(response.data);
-      }
-    } catch (error: any) {
-      console.error("Error fetching review stats:", error);
     }
   };
 
@@ -138,7 +133,6 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
     try {
       setSubmitting(true);
 
-      // Always create a new review (users can have multiple reviews)
       const response = await reviewsAPI.createReview(productId, {
         rating,
         comment,
@@ -153,23 +147,23 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
           description: "Review submitted successfully",
         });
 
-        // Update review stats with new data from response
-        if (response.data.productReviews !== undefined) {
-          setReviewStats((prev) =>
+        // Update product data with new stats
+        if (response.data.productReviews !== undefined && productData) {
+          setProductData((prev) =>
             prev
               ? {
                   ...prev,
+                  reviewCount: response.data.productReviews,
+                  rating: response.data.productRating,
                   totalReviews: response.data.productReviews,
-                  averageRating: response.data.productRating,
                 }
               : null
           );
         }
       }
 
-      // Refresh reviews and stats
-      fetchReviews();
-      fetchReviewStats();
+      // Refresh data
+      fetchProductWithReviews();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -195,22 +189,22 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
           description: "Review deleted successfully",
         });
 
-        // Update review stats with new data from response
-        if (response.data.productReviews !== undefined) {
-          setReviewStats((prev) =>
+        // Update product data with new stats
+        if (response.data.productReviews !== undefined && productData) {
+          setProductData((prev) =>
             prev
               ? {
                   ...prev,
+                  reviewCount: response.data.productReviews,
+                  rating: response.data.productRating,
                   totalReviews: response.data.productReviews,
-                  averageRating: response.data.productRating,
                 }
               : null
           );
         }
 
-        // Refresh reviews and stats
-        fetchReviews();
-        fetchReviewStats();
+        // Refresh data
+        fetchProductWithReviews();
       }
     } catch (error: any) {
       toast({
@@ -276,37 +270,6 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
     );
   };
 
-  const renderRatingDistribution = () => {
-    if (!reviewStats) return null;
-
-    return (
-      <div className="space-y-2">
-        {[5, 4, 3, 2, 1].map((star) => {
-          const stat = reviewStats.ratingDistribution[star];
-          const percentage = stat?.percentage || 0;
-
-          return (
-            <div key={star} className="flex items-center gap-3">
-              <div className="flex items-center gap-1 min-w-[60px]">
-                <span className="text-sm font-medium">{star}</span>
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              </div>
-              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-              <span className="text-sm text-gray-600 min-w-[40px] text-right">
-                {stat?.count || 0}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -325,6 +288,14 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
     );
   }
 
+  if (!productData) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No product data available</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Reviews Header */}
@@ -335,47 +306,40 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
           </h2>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1">
-              {reviewStats && (
-                <>
-                  <span className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    {reviewStats.averageRating.toFixed(1)}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    {renderStars(reviewStats.averageRating)}
-                  </div>
-                </>
-              )}
+              <span className="text-2xl sm:text-3xl font-bold text-gray-900">
+                {productData.rating.toFixed(1)}
+              </span>
+              <div className="flex items-center gap-1">
+                {renderStars(productData.rating)}
+              </div>
             </div>
           </div>
         </div>
 
-        {reviewStats && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-            {/* Rating Summary */}
-            <div className="space-y-3 sm:space-y-4">
-              <h3 className="font-semibold text-gray-900">Rating Breakdown</h3>
-              {renderRatingDistribution()}
-              <p className="text-sm text-gray-600">
-                Based on {reviewStats.totalReviews} reviews
-              </p>
-            </div>
-
-            {/* Sort Options */}
-            <div className="space-y-3 sm:space-y-4">
-              <h3 className="font-semibold text-gray-900">Sort Reviews</h3>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="highest">Highest Rated</option>
-                <option value="lowest">Lowest Rated</option>
-              </select>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+          {/* Rating Summary */}
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="font-semibold text-gray-900">Rating Summary</h3>
+            <p className="text-sm text-gray-600">
+              Based on {productData.totalReviews} reviews
+            </p>
           </div>
-        )}
+
+          {/* Sort Options */}
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="font-semibold text-gray-900">Sort Reviews</h3>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="highest">Highest Rated</option>
+              <option value="lowest">Lowest Rated</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Review Form */}
@@ -517,10 +481,10 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
       {/* Reviews List */}
       <div className="space-y-4 sm:space-y-6">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-          All Reviews ({reviewStats?.totalReviews || 0})
+          All Reviews ({productData.totalReviews})
         </h3>
 
-        {reviews.length === 0 ? (
+        {productData.reviews.length === 0 ? (
           <div className="text-center py-6 sm:py-8">
             <MessageCircle className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-sm sm:text-base">
@@ -529,7 +493,7 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
           </div>
         ) : (
           <div className="space-y-4 sm:space-y-6">
-            {reviews.map((review) => (
+            {productData.reviews.map((review) => (
               <div
                 key={review._id}
                 className="border border-gray-200 rounded-lg p-4 sm:p-6 bg-white shadow-sm"
@@ -586,7 +550,7 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {productData.totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-2 pt-6">
             <Button
               variant="outline"
@@ -599,16 +563,18 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
             </Button>
 
             <span className="text-sm text-gray-600 text-center">
-              Page {currentPage} of {totalPages}
+              Page {currentPage} of {productData.totalPages}
             </span>
 
             <Button
               variant="outline"
               size="sm"
               onClick={() =>
-                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                setCurrentPage((prev) =>
+                  Math.min(productData.totalPages, prev + 1)
+                )
               }
-              disabled={currentPage === totalPages}
+              disabled={currentPage === productData.totalPages}
               className="w-full sm:w-auto"
             >
               Next
@@ -637,4 +603,4 @@ const Reviews: React.FC<ReviewsProps> = ({ productId }) => {
   );
 };
 
-export default Reviews;
+export default ProductReviews;

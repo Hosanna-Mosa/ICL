@@ -1,6 +1,6 @@
 // API Configuration
 const API_BASE_URL =
- import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 // Local host: http://localhost:8000/api
 // Render host: https://icl-zsbu.onrender.com/api
@@ -246,7 +246,7 @@ export const cartAPI = {
 
   // Apply coins discount
   applyCoinsDiscount: async (coinsUsed) => {
-   return await apiRequest("/cart/coins", {
+    return await apiRequest("/cart/coins", {
       method: "POST",
       body: JSON.stringify({ coinsUsed }),
     });
@@ -311,7 +311,9 @@ export const lookbookAPI = {
   // Get lookbook items by category
   getByCategory: async (category, params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    return await apiRequest(`/lookbook/category/${category}${queryString ? `?${queryString}` : ""}`);
+    return await apiRequest(
+      `/lookbook/category/${category}${queryString ? `?${queryString}` : ""}`
+    );
   },
 
   // Get lookbook categories
@@ -411,7 +413,9 @@ export const userAPI = {
 
   // Get coin transactions
   getCoinTransactions: async (page = 1, limit = 20) => {
-    return await apiRequest(`/user/coins/transactions?page=${page}&limit=${limit}`);
+    return await apiRequest(
+      `/user/coins/transactions?page=${page}&limit=${limit}`
+    );
   },
 
   // Address book
@@ -440,8 +444,27 @@ export const userAPI = {
 // Reviews API functions
 export const reviewsAPI = {
   // Get reviews for a product
-  getProductReviews: async (productId, page = 1, limit = 10, sort = "newest") => {
-    return await apiRequest(`/reviews/product/${productId}?page=${page}&limit=${limit}&sort=${sort}`);
+  getProductReviews: async (
+    productId,
+    page = 1,
+    limit = 10,
+    sort = "newest"
+  ) => {
+    return await apiRequest(
+      `/reviews/product/${productId}?page=${page}&limit=${limit}&sort=${sort}`
+    );
+  },
+
+  // Get product with reviews (new endpoint)
+  getProductWithReviews: async (
+    productId,
+    page = 1,
+    limit = 5,
+    sort = "newest"
+  ) => {
+    return await apiRequest(
+      `/reviews/product/${productId}/with-reviews?page=${page}&limit=${limit}&sort=${sort}`
+    );
   },
 
   // Get review statistics for a product
