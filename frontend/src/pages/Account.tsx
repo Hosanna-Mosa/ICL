@@ -14,7 +14,7 @@ import {
   Loader2,
 
 } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 import Button from "@/components/UI/ICLButton";
@@ -31,6 +31,7 @@ const Account: React.FC = () => {
   const { user, isAuthenticated, login, register, logout, loading } = useAuth();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Authentication form states
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -393,6 +394,8 @@ const Account: React.FC = () => {
       title: "Logged Out",
       description: "You have been successfully logged out.",
     });
+    // Navigate to login page after logout
+    navigate('/login');
   };
 
   const handleLoginInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

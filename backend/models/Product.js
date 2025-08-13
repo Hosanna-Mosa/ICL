@@ -117,6 +117,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isNewProduct: {
+      type: Boolean,
+      default: false,
+    },
     rating: {
       type: Number,
       default: 0,
@@ -225,3 +229,230 @@ productSchema.statics.generateSKU = function (category, name) {
 };
 
 export default mongoose.model("Product", productSchema);
+
+
+    isFeatured: {
+
+      type: Boolean,
+
+      default: false,
+
+    },
+
+    rating: {
+
+      type: Number,
+
+      default: 0,
+
+      min: [0, "Rating cannot be negative"],
+
+      max: [5, "Rating cannot exceed 5"],
+
+    },
+
+    reviewCount: {
+
+      type: Number,
+
+      default: 0,
+
+      min: [0, "Review count cannot be negative"],
+
+    },
+
+    reviews: [
+
+      {
+
+        type: mongoose.Schema.Types.ObjectId,
+
+        ref: "Review",
+
+      },
+
+    ],
+
+    totalSold: {
+
+      type: Number,
+
+      default: 0,
+
+      min: [0, "Total sold cannot be negative"],
+
+    },
+
+    sku: {
+
+      type: String,
+
+      unique: true,
+
+      sparse: true,
+
+    },
+
+  },
+
+  {
+
+    timestamps: true,
+
+    toJSON: { virtuals: true },
+
+    toObject: { virtuals: true },
+
+  }
+
+);
+
+
+
+// Virtual for current price (sale price if available, otherwise base price)
+
+productSchema.virtual("currentPrice").get(function () {
+
+  return this.salePrice || this.basePrice;
+
+});
+
+
+
+// Virtual for discount percentage
+
+productSchema.virtual("discountPercentage").get(function () {
+
+  if (!this.salePrice || this.salePrice >= this.basePrice) return 0;
+
+  return Math.round(((this.basePrice - this.salePrice) / this.basePrice) * 100);
+
+});
+
+
+
+// Virtual for total stock
+
+productSchema.virtual("totalStock").get(function () {
+
+  return this.sizes.reduce((total, size) => total + size.stock, 0);
+
+});
+
+
+
+// Virtual for isInStock
+
+productSchema.virtual("isInStock").get(function () {
+
+  return this.totalStock > 0;
+
+});
+
+
+
+// Indexes for better query performance
+
+productSchema.index({ name: "text", description: "text", tags: "text" });
+
+productSchema.index({ category: 1, isActive: 1 });
+
+productSchema.index({ isFeatured: 1, isActive: 1 });
+
+productSchema.index({ rating: -1 });
+
+productSchema.index({ totalSold: -1 });
+
+productSchema.index({ "sizes.size": 1 });
+
+
+
+// Method to get available sizes
+
+productSchema.methods.getAvailableSizes = function () {
+
+  return this.sizes.filter((size) => size.stock > 0).map((size) => size.size);
+
+};
+
+
+
+// Method to check if size is available
+
+productSchema.methods.isSizeAvailable = function (size) {
+
+  const sizeData = this.sizes.find((s) => s.size === size);
+
+  return sizeData && sizeData.stock > 0;
+
+};
+
+
+
+// Method to get stock for a specific size
+
+productSchema.methods.getStockForSize = function (size) {
+
+  const sizeData = this.sizes.find((s) => s.size === size);
+
+  return sizeData ? sizeData.stock : 0;
+
+};
+
+
+
+// Method to update stock
+
+productSchema.methods.updateStock = function (size, quantity) {
+
+  const sizeData = this.sizes.find((s) => s.size === size);
+
+  if (sizeData) {
+
+    sizeData.stock = Math.max(0, sizeData.stock - quantity);
+
+    return this.save();
+
+  }
+
+  throw new Error(`Size ${size} not found`);
+
+};
+
+
+
+// Method to update rating
+
+productSchema.methods.updateRating = function (newRating) {
+
+  const totalRating = this.rating * this.reviewCount + newRating;
+
+  this.reviewCount += 1;
+
+  this.rating = totalRating / this.reviewCount;
+
+  return this.save();
+
+};
+
+
+
+// Static method to generate SKU
+
+productSchema.statics.generateSKU = function (category, name) {
+
+  const timestamp = Date.now().toString().slice(-6);
+
+  const categoryCode = category.substring(0, 3).toUpperCase();
+
+  const nameCode = name.substring(0, 3).toUpperCase();
+
+  return `${categoryCode}${nameCode}${timestamp}`;
+
+};
+
+
+
+export default mongoose.model("Product", productSchema);
+
+

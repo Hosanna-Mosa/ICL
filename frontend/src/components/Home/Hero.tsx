@@ -44,11 +44,13 @@ const Hero: React.FC = () => {
           
           {/* Mobile NEW DROP LIVE button - shown only on mobile */}
           <div className="mt-4 lg:hidden">
-            <div className="bg-accent text-accent-foreground px-4 py-2 rounded-md inline-block">
-              <p className="text-sm font-medium tracking-widest uppercase">
-                NEW DROP LIVE
-              </p>
-            </div>
+            <Link to="/shop?category=new">
+              <div className="bg-accent text-accent-foreground px-4 py-2 rounded-md inline-block cursor-pointer hover:bg-accent/90 transition-colors">
+                <p className="text-sm font-medium tracking-widest uppercase">
+                  NEW DROP LIVE
+                </p>
+              </div>
+            </Link>
           </div>
         </div>
 
@@ -59,11 +61,11 @@ const Hero: React.FC = () => {
       </div>
 
       {/* Side Banner - hidden on mobile, shown on lg and up */}
-      <div className="hidden lg:block absolute right-4 lg:right-8 top-1/2 transform -translate-y-1/2 bg-accent text-accent-foreground px-3 py-6 rotate-90 origin-center z-20">
+      <Link to="/shop?category=new" className="hidden lg:block absolute right-4 lg:right-8 top-1/2 transform -translate-y-1/2 bg-accent text-accent-foreground px-3 py-6 rotate-90 origin-center z-20 cursor-pointer hover:bg-accent/90 transition-colors">
         <p className="text-xs font-medium tracking-widest uppercase whitespace-nowrap">
           NEW DROP LIVE
         </p>
-      </div>
+      </Link>
     </section>
   );
 };
