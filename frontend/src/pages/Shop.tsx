@@ -3,7 +3,7 @@ import { Filter, Grid, List, Heart, Loader2, X } from 'lucide-react';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import Button from '@/components/UI/ICLButton';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { productsAPI, userAPI } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +16,8 @@ interface Product {
   images: Array<{ url: string; alt?: string; isPrimary: boolean }>;
   category: string;
   isFeatured?: boolean;
-  isNew?: boolean;
+  isNewProduct?: boolean;
+  createdAt?: string;
   sizes?: Array<{ size: string; colors: string[]; stock: number; price: number }>;
 }
 
@@ -38,8 +39,23 @@ const priceRanges = [
 ];
 
 const Shop: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Helper function to check if a product is new (added in last 30 days or marked as new)
+  const isProductNew = (product: Product): boolean => {
+    if (product.isNewProduct) return true;
+    
+    if (product.createdAt) {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const productDate = new Date(product.createdAt);
+      return productDate > thirtyDaysAgo;
+    }
+    
+    return false;
+  };
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -52,12 +68,21 @@ const Shop: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
 
+  // Handle URL parameters for category selection
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam === 'new') {
+      setSelectedCategory('new');
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         const response = await productsAPI.getAll();
         if (response.success) {
+          console.log('Fetched products:', response.data.products);
           setProducts(response.data.products);
         }
       } catch (error) {
@@ -168,8 +193,9 @@ const Shop: React.FC = () => {
     // Category filter
     if (selectedCategory !== 'All') {
       if (selectedCategory === 'new') {
-        // Show only new products
-        if (!product.isNew) return false;
+        // Show products added in the last 30 days or marked as new
+        const isNew = isProductNew(product);
+        if (!isNew) return false;
       } else if (product.category !== selectedCategory) {
         return false;
       }
@@ -192,24 +218,57 @@ const Shop: React.FC = () => {
     }
     
     return true;
-  }).sort((a, b) => {
-    // Sort products based on selected option
+  });
+  
+  // Debug logging for new products filter
+  if (selectedCategory === 'new') {
+    console.log('New products filter applied:', {
+      totalProducts: products.length,
+      filteredProducts: filteredProducts.length,
+      newProducts: products.filter(p => isProductNew(p)).length
+    });
+  }
+  
+  const sortedProducts = filteredProducts.sort((a, b) => {
+    // For New Drops category, always sort by creation date (newest first)
+    if (selectedCategory === 'new') {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA; // Newest first
+    }
+    
+    // For other categories, sort based on selected option
     switch (sortBy) {
       case 'price_low_high':
         return (a.salePrice || a.basePrice) - (b.salePrice || b.basePrice);
       case 'price_high_low':
         return (b.salePrice || b.basePrice) - (a.salePrice || a.basePrice);
       case 'newest':
-        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
       case 'featured':
         // Featured products first, then by creation date
         if (a.isFeatured && !b.isFeatured) return -1;
         if (!a.isFeatured && b.isFeatured) return 1;
-        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        const featuredDateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const featuredDateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return featuredDateB - featuredDateA;
       default:
         return 0;
     }
   });
+  
+  // Debug logging for sorted products in New Drops
+  if (selectedCategory === 'new') {
+    console.log('Sorted products for New Drops:', sortedProducts.map((product, index) => ({
+      position: index + 1,
+      name: product.name,
+      createdAt: product.createdAt,
+      isNewProduct: product.isNewProduct,
+      date: product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'No date'
+    })));
+  }
 
   return (
     <div className="min-h-screen">
@@ -219,7 +278,14 @@ const Shop: React.FC = () => {
         <div className="container mx-auto px-4 lg:px-8 py-8 lg:py-12">
           {/* Section Header */}
           <div className="mb-8">
-            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">SHOP ALL</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+              {selectedCategory === 'new' ? 'NEW DROPS' : 'SHOP ALL'}
+            </h1>
+            {selectedCategory === 'new' && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Fresh arrivals sorted by newest first
+              </p>
+            )}
           </div>
           
           <div className="flex flex-col lg:flex-row gap-8">
@@ -427,11 +493,18 @@ const Shop: React.FC = () => {
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                     className="text-sm border border-border px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-accent rounded"
+                    disabled={selectedCategory === 'new'}
                   >
-                    <option value="featured">SORT BY: FEATURED</option>
-                    <option value="price_low_high">PRICE: LOW TO HIGH</option>
-                    <option value="price_high_low">PRICE: HIGH TO LOW</option>
-                    <option value="newest">NEWEST FIRST</option>
+                    {selectedCategory === 'new' ? (
+                      <option value="newest">SORTED BY: NEWEST FIRST</option>
+                    ) : (
+                      <>
+                        <option value="featured">SORT BY: FEATURED</option>
+                        <option value="price_low_high">PRICE: LOW TO HIGH</option>
+                        <option value="price_high_low">PRICE: HIGH TO LOW</option>
+                        <option value="newest">NEWEST FIRST</option>
+                      </>
+                    )}
                   </select>
 
                   <div className="flex border border-border rounded overflow-hidden">
@@ -472,9 +545,10 @@ const Shop: React.FC = () => {
                           {selectedPriceRange}
                         </span>
                       )}
+
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {filteredProducts.length} of {products.length} products
+                      {sortedProducts.length} of {products.length} products
                     </span>
                   </div>
                 </div>
@@ -487,7 +561,7 @@ const Shop: React.FC = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                   <p className="mt-4 text-muted-foreground">Loading products...</p>
                 </div>
-              ) : filteredProducts.length === 0 ? (
+              ) : sortedProducts.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-muted-foreground mb-4">
                     <p className="text-lg font-medium mb-2">No products found</p>
@@ -512,7 +586,7 @@ const Shop: React.FC = () => {
                     ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' 
                     : 'grid-cols-1'
                 }`}>
-                  {filteredProducts.map(product => (
+                  {sortedProducts.map((product, index) => (
                     <Link key={product._id} to={`/product/${product._id}`} className="group block">
                       {/* Product Image */}
                       <div className="relative overflow-hidden aspect-[4/5] bg-muted mb-1">
@@ -524,7 +598,12 @@ const Shop: React.FC = () => {
                         
                         {/* Badges */}
                         <div className="absolute top-1 left-1 flex flex-col gap-1">
-                          {product.isNew && (
+                          {selectedCategory === 'new' && (
+                            <span className="bg-black text-white px-2 py-1 text-xs font-bold rounded-full">
+                              #{index + 1}
+                            </span>
+                          )}
+                          {isProductNew(product) && (
                             <span className="bg-accent text-accent-foreground px-1.5 py-0.5 text-xs font-medium tracking-widest uppercase">
                               NEW
                             </span>
