@@ -380,6 +380,36 @@ export const searchProducts = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get best selling products
+// @route   GET /api/products/bestsellers
+// @access  Public
+export const getBestSellers = asyncHandler(async (req, res) => {
+  const { limit = 8 } = req.query;
+
+  // Find best selling products, sorted by totalSold (highest first)
+  const bestSellers = await Product.find({
+    isActive: true,
+    totalSold: { $gt: 0 } // Only products that have been sold
+  })
+    .sort({ totalSold: -1, rating: -1 }) // Sort by sold count first, then rating
+    .limit(parseInt(limit))
+    .select('name basePrice salePrice images rating reviewCount totalSold category isNew')
+    .lean(); // Use lean() to avoid virtual fields and improve performance
+
+  console.log("Best sellers fetched", {
+    count: bestSellers.length,
+    limit: parseInt(limit),
+  });
+
+  res.json({
+    success: true,
+    data: {
+      bestSellers,
+      total: bestSellers.length,
+    },
+  });
+});
+
 // @desc    Get related products (same category, high sold count)
 // @route   GET /api/products/:id/related
 // @access  Public

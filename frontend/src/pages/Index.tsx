@@ -2,7 +2,7 @@ import React from 'react';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import Hero from '@/components/Home/Hero';
-import FeaturedProducts from '@/components/Home/FeaturedProducts';
+import BestSellers from '@/components/Home/BestSellers';
 import Categories from '@/components/Home/Categories';
 import BrandStory from '@/components/Home/BrandStory';
 
@@ -12,7 +12,7 @@ const Index = () => {
       <Header cartItemsCount={0} />
       <main>
         <Hero />
-        <FeaturedProducts />
+        <BestSellers />
         <Categories />
         <BrandStory />
       </main>

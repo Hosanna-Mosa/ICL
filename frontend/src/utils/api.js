@@ -188,6 +188,11 @@ export const productsAPI = {
   search: async (query) => {
     return await apiRequest(`/products/search?q=${encodeURIComponent(query)}`);
   },
+
+  // Get best sellers
+  getBestSellers: async (limit = 8) => {
+    return await apiRequest(`/products/bestsellers?limit=${limit}`);
+  },
 };
 
 // Cart API functions
