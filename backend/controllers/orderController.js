@@ -245,18 +245,52 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     order.coinsEarned > 0 &&
     !order.coinsCredited
   ) {
-    const user = await User.findById(order.user);
-    await user.addCoins(order.coinsEarned);
-    order.coinsCredited = true;
-    await order.save();
-    // Create coin transaction record
-    await CoinTransaction.createEarnedTransaction(
-      order.user,
-      order.coinsEarned,
-      "Purchase completed",
-      order.orderNumber,
-      order._id
-    );
+    try {
+      const user = await User.findById(order.user);
+      if (!user) {
+        console.error(`User not found for order ${order.orderNumber} when processing delivery`);
+        return res.status(404).json({
+          success: false,
+          message: "User not found for this order",
+        });
+      }
+      
+      // Check if transaction already exists to prevent duplicates
+      const existingTransaction = await CoinTransaction.findOne({
+        user: order.user,
+        order: order._id,
+        type: 'earned',
+        description: 'Purchase completed'
+      });
+      
+      if (existingTransaction) {
+        console.log(`Transaction already exists for order ${order.orderNumber}, skipping coin credit`);
+      } else {
+        // Add coins to user
+        await user.addCoins(order.coinsEarned);
+        
+        // Mark order as credited
+        order.coinsCredited = true;
+        await order.save();
+        
+        // Create coin transaction record
+        await CoinTransaction.createEarnedTransaction(
+          order.user,
+          order.coinsEarned,
+          "Purchase completed",
+          order.orderNumber,
+          order._id
+        );
+        
+        console.log(`Successfully credited ${order.coinsEarned} coins for delivered order ${order.orderNumber}`);
+      }
+    } catch (error) {
+      console.error(`Error processing coin credit for delivered order ${order.orderNumber}:`, error);
+      return res.status(500).json({
+        success: false,
+        message: "Error processing coin credit for delivery",
+      });
+    }
   }
 
   // If order is returned, debit coins from user (only if previously credited and not already debited)
@@ -267,18 +301,60 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     order.coinsCredited &&
     !order.coinsDebited
   ) {
-    const user = await User.findById(order.user);
-    await user.redeemCoins(order.coinsEarned);
-    order.coinsDebited = true;
-    await order.save();
-    // Create coin transaction record for debit
-    await CoinTransaction.createRedeemedTransaction(
-      order.user,
-      order.coinsEarned,
-      "Order returned - coins debited",
-      order.orderNumber,
-      order._id
-    );
+    try {
+      const user = await User.findById(order.user);
+      if (!user) {
+        console.error(`User not found for order ${order.orderNumber} when processing return`);
+        return res.status(404).json({
+          success: false,
+          message: "User not found for this order",
+        });
+      }
+      
+      if (user.coins < order.coinsEarned) {
+        console.error(`Insufficient coins for user ${user.email} when processing return for order ${order.orderNumber}`);
+        return res.status(400).json({
+          success: false,
+          message: "User has insufficient coins to process return",
+        });
+      }
+      
+      // Check if transaction already exists to prevent duplicates
+      const existingTransaction = await CoinTransaction.findOne({
+        user: order.user,
+        order: order._id,
+        type: 'redeemed',
+        description: 'Order returned - coins debited'
+      });
+      
+      if (existingTransaction) {
+        console.log(`Transaction already exists for order ${order.orderNumber}, skipping coin debit`);
+      } else {
+        // Create coin transaction record for debit first (before debiting coins)
+        await CoinTransaction.createRedeemedTransaction(
+          order.user,
+          order.coinsEarned,
+          "Order returned - coins debited",
+          order.orderNumber,
+          order._id
+        );
+        
+        // Debit coins from user
+        await user.redeemCoins(order.coinsEarned);
+        
+        // Mark order as debited
+        order.coinsDebited = true;
+        await order.save();
+        
+        console.log(`Successfully debited ${order.coinsEarned} coins for returned order ${order.orderNumber}`);
+      }
+    } catch (error) {
+      console.error(`Error processing coin debit for returned order ${order.orderNumber}:`, error);
+      return res.status(500).json({
+        success: false,
+        message: "Error processing coin debit for return",
+      });
+    }
   }
 
   console.log("Order status updated", {

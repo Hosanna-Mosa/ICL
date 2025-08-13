@@ -9,6 +9,7 @@ import {
   getProductsByCategory,
   searchProducts,
   getRelatedProducts,
+  getBestSellers,
 } from "../controllers/productController.js";
 import { protect, authorize } from "../middlewares/auth.js";
 import {
@@ -23,6 +24,7 @@ const router = express.Router();
 // Public routes
 router.get("/", validatePagination, getProducts);
 router.get("/featured", getFeaturedProducts);
+router.get("/bestsellers", getBestSellers);
 router.get("/category/:category", validatePagination, getProductsByCategory);
 router.get("/search", validateProductSearch, searchProducts);
 router.get("/:id", validateId, getProduct);
