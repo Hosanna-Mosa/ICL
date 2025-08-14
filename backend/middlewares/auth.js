@@ -86,6 +86,25 @@ export const authorize = (...roles) => {
   };
 };
 
+// Admin middleware - checks if user is admin
+export const admin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Access denied. Please login.",
+    });
+  }
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied. Admin access required.",
+    });
+  }
+
+  next();
+};
+
 export const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || "secretToken", {
     expiresIn: process.env.JWT_EXPIRE || "3d",

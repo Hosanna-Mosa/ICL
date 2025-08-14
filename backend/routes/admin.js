@@ -29,6 +29,10 @@ import {
   getDashboardStats,
   // Analytics
   getAnalytics,
+  // Coins
+  getCoinTransactions,
+  getUserCoins,
+  getCoinStats,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -90,5 +94,10 @@ router.get("/products/:id", validateId, getProductByIdAdmin);
 router.post("/products", validateProduct, createProductAdmin);
 router.put("/products/:id", [validateId, validateProduct], updateProductAdmin);
 router.delete("/products/:id", validateId, deleteProductAdmin);
+
+// ----- Coins -----
+router.get("/coins/transactions", validatePagination, getCoinTransactions);
+router.get("/coins/users", validatePagination, getUserCoins);
+router.get("/coins/stats", getCoinStats);
 
 export default router;

@@ -22,6 +22,7 @@ import adminRoutes from "./routes/admin.js";
 import uploadRoutes from "./routes/upload.js";
 import lookbookRoutes from "./routes/lookbook.js";
 import reviewRoutes from "./routes/reviews.js";
+import settingsRoutes from "./routes/settings.js";
 
 
 // Load environment variables
@@ -91,6 +92,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/lookbook", lookbookRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/settings", settingsRoutes);
 
 
 // 404 handler
