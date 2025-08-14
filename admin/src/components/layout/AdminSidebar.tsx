@@ -6,7 +6,6 @@ import {
   ShoppingCart, 
   Users, 
   Coins,
-  Settings,
   LogOut,
   BookOpen,
   BarChart3
@@ -62,11 +61,6 @@ const navigationItems = [
     url: '/admin/coins',
     icon: Coins,
   },
-  {
-    title: 'Settings',
-    url: '/admin/settings',
-    icon: Settings,
-  },
 ];
 
 export const AdminSidebar = () => {
@@ -100,7 +94,7 @@ export const AdminSidebar = () => {
           ) : (
             <div className="flex justify-center">
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">IC</span>
+                <span className="text-primary-foreground font-bold text-sm">BR</span>
               </div>
             </div>
           )}
