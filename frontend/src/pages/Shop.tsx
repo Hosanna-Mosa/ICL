@@ -71,8 +71,19 @@ const Shop: React.FC = () => {
   // Handle URL parameters for category selection
   useEffect(() => {
     const categoryParam = searchParams.get('category');
-    if (categoryParam === 'new') {
-      setSelectedCategory('new');
+    if (categoryParam) {
+      // Map URL parameters to category values
+      const categoryMapping: { [key: string]: string } = {
+        'new': 'new',
+        'hoodies': 'hoodies',
+        'tshirts': 'tshirts',
+        'pants': 'pants',
+        'accessories': 'accessories'
+      };
+      
+      if (categoryMapping[categoryParam]) {
+        setSelectedCategory(categoryMapping[categoryParam]);
+      }
     }
   }, [searchParams]);
 
@@ -279,11 +290,18 @@ const Shop: React.FC = () => {
           {/* Section Header */}
           <div className="mb-8">
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-              {selectedCategory === 'new' ? 'NEW DROPS' : 'SHOP ALL'}
+              {selectedCategory === 'new' ? 'NEW DROPS' : 
+               selectedCategory === 'All' ? 'SHOP ALL' :
+               selectedCategory.toUpperCase()}
             </h1>
             {selectedCategory === 'new' && (
               <p className="text-sm text-muted-foreground mt-2">
                 Fresh arrivals sorted by newest first
+              </p>
+            )}
+            {selectedCategory !== 'new' && selectedCategory !== 'All' && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Browse our {selectedCategory} collection
               </p>
             )}
           </div>
