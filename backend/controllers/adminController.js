@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
+import CoinTransaction from "../models/CoinTransaction.js";
 import { asyncHandler } from "../middlewares/errorHandler.js";
 import {
   createProduct as createProductController,
@@ -642,4 +643,189 @@ export const getAnalytics = asyncHandler(async (req, res) => {
       error: error.message
     });
   }
+});
+
+// ----- Coins -----
+
+// @desc    Get all coin transactions (Admin)
+// @route   GET /api/admin/coins/transactions
+// @access  Private/Admin
+export const getCoinTransactions = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 50 } = req.query;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const [transactions, total] = await Promise.all([
+    CoinTransaction.find()
+      .populate('user', 'firstName lastName email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit)),
+    CoinTransaction.countDocuments(),
+  ]);
+
+  const totalPages = Math.ceil(total / parseInt(limit));
+
+  res.json({
+    success: true,
+    data: {
+      transactions,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages,
+        hasNext: parseInt(page) < totalPages,
+        hasPrev: parseInt(page) > 1,
+      },
+    },
+  });
+});
+
+// @desc    Get user coin balances and statistics (Admin)
+// @route   GET /api/admin/coins/users
+// @access  Private/Admin
+export const getUserCoins = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 50 } = req.query;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  // Get users with their coin statistics
+  const users = await User.aggregate([
+    {
+      $lookup: {
+        from: 'cointransactions',
+        localField: '_id',
+        foreignField: 'user',
+        as: 'transactions'
+      }
+    },
+    {
+      $addFields: {
+        totalEarned: {
+          $sum: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$transactions',
+                  cond: { $eq: ['$$this.type', 'earned'] }
+                }
+              },
+              as: 'tx',
+              in: '$$tx.amount'
+            }
+          }
+        },
+        totalRedeemed: {
+          $sum: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$transactions',
+                  cond: { $eq: ['$$this.type', 'redeemed'] }
+                }
+              },
+              as: 'tx',
+              in: '$$tx.amount'
+            }
+          }
+        },
+        transactionCount: { $size: '$transactions' }
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        firstName: 1,
+        lastName: 1,
+        email: 1,
+        coins: 1,
+        totalEarned: 1,
+        totalRedeemed: 1,
+        transactionCount: 1
+      }
+    },
+    {
+      $sort: { coins: -1 }
+    },
+    {
+      $skip: skip
+    },
+    {
+      $limit: parseInt(limit)
+    }
+  ]);
+
+  const total = await User.countDocuments();
+
+  const totalPages = Math.ceil(total / parseInt(limit));
+
+  res.json({
+    success: true,
+    data: {
+      users,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages,
+        hasNext: parseInt(page) < totalPages,
+        hasPrev: parseInt(page) > 1,
+      },
+    },
+  });
+});
+
+// @desc    Get coin system statistics (Admin)
+// @route   GET /api/admin/coins/stats
+// @access  Private/Admin
+export const getCoinStats = asyncHandler(async (req, res) => {
+  // Get overall coin statistics
+  const stats = await CoinTransaction.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalEarned: {
+          $sum: {
+            $cond: [{ $eq: ['$type', 'earned'] }, '$amount', 0]
+          }
+        },
+        totalRedeemed: {
+          $sum: {
+            $cond: [{ $eq: ['$type', 'redeemed'] }, '$amount', 0]
+          }
+        },
+        totalTransactions: { $sum: 1 }
+      }
+    }
+  ]);
+
+  // Get users with coins
+  const usersWithCoins = await User.countDocuments({ coins: { $gt: 0 } });
+
+  // Get total coins in circulation
+  const totalCoinsInCirculation = await User.aggregate([
+    {
+      $group: {
+        _id: null,
+        total: { $sum: '$coins' }
+      }
+    }
+  ]);
+
+  const coinStats = stats[0] || { totalEarned: 0, totalRedeemed: 0, totalTransactions: 0 };
+  const totalCoins = totalCoinsInCirculation[0]?.total || 0;
+  const averageCoinsPerUser = usersWithCoins > 0 ? totalCoins / usersWithCoins : 0;
+
+  res.json({
+    success: true,
+    data: {
+      stats: {
+        totalCoinsInCirculation: totalCoins,
+        totalUsersWithCoins: usersWithCoins,
+        totalTransactions: coinStats.totalTransactions,
+        totalEarned: coinStats.totalEarned,
+        totalRedeemed: coinStats.totalRedeemed,
+        averageCoinsPerUser: Math.round(averageCoinsPerUser * 100) / 100
+      }
+    }
+  });
 });

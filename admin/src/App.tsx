@@ -13,6 +13,8 @@ import Products from "./pages/admin/Products";
 import Orders from "./pages/admin/Orders";
 import Users from "./pages/admin/Users";
 import Lookbook from "./pages/admin/Lookbook";
+import Coins from "./pages/admin/Coins";
+import Settings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,8 +45,8 @@ const App = () => (
               <Route path="orders" element={<Orders />} />
               <Route path="users" element={<Users />} />
               <Route path="lookbook" element={<Lookbook />} />
-              <Route path="coins" element={<div className="p-8">Coins page coming soon...</div>} />
-              <Route path="settings" element={<div className="p-8">Settings page coming soon...</div>} />
+              <Route path="coins" element={<Coins />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
             
             {/* Catch all route */}
