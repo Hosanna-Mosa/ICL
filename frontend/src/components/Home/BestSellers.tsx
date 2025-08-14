@@ -161,14 +161,10 @@ const BestSellers: React.FC = () => {
               BEST SELLERS
             </h2>
           </div>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Discover our most popular pieces loved by thousands of customers. 
-            These trending items are flying off the shelves!
-          </p>
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 lg:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 lg:gap-4">
           {products.map((product) => (
             <Link key={product._id} to={`/product/${product._id}`} className="group block">
               {/* Product Card */}
@@ -181,43 +177,43 @@ const BestSellers: React.FC = () => {
                     className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
                   />
                   
-                                     {/* Badges */}
-                   <div className="absolute top-1.5 left-1.5 flex flex-col gap-0.5">
-                     {product.isNew && (
-                       <span className="bg-accent text-accent-foreground px-1.5 py-0.5 text-[10px] font-semibold tracking-widest uppercase rounded shadow-sm">
-                         NEW
-                       </span>
-                     )}
-                     {product.salePrice && (
-                       <span className="bg-destructive text-destructive-foreground px-1.5 py-0.5 text-[10px] font-semibold tracking-widest uppercase rounded shadow-sm">
-                         SALE
-                       </span>
-                     )}
-                   </div>
+                  {/* Sold Count Badge */}
+                  <div className="absolute top-1.5 right-1.5">
+                    <div className="bg-primary/90 text-primary-foreground px-1.5 py-0.5 text-[10px] font-semibold rounded shadow-sm backdrop-blur-sm">
+                      {product.totalSold} sold
+                    </div>
+                  </div>
 
-                                     {/* Sold Count Badge */}
-                   <div className="absolute top-1.5 right-1.5">
-                     <div className="bg-primary/90 text-primary-foreground px-1.5 py-0.5 text-[10px] font-semibold rounded shadow-sm backdrop-blur-sm">
-                       {product.totalSold} sold
-                     </div>
-                   </div>
+                  {/* Desktop Badges */}
+                  <div className="absolute top-1.5 left-1.5 flex flex-col gap-0.5 hidden md:flex">
+                    {product.isNew && (
+                      <span className="bg-accent text-accent-foreground px-1.5 py-0.5 text-[10px] font-semibold tracking-widest uppercase rounded shadow-sm">
+                        NEW
+                      </span>
+                    )}
+                    {product.salePrice && (
+                      <span className="bg-destructive text-destructive-foreground px-1.5 py-0.5 text-[10px] font-semibold tracking-widest uppercase rounded shadow-sm">
+                        SALE
+                      </span>
+                    )}
+                  </div>
 
-                                     {/* Wishlist Button */}
-                   <button 
-                     className="absolute bottom-1.5 right-1.5 p-1.5 bg-background/90 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-background hover:text-accent z-10 disabled:opacity-50 shadow-sm"
-                     aria-label="Add to wishlist"
-                     onClick={(e) => handleWishlistToggle(product._id, e)}
-                     disabled={wishlistLoading === product._id}
-                   >
-                     {wishlistLoading === product._id ? (
-                       <Loader2 size={14} className="animate-spin" />
-                     ) : (
-                       <Heart 
-                         size={14} 
-                         className={wishlistItems.includes(product._id) ? 'fill-accent text-accent' : 'text-foreground'} 
-                       />
-                     )}
-                   </button>
+                  {/* Desktop Wishlist Button */}
+                  <button 
+                    className="absolute bottom-1.5 right-1.5 p-1.5 bg-background/90 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-background hover:text-accent z-10 disabled:opacity-50 shadow-sm hidden md:block"
+                    aria-label="Add to wishlist"
+                    onClick={(e) => handleWishlistToggle(product._id, e)}
+                    disabled={wishlistLoading === product._id}
+                  >
+                    {wishlistLoading === product._id ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Heart 
+                        size={14} 
+                        className={wishlistItems.includes(product._id) ? 'fill-accent text-accent' : 'text-foreground'} 
+                      />
+                    )}
+                  </button>
                 </div>
 
                 {/* Product Info */}
@@ -226,44 +222,44 @@ const BestSellers: React.FC = () => {
                     {product.name}
                   </h3>
                   
-                                     {/* Rating */}
-                   <div className="flex items-center gap-1">
-                     <div className="flex items-center">
-                       {[...Array(5)].map((_, i) => (
-                         <Star
-                           key={i}
-                           size={10}
-                           className={`${
-                             i < Math.floor(product.rating)
-                               ? 'fill-yellow-400 text-yellow-400'
-                               : 'text-muted-foreground'
-                           }`}
-                         />
-                       ))}
-                     </div>
-                     <span className="text-xs text-muted-foreground ml-1">
-                       ({product.reviewCount})
-                     </span>
-                   </div>
+                  {/* Desktop Rating */}
+                  <div className="flex items-center gap-1 hidden md:flex">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={10}
+                          className={`${
+                            i < Math.floor(product.rating)
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-muted-foreground'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-muted-foreground ml-1">
+                      ({product.reviewCount})
+                    </span>
+                  </div>
                   
-                                     {/* Price */}
-                   <div className="flex items-center justify-between">
-                     <div className="flex items-center space-x-1.5">
-                       <span className="text-sm font-bold text-primary">
-                         ₹{(product.salePrice || product.basePrice).toLocaleString()}
-                       </span>
-                       {product.salePrice && (
-                         <span className="text-muted-foreground line-through text-xs">
-                           ₹{product.basePrice.toLocaleString()}
-                         </span>
-                       )}
-                     </div>
-                     
-                     {/* Category */}
-                     <span className="text-xs text-muted-foreground uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded text-[10px]">
-                       {product.category}
-                     </span>
-                   </div>
+                  {/* Price */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="text-sm font-bold text-primary">
+                        ₹{(product.salePrice || product.basePrice).toLocaleString()}
+                      </span>
+                      {product.salePrice && (
+                        <span className="text-muted-foreground line-through text-xs">
+                          ₹{product.basePrice.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Desktop Category */}
+                    <span className="text-xs text-muted-foreground uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded text-[10px] hidden md:block">
+                      {product.category}
+                    </span>
+                  </div>
                 </div>
               </div>
             </Link>

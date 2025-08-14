@@ -19,6 +19,7 @@ import Pocket from "./pages/Pocket";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
+import BackToTop from "./components/UI/back-to-top";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <BackToTop />
           </BrowserRouter>
         </CartProvider>
       </AuthProvider>

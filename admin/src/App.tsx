@@ -16,6 +16,7 @@ import Lookbook from "./pages/admin/Lookbook";
 import Coins from "./pages/admin/Coins";
 import Settings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
+import BackToTop from "@/components/ui/back-to-top";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
             {/* Catch all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <BackToTop />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
