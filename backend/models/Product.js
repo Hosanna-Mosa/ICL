@@ -99,16 +99,6 @@ const productSchema = new mongoose.Schema(
       enum: ["regular", "oversized", "slim", "relaxed"],
       default: "regular",
     },
-    washCare: {
-      type: String,
-      trim: true,
-    },
-    tags: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
     isActive: {
       type: Boolean,
       default: true,
@@ -117,10 +107,12 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
     isNewProduct: {
       type: Boolean,
       default: false,
     },
+
     rating: {
       type: Number,
       default: 0,
@@ -178,7 +170,9 @@ productSchema.virtual("isInStock").get(function () {
 });
 
 // Indexes for better query performance
+
 productSchema.index({ name: "text", description: "text", tags: "text" });
+
 productSchema.index({ category: 1, isActive: 1 });
 productSchema.index({ isFeatured: 1, isActive: 1 });
 productSchema.index({ rating: -1 });

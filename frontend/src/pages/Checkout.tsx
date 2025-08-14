@@ -63,7 +63,9 @@ const Checkout: React.FC = () => {
   // Shipping policy: free if subtotal > 2000 (aligns with backend)
   const shipping = cart && cart.subtotal > 2000 ? 0 : 150;
   const coinDiscount = cart?.coinsDiscount || 0;
-  const total = (cart?.total || 0) + shipping;
+  // Calculate GST (18%) on subtotal after coin discount
+  const gstAmount = Math.round((subtotal - coinDiscount) * 0.18);
+  const total = (subtotal - coinDiscount) + gstAmount + shipping;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -672,19 +674,24 @@ const Checkout: React.FC = () => {
                       <span className="text-foreground">₹{subtotal.toLocaleString()}</span>
                     </div>
                     
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Shipping</span>
-                      <span className="text-foreground">
-                        {shipping === 0 ? 'FREE' : `₹${shipping}`}
-                      </span>
-                    </div>
-                    
                     {coinDiscount > 0 && (
                       <div className="flex justify-between text-primary">
                         <span>Coin Discount</span>
                         <span>-₹{coinDiscount.toLocaleString()}</span>
                       </div>
                     )}
+                    
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">GST (18%)</span>
+                      <span className="text-foreground">₹{gstAmount.toLocaleString()}</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Shipping</span>
+                      <span className="text-foreground">
+                        {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                      </span>
+                    </div>
                     
                     <hr className="border-border" />
                     
