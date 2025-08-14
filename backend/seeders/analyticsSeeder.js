@@ -85,7 +85,7 @@ export const seedAnalyticsData = async () => {
         description: `This is a sample ${category} product for testing analytics.`,
         category: category,
         subcategory: "sample",
-        brand: "ICL",
+        brand: "BRELIS",
         images: [
           {
             url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800",

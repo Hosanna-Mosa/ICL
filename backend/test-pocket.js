@@ -31,7 +31,7 @@ async function testPocketFunctionality() {
       testUser._id,
       25,
       'Test purchase completed',
-      'ICL12345678'
+      'BRELIS12345678'
     );
     console.log('Created earned transaction:', earnedTransaction._id);
 
@@ -40,7 +40,7 @@ async function testPocketFunctionality() {
       testUser._id,
       10,
       'Test coins applied to order',
-      'ICL12345679'
+      'BRELIS12345679'
     );
     console.log('Created redeemed transaction:', redeemedTransaction._id);
 

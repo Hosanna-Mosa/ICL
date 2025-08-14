@@ -4,7 +4,7 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 // Test data
 const testUser = {
-  email: 'test@icl.com',
+  email: 'test@brelis.com',
   password: 'test123'
 };
 

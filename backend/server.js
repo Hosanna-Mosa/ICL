@@ -76,7 +76,7 @@ app.use(morganMiddleware);
 app.get("/health", (req, res) => {
   res.json({
     success: true,
-    message: "ICL Backend API is running",
+    message: "BRELIS Backend API is running",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
   });

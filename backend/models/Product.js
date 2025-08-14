@@ -50,7 +50,7 @@ const productSchema = new mongoose.Schema(
     },
     brand: {
       type: String,
-      default: "ICL",
+      default: "BRELIS",
       trim: true,
     },
     images: [

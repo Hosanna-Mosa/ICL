@@ -14,6 +14,9 @@ import { Link, useNavigate } from 'react-router-dom';
 const Checkout: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cod'>('upi');
   const [useCoins, setUseCoins] = useState(false);
+  const [userCoins, setUserCoins] = useState(0);
+  const [coinsToUse, setCoinsToUse] = useState(100);
+  const [loadingCoins, setLoadingCoins] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [placedOrder, setPlacedOrder] = useState(null);
@@ -36,9 +39,19 @@ const Checkout: React.FC = () => {
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [showAddAddressForm, setShowAddAddressForm] = useState(false);
 
+  // Load user's coin balance
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchUserCoins();
+    }
+  }, [isAuthenticated]);
+
   // Keep coins toggle in sync with cart state
   useEffect(() => {
     setUseCoins((cart?.coinsUsed || 0) > 0);
+    if (cart?.coinsUsed) {
+      setCoinsToUse(cart.coinsUsed);
+    }
   }, [cart?.coinsUsed]);
 
   // Load saved addresses
@@ -58,6 +71,30 @@ const Checkout: React.FC = () => {
     })();
   }, [isAuthenticated]);
 
+  const fetchUserCoins = async () => {
+    try {
+      setLoadingCoins(true);
+      const response = await userAPI.getUserCoins();
+      if (response.success) {
+        setUserCoins(response.data.coins);
+        // If user has coins and none are currently used, set default amount
+        if (response.data.coins > 0 && !cart?.coinsUsed) {
+          const defaultCoins = Math.min(100, response.data.coins);
+          setCoinsToUse(defaultCoins);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user coins:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load your coin balance',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingCoins(false);
+    }
+  };
+
   const cartItems = useMemo(() => cart?.items || [], [cart?.items]);
   const subtotal = cart?.subtotal || 0;
   // Shipping policy: free if subtotal > 2000 (aligns with backend)
@@ -73,6 +110,8 @@ const Checkout: React.FC = () => {
       [e.target.name]: e.target.value
     });
   };
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +138,16 @@ const Checkout: React.FC = () => {
       toast({
         title: 'Address required',
         description: 'Please select a saved address or fill in the shipping details',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate coins usage
+    if (useCoins && coinsToUse > userCoins) {
+      toast({
+        title: 'Insufficient coins',
+        description: 'You don\'t have enough coins for this purchase',
         variant: 'destructive',
       });
       return;
@@ -210,14 +259,46 @@ const Checkout: React.FC = () => {
     setUseCoins(checked);
     try {
       if (checked) {
-        // Apply a flat 100 coin discount if supported
-        await applyCoinsDiscount(100);
+        // Apply the selected coin amount
+        await applyCoinsDiscount(coinsToUse);
       } else {
         await removeCoinsDiscount();
       }
     } catch (error) {
       // Re-sync if anything failed
       await refreshCart();
+    }
+  };
+
+  const handleCoinsAmountChange = async () => {
+    if (!useCoins) return;
+    
+    try {
+      await applyCoinsDiscount(coinsToUse);
+    } catch (error) {
+      // Re-sync if anything failed
+      await refreshCart();
+    }
+  };
+
+  // Handle coin submission
+  const handleCoinSubmit = async () => {
+    if (!useCoins) return;
+    
+    try {
+      await applyCoinsDiscount(coinsToUse);
+      toast({
+        title: 'Coins applied successfully!',
+        description: `₹${coinsToUse} discount applied to your order`,
+      });
+    } catch (error) {
+      // Re-sync if anything failed
+      await refreshCart();
+      toast({
+        title: 'Error applying coins',
+        description: 'Failed to apply coins. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -575,7 +656,7 @@ const Checkout: React.FC = () => {
                             </div>
                           </div>
                           <p className="text-xs text-muted-foreground mt-2">
-                            UPI ID: icl@paytm
+                            UPI ID: brelis@paytm
                           </p>
                         </div>
                       )}
@@ -612,94 +693,235 @@ const Checkout: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* Coin Discount */}
-                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Checkbox 
-                      id="useCoins" 
-                      checked={useCoins} 
-                      onCheckedChange={(checked) => !placingOrder && handleCoinsToggle(!!checked)}
-                      disabled={placingOrder}
-                    />
-                    <label htmlFor="useCoins" className="flex items-center gap-2 cursor-pointer">
-                      <Coins className="w-5 h-5 text-primary" />
-                      <span className="font-medium text-foreground">Use 100 Coins (₹100 off)</span>
-                    </label>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    You have 100 coins available. First-time buyer bonus!
-                  </p>
-                </div>
+                                 {/* Coin Discount */}
+                 {userCoins > 0 && (
+                   <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-6">
+                     <div className="flex items-center gap-3 mb-4">
+                       <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                         <Coins className="w-5 h-5 text-primary" />
+                       </div>
+                       <div className="flex-1">
+                         <div className="flex items-center gap-3">
+                           <Checkbox 
+                             id="useCoins" 
+                             checked={useCoins} 
+                             onCheckedChange={(checked) => !placingOrder && handleCoinsToggle(!!checked)}
+                             disabled={placingOrder || loadingCoins}
+                           />
+                           <label htmlFor="useCoins" className="flex items-center gap-2 cursor-pointer">
+                             <span className="font-semibold text-foreground">Use Coins for Discount</span>
+                           </label>
+                         </div>
+                         <p className="text-sm text-muted-foreground ml-7">
+                           Redeem your earned coins for instant discounts
+                         </p>
+                       </div>
+                     </div>
+                     
+                     {loadingCoins ? (
+                       <div className="flex items-center gap-2 text-sm text-muted-foreground ml-7">
+                         <Loader2 className="w-4 h-4 animate-spin" />
+                         Loading your coin balance...
+                       </div>
+                     ) : (
+                       <div className="space-y-4 ml-7">
+                         {/* Coin Balance Display */}
+                         <div className="bg-white/50 border border-primary/20 rounded-lg p-3">
+                           <div className="flex items-center justify-between">
+                             <div>
+                               <p className="text-sm font-medium text-foreground">Available Coins</p>
+                               <p className="text-xs text-muted-foreground">1 coin = ₹1 discount</p>
+                             </div>
+                             <div className="text-right">
+                               <p className="text-lg font-bold text-primary">{userCoins}</p>
+                               <p className="text-xs text-muted-foreground">coins</p>
+                             </div>
+                           </div>
+                         </div>
+                         
+                         {useCoins && (
+                           <div className="space-y-3">
+                             <div className="bg-white/50 border border-primary/20 rounded-lg p-3">
+                               <label className="text-sm font-medium text-foreground mb-2 block">
+                                 How many coins to use?
+                               </label>
+                               <div className="flex items-center gap-2">
+                                 <Input
+                                   type="number"
+                                   min="1"
+                                   max={Math.min(userCoins, subtotal)}
+                                   value={coinsToUse}
+                                   onChange={(e) => setCoinsToUse(Number(e.target.value))}
+                                   className="flex-1 h-10 text-sm"
+                                   disabled={placingOrder}
+                                   placeholder="Enter amount"
+                                 />
+                                 <Button
+                                   type="button"
+                                   onClick={handleCoinSubmit}
+                                   disabled={placingOrder || coinsToUse <= 0 || coinsToUse > Math.min(userCoins, subtotal)}
+                                   size="sm"
+                                   className="h-10 px-4"
+                                 >
+                                   Apply
+                                 </Button>
+                               </div>
+                               <div className="flex items-center justify-between mt-2">
+                                 <span className="text-xs text-muted-foreground">
+                                   Max: {Math.min(userCoins, subtotal)} coins
+                                 </span>
+                                 {coinsToUse > 0 && (
+                                   <span className="text-sm font-semibold text-green-600">
+                                     = ₹{coinsToUse.toLocaleString()} discount
+                                   </span>
+                                 )}
+                               </div>
+                             </div>
+                             
+                             {/* Usage Guidelines */}
+                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                               <h4 className="text-xs font-semibold text-blue-700 mb-2">💡 Usage Guidelines</h4>
+                               <ul className="text-xs text-blue-600 space-y-1">
+                                 <li>• You can use up to {Math.min(userCoins, subtotal)} coins</li>
+                                 <li>• Each coin gives you ₹1 discount</li>
+                                 <li>• Coins are deducted from your balance after order</li>
+                                 <li>• Unused coins remain in your account</li>
+                               </ul>
+                             </div>
+                           </div>
+                         )}
+                       </div>
+                     )}
+                   </div>
+                 )}
               </div>
               
-              {/* Order Summary */}
-              <div>
-                <div className={`bg-card p-6 shadow-soft sticky top-32 ${placingOrder ? 'opacity-75' : ''}`}>
-                  <h2 className="text-xl font-bold text-foreground mb-6">
-                    Order Summary
-                  </h2>
-                  
+                             {/* Order Summary */}
+               <div>
+                 <div className={`bg-card p-6 shadow-soft sticky top-32 ${placingOrder ? 'opacity-75' : ''}`}>
+                   <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+                     <ShoppingBag className="w-5 h-5" />
+                     Order Summary
+                   </h2>
+                   
                    {/* Cart Items */}
-                  <div className="space-y-4 mb-6">
-                    {cartItems.map((item) => (
-                      <div key={`${item.product._id}-${item.size}`} className="flex gap-3">
-                        <div className="w-16 h-16 bg-muted overflow-hidden">
-                          <img
-                            src={item.product.images[0]?.url || '/placeholder.svg'}
-                            alt={item.product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-foreground text-sm">
-                            {item.product.name}
-                          </h4>
-                          <p className="text-xs text-muted-foreground">
-                            Size: {item.size} • Qty: {item.quantity}
-                          </p>
-                          <p className="text-sm font-medium text-foreground">
-                            ₹{(item.price * item.quantity).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <hr className="border-border mb-4" />
-                  
-                  {/* Price Breakdown */}
-                  <div className="space-y-3 mb-6">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Subtotal</span>
-                      <span className="text-foreground">₹{subtotal.toLocaleString()}</span>
-                    </div>
-                    
-                    {coinDiscount > 0 && (
-                      <div className="flex justify-between text-primary">
-                        <span>Coin Discount</span>
-                        <span>-₹{coinDiscount.toLocaleString()}</span>
-                      </div>
-                    )}
-                    
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">GST (18%)</span>
-                      <span className="text-foreground">₹{gstAmount.toLocaleString()}</span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Shipping</span>
-                      <span className="text-foreground">
-                        {shipping === 0 ? 'FREE' : `₹${shipping}`}
-                      </span>
-                    </div>
-                    
-                    <hr className="border-border" />
-                    
-                    <div className="flex justify-between text-lg font-bold">
-                      <span className="text-foreground">Total</span>
-                      <span className="text-foreground">₹{total.toLocaleString()}</span>
-                    </div>
-                  </div>
+                   <div className="space-y-4 mb-6">
+                     <div className="flex items-center justify-between mb-3">
+                       <h3 className="text-sm font-semibold text-foreground">Items ({cartItems.length})</h3>
+                       <span className="text-xs text-muted-foreground">Total Items</span>
+                     </div>
+                     
+                     {cartItems.map((item) => (
+                       <div key={`${item.product._id}-${item.size}`} className="flex gap-3 p-3 bg-muted/30 rounded-lg">
+                         <div className="w-16 h-16 bg-white overflow-hidden rounded-md border">
+                           <img
+                             src={item.product.images[0]?.url || '/placeholder.svg'}
+                             alt={item.product.name}
+                             className="w-full h-full object-cover"
+                           />
+                         </div>
+                         <div className="flex-1 min-w-0">
+                           <h4 className="font-medium text-foreground text-sm truncate">
+                             {item.product.name}
+                           </h4>
+                           <div className="flex items-center gap-2 mt-1">
+                             <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                               Size: {item.size}
+                             </span>
+                             <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                               Qty: {item.quantity}
+                             </span>
+                           </div>
+                           <div className="flex items-center justify-between mt-2">
+                             <span className="text-xs text-muted-foreground">
+                               ₹{item.price.toLocaleString()} each
+                             </span>
+                             <span className="text-sm font-semibold text-foreground">
+                               ₹{(item.price * item.quantity).toLocaleString()}
+                             </span>
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                   
+                   <hr className="border-border mb-4" />
+                   
+                   {/* Transaction Breakdown */}
+                   <div className="space-y-4 mb-6">
+                     <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                       <CreditCard className="w-4 h-4" />
+                       Transaction Details
+                     </h3>
+                     
+                     {/* Subtotal */}
+                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
+                       <div>
+                         <span className="text-sm font-medium text-foreground">Subtotal</span>
+                         <p className="text-xs text-muted-foreground">Before taxes & discounts</p>
+                       </div>
+                       <span className="text-sm font-semibold text-foreground">₹{subtotal.toLocaleString()}</span>
+                     </div>
+                     
+                     {/* Coin Discount */}
+                     {coinDiscount > 0 && (
+                       <div className="flex justify-between items-center p-3 bg-green-50 border border-green-200 rounded-lg">
+                         <div className="flex items-center gap-2">
+                           <Coins className="w-4 h-4 text-green-600" />
+                           <div>
+                             <span className="text-sm font-medium text-green-700">Coin Discount</span>
+                             <p className="text-xs text-green-600">Applied from your coin balance</p>
+                           </div>
+                         </div>
+                         <span className="text-sm font-semibold text-green-700">-₹{coinDiscount.toLocaleString()}</span>
+                       </div>
+                     )}
+                     
+                     {/* GST */}
+                     <div className="flex justify-between items-center p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                       <div>
+                         <span className="text-sm font-medium text-blue-700">GST (18%)</span>
+                         <p className="text-xs text-blue-600">Government tax on subtotal</p>
+                       </div>
+                       <span className="text-sm font-semibold text-blue-700">₹{gstAmount.toLocaleString()}</span>
+                     </div>
+                     
+                     {/* Shipping */}
+                     <div className="flex justify-between items-center p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                       <div>
+                         <span className="text-sm font-medium text-orange-700">Shipping</span>
+                         <p className="text-xs text-orange-600">
+                           {shipping === 0 ? 'Free shipping on orders above ₹2,000' : 'Standard delivery charge'}
+                         </p>
+                       </div>
+                       <span className="text-sm font-semibold text-orange-700">
+                         {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                       </span>
+                     </div>
+                   </div>
+                   
+                   <hr className="border-border mb-4" />
+                   
+                   {/* Final Total */}
+                   <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
+                     <div className="flex justify-between items-center">
+                       <div>
+                         <span className="text-lg font-bold text-foreground">Total Amount</span>
+                         <p className="text-xs text-muted-foreground">Amount to be paid</p>
+                       </div>
+                       <span className="text-xl font-bold text-primary">₹{total.toLocaleString()}</span>
+                     </div>
+                     
+                     {/* Savings Summary */}
+                     {coinDiscount > 0 && (
+                       <div className="mt-3 pt-3 border-t border-primary/20">
+                         <div className="flex justify-between items-center">
+                           <span className="text-sm text-muted-foreground">You Save:</span>
+                           <span className="text-sm font-semibold text-green-600">₹{coinDiscount.toLocaleString()}</span>
+                         </div>
+                       </div>
+                     )}
+                   </div>
                   
                   <Button type="submit" className="w-full btn-hero" disabled={placingOrder}>
                     {placingOrder ? (

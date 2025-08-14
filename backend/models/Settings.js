@@ -6,7 +6,7 @@ const settingsSchema = new mongoose.Schema(
     general: {
       storeName: {
         type: String,
-        default: "ICL Streetwear",
+        default: "BRELIS Streetwear",
         trim: true,
       },
       storeDescription: {
@@ -16,7 +16,7 @@ const settingsSchema = new mongoose.Schema(
       },
       contactEmail: {
         type: String,
-        default: "contact@iclstreetwear.com",
+        default: "contact@brelisstreetwear.com",
         trim: true,
       },
       contactPhone: {
@@ -124,7 +124,7 @@ const settingsSchema = new mongoose.Schema(
       },
       emailFrom: {
         type: String,
-        default: "ICL Streetwear <noreply@iclstreetwear.com>",
+        default: "BRELIS Streetwear <noreply@brelisstreetwear.com>",
         trim: true,
       },
       emailSecure: {
@@ -218,7 +218,7 @@ const settingsSchema = new mongoose.Schema(
       },
       notificationEmail: {
         type: String,
-        default: "admin@iclstreetwear.com",
+        default: "admin@brelisstreetwear.com",
         trim: true,
       },
     },

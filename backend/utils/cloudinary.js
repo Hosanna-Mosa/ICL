@@ -18,7 +18,7 @@ cloudinary.config({
  */
 export const uploadImage = async (
   imageData,
-  folder = "icl-products",
+  folder = "brelis-products",
   options = {}
 ) => {
   try {
@@ -64,7 +64,7 @@ export const uploadImage = async (
  * @param {string} folder - Cloudinary folder name
  * @returns {Promise<Array>} Array of upload results
  */
-export const uploadMultipleImages = async (images, folder = "icl-products") => {
+export const uploadMultipleImages = async (images, folder = "brelis-products") => {
   const uploadPromises = images.map((imageData, index) => {
     const options = {
       public_id: `${folder}-${Date.now()}-${index}`,

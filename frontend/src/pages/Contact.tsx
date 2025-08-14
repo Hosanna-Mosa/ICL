@@ -155,12 +155,12 @@ const Contact: React.FC = () => {
                     Follow us for latest drops and style inspiration
                   </p>
                   <a 
-                    href="https://instagram.com/icl_streetwear" 
+                    href="https://instagram.com/brelis_streetwear" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-primary hover:text-primary/80 font-medium text-sm"
                   >
-                    @icl_streetwear
+                                          @brelis_streetwear
                   </a>
                 </div>
               </div>
@@ -176,10 +176,10 @@ const Contact: React.FC = () => {
                     For detailed inquiries and business partnerships
                   </p>
                   <a 
-                    href="mailto:hello@iclstreetwear.com"
+                    href="mailto:hello@brelisstreetwear.com"
                     className="text-primary hover:text-primary/80 font-medium text-sm"
                   >
-                    hello@iclstreetwear.com
+                                          hello@brelisstreetwear.com
                   </a>
                 </div>
               </div>
@@ -195,7 +195,7 @@ const Contact: React.FC = () => {
                     Visit our design studio and warehouse
                   </p>
                   <address className="text-primary text-sm not-italic">
-                    ICL Streetwear Studio<br />
+                    BRELIS Streetwear Studio<br />
                     Block A, Sector 15<br />
                     Noida, UP 201301<br />
                     India

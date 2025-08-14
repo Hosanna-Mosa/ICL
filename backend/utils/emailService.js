@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 // Direct Gmail credentials (App Password)
 const GMAIL_USER = "laptoptest7788@gmail.com";
 const GMAIL_APP_PASSWORD = "uqfiabjkiqudrgdw";
-const FROM_ADDRESS = "ICL Streetwear <laptoptest7788@gmail.com>";
+const FROM_ADDRESS = "BRELIS Streetwear <laptoptest7788@gmail.com>";
 
 // Explicit Gmail SMTP transport
 const transporter = nodemailer.createTransport({

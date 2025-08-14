@@ -252,7 +252,7 @@ orderSchema.statics.generateOrderNumber = function () {
   const random = Math.floor(Math.random() * 1000)
     .toString()
     .padStart(3, "0");
-  return `ICL${timestamp}${random}`;
+      return `BRELIS${timestamp}${random}`;
 };
 
 // Method to update order status

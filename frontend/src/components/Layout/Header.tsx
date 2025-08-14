@@ -110,8 +110,13 @@ const Header: React.FC = () => {
             to="/" 
             className="flex items-center space-x-2 group"
           >
+            <img 
+              src="/Brelis-01.jpg" 
+              alt="BRELIS Logo" 
+              className="h-8 w-auto transition-transform duration-300 group-hover:scale-105"
+            />
             <div className="text-2xl lg:text-3xl font-montserrat font-black tracking-tighter transition-transform duration-300 group-hover:scale-105">
-              ICL
+              BRELIS
             </div>
           </Link>
 

@@ -10,14 +10,14 @@ const Footer: React.FC = () => {
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="text-3xl font-montserrat font-black tracking-tighter">
-              ICL
+              BRELIS
             </div>
             <p className="text-sm text-primary-foreground/80 max-w-xs">
               Urban Spirit. Elite Streetwear.
             </p>
             <div className="flex space-x-4">
               <a 
-                href="https://instagram.com/icl.streetwear" 
+                href="https://instagram.com/brelis.streetwear" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 hover:text-accent transition-colors duration-300"
@@ -35,7 +35,7 @@ const Footer: React.FC = () => {
                 <MessageCircle size={20} />
               </a>
               <a 
-                href="mailto:hello@icl.in" 
+                href="mailto:hello@brelis.in" 
                 className="p-2 hover:text-accent transition-colors duration-300"
                 aria-label="Email us"
               >
@@ -92,7 +92,7 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-primary-foreground/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="text-sm text-primary-foreground/60">
-            © 2024 ICL. All rights reserved.
+            © 2024 BRELIS. All rights reserved.
           </div>
           <div className="flex space-x-6 text-sm text-primary-foreground/60">
             <Link to="/privacy" className="hover:text-primary-foreground transition-colors duration-300">

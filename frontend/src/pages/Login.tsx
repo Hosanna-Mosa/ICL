@@ -158,7 +158,7 @@ const Login: React.FC = () => {
           <div className="bg-card p-8 shadow-soft">
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold text-foreground mb-2">Welcome Back</h1>
-              <p className="text-muted-foreground">Sign in to your ICL account</p>
+              <p className="text-muted-foreground">Sign in to your BRELIS account</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">

@@ -102,7 +102,7 @@ const Register: React.FC = () => {
                 Create Account
               </h1>
               <p className="text-muted-foreground">
-                Join the ICL streetwear community
+                Join the BRELIS streetwear community
               </p>
             </div>
 
