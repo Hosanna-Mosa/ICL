@@ -1,8 +1,19 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Instagram, MessageCircle, Mail } from 'lucide-react';
 
 const Footer: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleNavigation = (path: string) => {
+    // Scroll to top smoothly before navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Small delay to ensure scroll completes before navigation
+    setTimeout(() => {
+      navigate(path);
+    }, 100);
+  };
+
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 lg:px-8 py-12 lg:py-16">
@@ -44,64 +55,45 @@ const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Shop Links */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium tracking-widest uppercase">SHOP</h3>
-            <ul className="space-y-2 text-sm text-primary-foreground/80">
-              <li><Link to="/shop/new-drops" className="hover:text-primary-foreground transition-colors duration-300">New Drops</Link></li>
-              <li><Link to="/shop/hoodies" className="hover:text-primary-foreground transition-colors duration-300">Hoodies</Link></li>
-              <li><Link to="/shop/tees" className="hover:text-primary-foreground transition-colors duration-300">Oversized Tees</Link></li>
-              <li><Link to="/shop/bottoms" className="hover:text-primary-foreground transition-colors duration-300">Bottoms</Link></li>
-              <li><Link to="/shop/accessories" className="hover:text-primary-foreground transition-colors duration-300">Accessories</Link></li>
-            </ul>
-          </div>
+                                           {/* Shop Links */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium tracking-widest uppercase">SHOP</h3>
+              <ul className="space-y-2 text-sm text-primary-foreground/80">
+                <li><button onClick={() => handleNavigation('/shop?category=new')} className="hover:text-primary-foreground transition-colors duration-300 text-left">New Drops</button></li>
+                <li><button onClick={() => handleNavigation('/shop?category=hoodies')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Hoodies</button></li>
+                <li><button onClick={() => handleNavigation('/shop?category=tshirts')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Oversized Tees</button></li>
+                <li><button onClick={() => handleNavigation('/shop?category=pants')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Bottoms</button></li>
+                <li><button onClick={() => handleNavigation('/shop?category=accessories')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Accessories</button></li>
+              </ul>
+            </div>
 
-          {/* Support Links */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium tracking-widest uppercase">SUPPORT</h3>
-            <ul className="space-y-2 text-sm text-primary-foreground/80">
-              <li><Link to="/size-guide" className="hover:text-primary-foreground transition-colors duration-300">Size Guide</Link></li>
-              <li><Link to="/shipping" className="hover:text-primary-foreground transition-colors duration-300">Shipping Info</Link></li>
-              <li><Link to="/returns" className="hover:text-primary-foreground transition-colors duration-300">Returns</Link></li>
-              <li><Link to="/faq" className="hover:text-primary-foreground transition-colors duration-300">FAQ</Link></li>
-              <li><Link to="/contact" className="hover:text-primary-foreground transition-colors duration-300">Contact Us</Link></li>
-            </ul>
-          </div>
+                                           {/* Support Links */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium tracking-widest uppercase">SUPPORT</h3>
+              <ul className="space-y-2 text-sm text-primary-foreground/80">
+                <li><button onClick={() => handleNavigation('/size-guide')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Size Guide</button></li>
+                <li><button onClick={() => handleNavigation('/shipping')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Shipping Info</button></li>
+                <li><button onClick={() => handleNavigation('/returns')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Returns</button></li>
+                <li><button onClick={() => handleNavigation('/faq')} className="hover:text-primary-foreground transition-colors duration-300 text-left">FAQ</button></li>
+                <li><button onClick={() => handleNavigation('/contact')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Contact Us</button></li>
+              </ul>
+            </div>
 
-          {/* Newsletter */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium tracking-widest uppercase">STAY UPDATED</h3>
-            <p className="text-sm text-primary-foreground/80">
-              Get exclusive drops and early access to new collections.
-            </p>
-            <form className="space-y-3">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="w-full bg-primary-foreground/10 border border-primary-foreground/20 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-300"
-              />
-              <button 
-                type="submit"
-                className="w-full btn-accent text-sm py-2"
-              >
-                SUBSCRIBE
-              </button>
-            </form>
-          </div>
+
         </div>
 
         <div className="border-t border-primary-foreground/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="text-sm text-primary-foreground/60">
             © 2024 BRELIS. All rights reserved.
           </div>
-          <div className="flex space-x-6 text-sm text-primary-foreground/60">
-            <Link to="/privacy" className="hover:text-primary-foreground transition-colors duration-300">
-              Privacy Policy
-            </Link>
-            <Link to="/terms" className="hover:text-primary-foreground transition-colors duration-300">
-              Terms of Service
-            </Link>
-          </div>
+                     <div className="flex space-x-6 text-sm text-primary-foreground/60">
+             <button onClick={() => handleNavigation('/privacy')} className="hover:text-primary-foreground transition-colors duration-300">
+               Privacy Policy
+             </button>
+             <button onClick={() => handleNavigation('/terms')} className="hover:text-primary-foreground transition-colors duration-300">
+               Terms of Service
+             </button>
+           </div>
         </div>
 
         {/* Special Notices */}
