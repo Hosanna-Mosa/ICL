@@ -10,6 +10,7 @@ import {
   searchProducts,
   getRelatedProducts,
   getBestSellers,
+  getCategoryStats,
 } from "../controllers/productController.js";
 import { protect, authorize } from "../middlewares/auth.js";
 import {
@@ -27,6 +28,7 @@ router.get("/featured", getFeaturedProducts);
 router.get("/bestsellers", getBestSellers);
 router.get("/category/:category", validatePagination, getProductsByCategory);
 router.get("/search", validateProductSearch, searchProducts);
+router.get("/categories/stats", getCategoryStats);
 router.get("/:id", validateId, getProduct);
 router.get("/:id/related", validateId, getRelatedProducts);
 

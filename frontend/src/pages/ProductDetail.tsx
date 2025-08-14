@@ -790,9 +790,9 @@ const ProductDetail = () => {
         </div>
       </main>
 
-      {/* Sticky Add to Cart - Desktop and Mobile */}
+      {/* Sticky Add to Cart - Mobile Only */}
       <div
-        className={`fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-50 transition-transform duration-300 ${
+        className={`fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-50 transition-transform duration-300 lg:hidden ${
           isScrolled ? "translate-y-0" : "translate-y-full"
         }`}
       >

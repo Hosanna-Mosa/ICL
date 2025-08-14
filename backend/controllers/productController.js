@@ -454,3 +454,93 @@ export const getRelatedProducts = asyncHandler(async (req, res) => {
     },
   });
 });
+
+// @desc    Get category statistics with product counts and best-selling products
+// @route   GET /api/products/categories/stats
+// @access  Public
+export const getCategoryStats = asyncHandler(async (req, res) => {
+  try {
+    // Get category breakdown with product counts
+    const categoryStats = await Product.aggregate([
+      {
+        $match: { isActive: true }
+      },
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+          totalSold: { $sum: "$totalSold" },
+          avgRating: { $avg: "$rating" }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    // Get best-selling product for each category
+    const categoryBestSellers = await Product.aggregate([
+      {
+        $match: { 
+          isActive: true,
+          totalSold: { $gt: 0 } // Only products that have been sold
+        }
+      },
+      {
+        $sort: { totalSold: -1, rating: -1 }
+      },
+      {
+        $group: {
+          _id: "$category",
+          bestSeller: { $first: "$$ROOT" }
+        }
+      },
+      {
+        $project: {
+          category: "$_id",
+          bestSeller: {
+            _id: "$bestSeller._id",
+            name: "$bestSeller.name",
+            images: "$bestSeller.images",
+            basePrice: "$bestSeller.basePrice",
+            salePrice: "$bestSeller.salePrice",
+            totalSold: "$bestSeller.totalSold",
+            rating: "$bestSeller.rating"
+          }
+        }
+      }
+    ]);
+
+    // Combine the data
+    const categories = categoryStats.map(stat => {
+      const bestSeller = categoryBestSellers.find(bs => bs.category === stat._id);
+      return {
+        category: stat._id,
+        count: stat.count,
+        totalSold: stat.totalSold || 0,
+        avgRating: Math.round((stat.avgRating || 0) * 10) / 10,
+        bestSeller: bestSeller?.bestSeller || null
+      };
+    });
+
+    console.log("Category statistics fetched", {
+      totalCategories: categories.length,
+      categories: categories.map(c => ({ category: c.category, count: c.count }))
+    });
+
+    res.json({
+      success: true,
+      data: {
+        categories,
+        totalCategories: categories.length
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching category statistics:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch category statistics",
+      error: error.message
+    });
+  }
+});

@@ -193,6 +193,11 @@ export const productsAPI = {
   getBestSellers: async (limit = 8) => {
     return await apiRequest(`/products/bestsellers?limit=${limit}`);
   },
+
+  // Get category statistics
+  getCategoryStats: async () => {
+    return await apiRequest("/products/categories/stats");
+  },
 };
 
 // Cart API functions
