@@ -74,7 +74,10 @@ const Cart: React.FC = () => {
 
   // Calculate shipping based on subtotal
   const shipping = cart && cart.subtotal > 2000 ? 0 : 150;
-  const total = cart ? cart.total + shipping : 0;
+  // Calculate GST (18%) on subtotal after discounts
+  const subtotalAfterDiscounts = cart ? cart.subtotal - (cart.discountAmount || 0) - (cart.coinsDiscount || 0) : 0;
+  const gstAmount = Math.round(subtotalAfterDiscounts * 0.18);
+  const total = cart ? subtotalAfterDiscounts + gstAmount + shipping : 0;
 
   // Show loading state
   if (loading) {
@@ -295,6 +298,11 @@ const Cart: React.FC = () => {
                       <span>-₹{cart.coinsDiscount.toLocaleString()}</span>
                     </div>
                   )}
+                  
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">GST (18%)</span>
+                    <span className="text-foreground">₹{gstAmount.toLocaleString()}</span>
+                  </div>
                   
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
