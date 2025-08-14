@@ -52,7 +52,7 @@ const Login = () => {
     if (success) {
       toast({
         title: 'Welcome back!',
-        description: 'Successfully logged in to ICL Admin Panel.',
+        description: 'Successfully logged in to BRELIS Admin Panel.',
       });
     } else {
       toast({
@@ -171,7 +171,7 @@ const Login = () => {
             <div>
               <CardTitle className="text-2xl font-semibold">Admin Login</CardTitle>
               <CardDescription className="text-muted-foreground">
-                Access the ICL Streetwear management panel
+                Access the BRELIS Streetwear management panel
               </CardDescription>
             </div>
           </CardHeader>
@@ -190,7 +190,7 @@ const Login = () => {
                   onChange={handleChange}
                   required
                   className="h-12 bg-input/50 border-border/50 focus:border-primary transition-colors"
-                  placeholder="admin@iclstreetwear.com"
+                  placeholder="admin@brelisstreetwear.com"
                 />
               </div>
 
@@ -253,7 +253,7 @@ const Login = () => {
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
-                Demo credentials: admin@iclstreetwear.com / admin123
+                Demo credentials: admin@brelisstreetwear.com / admin123
               </p>
             </div>
           </CardContent>
@@ -277,7 +277,7 @@ const Login = () => {
                   type="email"
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
-                  placeholder="admin@iclstreetwear.com"
+                  placeholder="admin@brelisstreetwear.com"
                   required
                   disabled={forgotLoading}
                 />

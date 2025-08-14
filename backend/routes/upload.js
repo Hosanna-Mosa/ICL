@@ -13,7 +13,7 @@ router.post(
   protect,
   authorize("admin"),
   asyncHandler(async (req, res) => {
-    const { imageData, folder = "icl-products" } = req.body;
+    const { imageData, folder = "brelis-products" } = req.body;
 
     if (!imageData) {
       return res.status(400).json({
@@ -53,7 +53,7 @@ router.post(
   protect,
   authorize("admin"),
   asyncHandler(async (req, res) => {
-    const { images, folder = "icl-products" } = req.body;
+    const { images, folder = "brelis-products" } = req.body;
 
     if (!images || !Array.isArray(images) || images.length === 0) {
       return res.status(400).json({

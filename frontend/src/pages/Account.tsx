@@ -182,7 +182,33 @@ const Account: React.FC = () => {
     }
   };
 
-  
+  // Handle cancel order
+  const handleCancelOrder = async (orderId) => {
+    try {
+      const response = await ordersAPI.cancelOrder(orderId);
+      if (response.success) {
+        toast({ title: 'Order Cancelled', description: 'Your order has been cancelled successfully.' });
+        fetchOrders();
+      } else {
+        toast({ title: 'Error', description: response.message || 'Failed to cancel order', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: error.message || 'Failed to cancel order', variant: 'destructive' });
+    }
+  };
+
+  // Order details dialog state
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
+
+  // Handle view order details
+  const handleViewOrderDetails = (orderId: string) => {
+    const order = orders.find(o => o._id === orderId);
+    if (order) {
+      setSelectedOrder(order);
+      setOrderDetailsOpen(true);
+    }
+  };
 
   const fetchAddresses = async () => {
     try {
@@ -617,8 +643,8 @@ const Account: React.FC = () => {
                 </h1>
                 <p className="text-muted-foreground">
                   {isLoginMode
-                    ? "Sign in to access your ICL account"
-                    : "Join the ICL streetwear community"}
+                            ? "Sign in to access your BRELIS account"
+        : "Join the BRELIS streetwear community"}
                 </p>
               </div>
 
@@ -1529,12 +1555,305 @@ const Account: React.FC = () => {
               </div>
             </TabsContent>
           </Tabs>
-        </div>
-      </div>
+                 </div>
+       </div>
 
-      <Footer />
-    </div>
-  );
-};
+       {/* Order Details Dialog */}
+       <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
+         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+           {selectedOrder && (
+             <>
+               <DialogHeader>
+                 <DialogTitle className="flex items-center gap-2">
+                   <Package className="w-5 h-5" />
+                   Order Details - #{selectedOrder.orderNumber}
+                 </DialogTitle>
+                 <DialogDescription>
+                   Complete order information and transaction details
+                 </DialogDescription>
+               </DialogHeader>
+
+               <div className="space-y-6">
+                 {/* Order Header */}
+                 <div className="bg-muted/50 p-4 rounded-lg">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div>
+                       <h3 className="font-semibold text-foreground mb-2">Order Information</h3>
+                       <div className="space-y-1 text-sm">
+                         <div className="flex justify-between">
+                           <span className="text-muted-foreground">Order ID:</span>
+                           <span className="font-medium">{selectedOrder._id}</span>
+                         </div>
+                         <div className="flex justify-between">
+                           <span className="text-muted-foreground">Order Number:</span>
+                           <span className="font-medium">#{selectedOrder.orderNumber}</span>
+                         </div>
+                         <div className="flex justify-between">
+                           <span className="text-muted-foreground">Order Date:</span>
+                           <span className="font-medium">
+                             {new Date(selectedOrder.createdAt).toLocaleDateString('en-US', {
+                               year: 'numeric',
+                               month: 'long',
+                               day: 'numeric',
+                               hour: '2-digit',
+                               minute: '2-digit'
+                             })}
+                           </span>
+                         </div>
+                         <div className="flex justify-between">
+                           <span className="text-muted-foreground">Status:</span>
+                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                             selectedOrder.status === "delivered"
+                               ? "bg-green-100 text-green-800"
+                               : selectedOrder.status === "cancelled"
+                               ? "bg-red-100 text-red-800"
+                               : selectedOrder.status === "shipped"
+                               ? "bg-blue-100 text-blue-800"
+                               : selectedOrder.status === "processing"
+                               ? "bg-purple-100 text-purple-800"
+                               : selectedOrder.status === "confirmed"
+                               ? "bg-indigo-100 text-indigo-800"
+                               : "bg-yellow-100 text-yellow-800"
+                           }`}>
+                             {selectedOrder.statusDisplay || selectedOrder.status}
+                           </span>
+                         </div>
+                         {selectedOrder.trackingNumber && (
+                           <div className="flex justify-between">
+                             <span className="text-muted-foreground">Tracking:</span>
+                             <span className="font-medium">{selectedOrder.trackingNumber}</span>
+                           </div>
+                         )}
+                       </div>
+                     </div>
+                     <div>
+                       <h3 className="font-semibold text-foreground mb-2">Payment Information</h3>
+                       <div className="space-y-1 text-sm">
+                         <div className="flex justify-between">
+                           <span className="text-muted-foreground">Payment Method:</span>
+                           <span className="font-medium capitalize">
+                             {selectedOrder.payment?.method === 'cod' ? 'Cash on Delivery' : selectedOrder.payment?.method?.toUpperCase()}
+                           </span>
+                         </div>
+                         <div className="flex justify-between">
+                           <span className="text-muted-foreground">Payment Status:</span>
+                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                             selectedOrder.payment?.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                           }`}>
+                             {selectedOrder.payment?.status || 'Pending'}
+                           </span>
+                         </div>
+                         {selectedOrder.payment?.transactionId && (
+                           <div className="flex justify-between">
+                             <span className="text-muted-foreground">Transaction ID:</span>
+                             <span className="font-medium text-xs">{selectedOrder.payment.transactionId}</span>
+                           </div>
+                         )}
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* Order Items */}
+                 <div>
+                   <h3 className="font-semibold text-foreground mb-3">Order Items</h3>
+                   <div className="space-y-3">
+                     {selectedOrder.items.map((item, index) => (
+                       <div key={index} className="flex gap-4 p-3 bg-muted/30 rounded-lg">
+                         <div className="w-20 h-20 bg-muted overflow-hidden rounded">
+                           <img
+                             src={item.product?.images?.[0]?.url || '/placeholder.svg'}
+                             alt={item.name}
+                             className="w-full h-full object-cover"
+                           />
+                         </div>
+                         <div className="flex-1">
+                           <h4 className="font-medium text-foreground">{item.name}</h4>
+                           <div className="grid grid-cols-2 gap-4 mt-2 text-sm">
+                             <div>
+                               <span className="text-muted-foreground">Size:</span>
+                               <span className="ml-2 font-medium">{item.size}</span>
+                             </div>
+                             <div>
+                               <span className="text-muted-foreground">Quantity:</span>
+                               <span className="ml-2 font-medium">{item.quantity}</span>
+                             </div>
+                             <div>
+                               <span className="text-muted-foreground">Price:</span>
+                               <span className="ml-2 font-medium">₹{item.price.toLocaleString()}</span>
+                             </div>
+                             <div>
+                               <span className="text-muted-foreground">Total:</span>
+                               <span className="ml-2 font-medium">₹{(item.price * item.quantity).toLocaleString()}</span>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+
+                 {/* Coin Transaction Details */}
+                 {selectedOrder.coinsUsed > 0 && (
+                   <div>
+                     <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                       <Coins className="w-4 h-4" />
+                       Coin Transaction Details
+                     </h3>
+                     <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                       <div className="space-y-2 text-sm">
+                         <div className="flex justify-between">
+                           <span className="text-muted-foreground">Coins Used:</span>
+                           <span className="font-medium text-yellow-700">{selectedOrder.coinsUsed} coins</span>
+                         </div>
+                         <div className="flex justify-between">
+                           <span className="text-muted-foreground">Discount Applied:</span>
+                           <span className="font-medium text-yellow-700">-₹{selectedOrder.coinsUsed}</span>
+                         </div>
+                         <div className="text-xs text-muted-foreground mt-2">
+                           💡 Coins are automatically deducted from your balance when the order is placed
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 )}
+
+                 {/* Pricing Breakdown */}
+                 <div>
+                   <h3 className="font-semibold text-foreground mb-3">Pricing Breakdown</h3>
+                   <div className="bg-muted/30 p-4 rounded-lg">
+                     <div className="space-y-2 text-sm">
+                       <div className="flex justify-between">
+                         <span className="text-muted-foreground">Subtotal:</span>
+                         <span className="font-medium">₹{selectedOrder.subtotal.toLocaleString()}</span>
+                       </div>
+                       {selectedOrder.shippingCost > 0 && (
+                         <div className="flex justify-between">
+                           <span className="text-muted-foreground">Shipping Cost:</span>
+                           <span className="font-medium">₹{selectedOrder.shippingCost}</span>
+                         </div>
+                       )}
+                       {selectedOrder.coinsUsed > 0 && (
+                         <div className="flex justify-between text-yellow-700">
+                           <span>Coins Discount:</span>
+                           <span className="font-medium">-₹{selectedOrder.coinsUsed}</span>
+                         </div>
+                       )}
+                       <div className="flex justify-between pt-2 border-t border-border">
+                         <span className="font-semibold text-foreground">Total Amount:</span>
+                         <span className="font-bold text-foreground">₹{selectedOrder.total.toLocaleString()}</span>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* Shipping Address */}
+                 {selectedOrder.shippingAddress && (
+                   <div>
+                     <h3 className="font-semibold text-foreground mb-3">Shipping Address</h3>
+                     <div className="bg-muted/30 p-4 rounded-lg">
+                       <div className="text-sm">
+                         <div className="font-medium text-foreground">
+                           {selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}
+                         </div>
+                         <div className="text-muted-foreground mt-1">
+                           {selectedOrder.shippingAddress.phone}
+                         </div>
+                         <div className="text-muted-foreground mt-1">
+                           {selectedOrder.shippingAddress.street}
+                         </div>
+                         <div className="text-muted-foreground">
+                           {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}
+                         </div>
+                         <div className="text-muted-foreground">
+                           {selectedOrder.shippingAddress.country}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 )}
+
+                 {/* Order Timeline */}
+                 <div>
+                   <h3 className="font-semibold text-foreground mb-3">Order Timeline</h3>
+                   <div className="space-y-3">
+                     <div className="flex items-start gap-3">
+                       <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                       <div className="flex-1">
+                         <div className="text-sm font-medium text-foreground">Order Placed</div>
+                         <div className="text-xs text-muted-foreground">
+                           {new Date(selectedOrder.createdAt).toLocaleDateString('en-US', {
+                             year: 'numeric',
+                             month: 'long',
+                             day: 'numeric',
+                             hour: '2-digit',
+                             minute: '2-digit'
+                           })}
+                         </div>
+                       </div>
+                     </div>
+                     {selectedOrder.status !== 'pending' && (
+                       <div className="flex items-start gap-3">
+                         <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                         <div className="flex-1">
+                           <div className="text-sm font-medium text-foreground">Order Confirmed</div>
+                           <div className="text-xs text-muted-foreground">
+                             Order has been confirmed and is being processed
+                           </div>
+                         </div>
+                       </div>
+                     )}
+                     {['shipped', 'delivered'].includes(selectedOrder.status) && (
+                       <div className="flex items-start gap-3">
+                         <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                         <div className="flex-1">
+                           <div className="text-sm font-medium text-foreground">Order Shipped</div>
+                           <div className="text-xs text-muted-foreground">
+                             {selectedOrder.trackingNumber ? `Tracking: ${selectedOrder.trackingNumber}` : 'Package is on its way'}
+                           </div>
+                         </div>
+                       </div>
+                     )}
+                     {selectedOrder.status === 'delivered' && (
+                       <div className="flex items-start gap-3">
+                         <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                         <div className="flex-1">
+                           <div className="text-sm font-medium text-foreground">Order Delivered</div>
+                           <div className="text-xs text-muted-foreground">
+                             Package has been successfully delivered
+                           </div>
+                         </div>
+                       </div>
+                     )}
+                   </div>
+                 </div>
+               </div>
+
+               <DialogFooter className="mt-6">
+                 <Button variant="outline" onClick={() => setOrderDetailsOpen(false)}>
+                   Close
+                 </Button>
+                 {selectedOrder.status === "delivered" && (
+                   <Button
+                     variant="outline"
+                     className="text-yellow-600 border-yellow-200 hover:bg-yellow-50"
+                     onClick={() => {
+                       setOrderDetailsOpen(false);
+                       handleRequestReturn(selectedOrder._id);
+                     }}
+                   >
+                     Request Return
+                   </Button>
+                 )}
+               </DialogFooter>
+             </>
+           )}
+         </DialogContent>
+       </Dialog>
+
+       <Footer />
+     </div>
+   );
+ };
 
 export default Account;

@@ -22,7 +22,7 @@ const BrandStory: React.FC = () => {
             
             <div className="space-y-4 text-foreground/80 leading-relaxed">
               <p>
-                Born from the concrete jungles and neon-lit streets, ICL represents the evolution of streetwear. 
+                Born from the concrete jungles and neon-lit streets, BRELIS represents the evolution of streetwear. 
                 We don't just make clothes – we craft statements.
               </p>
               <p>
@@ -31,7 +31,7 @@ const BrandStory: React.FC = () => {
               </p>
               <p>
                 From oversized silhouettes that speak to comfort and confidence, to premium fabrics that stand the 
-                test of time – ICL is where authenticity meets aspiration.
+                test of time – BRELIS is where authenticity meets aspiration.
               </p>
             </div>
 
@@ -70,7 +70,7 @@ const BrandStory: React.FC = () => {
             <div className="relative group">
               <img 
                 src={lookbookImage}
-                alt="ICL Brand Story"
+                alt="BRELIS Brand Story"
                 className="w-full aspect-[4/5] object-cover object-center shadow-strong transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
@@ -78,10 +78,10 @@ const BrandStory: React.FC = () => {
               {/* Floating Quote */}
               <div className="absolute bottom-6 left-6 right-6 bg-background/95 backdrop-blur-sm p-4 lg:p-6">
                 <blockquote className="text-sm lg:text-base font-medium italic">
-                  "Fashion fades, but style is eternal. ICL is about creating pieces that transcend trends."
+                  "Fashion fades, but style is eternal. BRELIS is about creating pieces that transcend trends."
                 </blockquote>
                 <cite className="text-xs text-muted-foreground mt-2 block not-italic">
-                  — ICL Design Team
+                  — BRELIS Design Team
                 </cite>
               </div>
             </div>

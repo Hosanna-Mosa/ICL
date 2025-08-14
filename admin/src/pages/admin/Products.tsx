@@ -127,7 +127,7 @@ const AddProductDialog: React.FC<{ onCreated: () => void }> = ({
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<string>("hoodies");
   const [subcategory, setSubcategory] = useState("");
-  const [brand, setBrand] = useState("ICL");
+  const [brand, setBrand] = useState("BRELIS");
   const [basePrice, setBasePrice] = useState<string>("");
   const [salePrice, setSalePrice] = useState<string>("");
   const [coinsEarned, setCoinsEarned] = useState<string>("");
@@ -151,7 +151,7 @@ const AddProductDialog: React.FC<{ onCreated: () => void }> = ({
     setDescription("");
     setCategory("hoodies");
     setSubcategory("");
-    setBrand("ICL");
+    setBrand("BRELIS");
     setBasePrice("");
     setSalePrice("");
     setCoinsEarned("");
@@ -857,7 +857,7 @@ const EditProductDialog: React.FC<{
       setDescription(product.description || "");
       setCategory(product.category || "hoodies");
       setSubcategory(product.subcategory || "");
-      setBrand(product.brand || "ICL");
+      setBrand(product.brand || "BRELIS");
       setBasePrice(String(product.basePrice || ""));
       setSalePrice(product.salePrice ? String(product.salePrice) : "");
       setCoinsEarned(product.coinsEarned ? String(product.coinsEarned) : "");
@@ -902,7 +902,7 @@ const EditProductDialog: React.FC<{
     setDescription("");
     setCategory("hoodies");
     setSubcategory("");
-    setBrand("ICL");
+    setBrand("BRELIS");
     setBasePrice("");
     setSalePrice("");
     setCoinsEarned("");

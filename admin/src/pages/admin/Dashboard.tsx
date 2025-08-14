@@ -205,7 +205,7 @@ const Dashboard = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
-          Overview of your ICL Streetwear business performance
+          Overview of your BRELIS Streetwear business performance
         </p>
       </div>
 

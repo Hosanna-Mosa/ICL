@@ -13,8 +13,13 @@ export const Logo: React.FC<LogoProps> = ({ className = '', size = 'md' }) => {
   };
 
   return (
-    <div className={`font-bold tracking-tight ${sizeClasses[size]} ${className}`}>
-      <span className="bg-gradient-primary bg-clip-text text-transparent">ICL</span>
+    <div className={`font-bold tracking-tight flex items-center ${sizeClasses[size]} ${className}`}>
+      <img 
+        src="/Brelis-01.jpg" 
+        alt="BRELIS Logo" 
+        className="h-6 w-auto mr-2"
+      />
+      <span className="bg-gradient-primary bg-clip-text text-transparent">BRELIS</span>
       <span className="text-foreground ml-1">Streetwear</span>
     </div>
   );

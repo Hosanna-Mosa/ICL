@@ -157,7 +157,7 @@ const FeaturedProducts: React.FC = () => {
             FEATURED DROPS
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Hand-picked pieces that define the ICL aesthetic. Limited quantities, maximum impact.
+            Hand-picked pieces that define the BRELIS aesthetic. Limited quantities, maximum impact.
           </p>
         </div>
 

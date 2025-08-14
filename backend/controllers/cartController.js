@@ -249,10 +249,25 @@ export const removeCoupon = asyncHandler(async (req, res) => {
 export const applyCoinsDiscount = asyncHandler(async (req, res) => {
   const { coinsUsed } = req.body;
 
-  if (coinsUsed <= 0) {
+  if (coinsUsed < 0) {
     return res.status(400).json({
       success: false,
       message: "Invalid coins amount",
+    });
+  }
+
+  // If coinsUsed is 0, remove coins discount
+  if (coinsUsed === 0) {
+    const cart = await Cart.getOrCreateCart(req.user.id);
+    await cart.removeCoinsDiscount();
+    await cart.populate("items.product");
+    
+    console.log("Coins discount removed", { userId: req.user.id });
+    
+    return res.json({
+      success: true,
+      message: "Coins discount removed successfully",
+      data: { cart },
     });
   }
 

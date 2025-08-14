@@ -96,9 +96,9 @@ const Settings = () => {
   
   // Settings state
   const [general, setGeneral] = useState<GeneralSettings>({
-    storeName: 'ICL Streetwear',
+          storeName: 'BRELIS Streetwear',
     storeDescription: 'Premium streetwear fashion brand',
-    contactEmail: 'contact@iclstreetwear.com',
+          contactEmail: 'contact@brelisstreetwear.com',
     contactPhone: '+91 9999999999',
     address: '123 Fashion Street',
     city: 'Mumbai',
@@ -125,7 +125,7 @@ const Settings = () => {
     emailPort: 587,
     emailUser: '',
     emailPass: '',
-    emailFrom: 'ICL Streetwear <noreply@iclstreetwear.com>',
+          emailFrom: 'BRELIS Streetwear <noreply@brelisstreetwear.com>',
     emailSecure: false
   });
   
@@ -152,7 +152,7 @@ const Settings = () => {
     orderNotifications: true,
     userNotifications: true,
     systemNotifications: true,
-    notificationEmail: 'admin@iclstreetwear.com'
+          notificationEmail: 'admin@brelisstreetwear.com'
   });
 
   const { toast } = useToast();

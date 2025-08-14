@@ -8,7 +8,7 @@ const About: React.FC = () => {
     {
       year: '2020',
       title: 'Brand Launch',
-      description: 'ICL was born from the streets, bringing authentic urban culture to premium streetwear.'
+      description: 'BRELIS was born from the streets, bringing authentic urban culture to premium streetwear.'
     },
     {
       year: '2021',
@@ -40,7 +40,7 @@ const About: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <div className="mb-12 text-center">
-            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">ABOUT ICL</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">ABOUT BRELIS</h1>
           </div>
           
           {/* Two Column Layout */}
@@ -52,7 +52,7 @@ const About: React.FC = () => {
                   Our Story
                 </h2>
                 <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                  ICL was born from the vibrant streets of India, where culture meets creativity and tradition blends with rebellion. We recognized that streetwear wasn't just clothing—it was a language, a movement, a way of life.
+                  BRELIS was born from the vibrant streets of India, where culture meets creativity and tradition blends with rebellion. We recognized that streetwear wasn't just clothing—it was a language, a movement, a way of life.
                 </p>
                 <p className="text-muted-foreground text-lg leading-relaxed">
                   Our mission is to create premium streetwear that speaks to the urban soul. Every piece is designed with meticulous attention to detail, using high-quality materials that stand the test of time and trend cycles.
@@ -98,7 +98,7 @@ const About: React.FC = () => {
               <div className="aspect-[4/5] overflow-hidden bg-muted">
                 <img 
                   src={heroImage} 
-                  alt="ICL Brand" 
+                  alt="BRELIS Brand" 
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -163,10 +163,10 @@ const About: React.FC = () => {
             Founder's Message
           </h2>
           <blockquote className="text-xl text-muted-foreground leading-relaxed italic mb-8">
-            "ICL isn't just a brand—it's a movement. We're building more than clothing; we're creating a community where authenticity meets style, where the streets inspire the studio, and where every piece tells a story of urban culture."
+            "BRELIS isn't just a brand—it's a movement. We're building more than clothing; we're creating a community where authenticity meets style, where the streets inspire the studio, and where every piece tells a story of urban culture."
           </blockquote>
           <div className="text-foreground font-medium">
-            — The ICL Team
+            — The BRELIS Team
           </div>
         </div>
       </section>

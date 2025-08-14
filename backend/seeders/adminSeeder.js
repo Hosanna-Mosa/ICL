@@ -18,9 +18,9 @@ export const seedAdmin = async () => {
   try {
     await connectDB();
 
-    const firstName = process.env.ADMIN_FIRST_NAME || "ICL";
+    const firstName = process.env.ADMIN_FIRST_NAME || "BRELIS";
     const lastName = process.env.ADMIN_LAST_NAME || "Admin";
-    const email = process.env.ADMIN_EMAIL || "admin@iclstreetwear.com";
+    const email = process.env.ADMIN_EMAIL || "admin@brelisstreetwear.com";
     const password = process.env.ADMIN_PASSWORD || "admin123";
     const phone = process.env.ADMIN_PHONE || "9999999999";
 
