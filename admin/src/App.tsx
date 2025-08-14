@@ -14,7 +14,6 @@ import Orders from "./pages/admin/Orders";
 import Users from "./pages/admin/Users";
 import Lookbook from "./pages/admin/Lookbook";
 import Coins from "./pages/admin/Coins";
-import Settings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
 import BackToTop from "@/components/ui/back-to-top";
 
@@ -47,7 +46,6 @@ const App = () => (
               <Route path="users" element={<Users />} />
               <Route path="lookbook" element={<Lookbook />} />
               <Route path="coins" element={<Coins />} />
-              <Route path="settings" element={<Settings />} />
             </Route>
             
             {/* Catch all route */}

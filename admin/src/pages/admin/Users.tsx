@@ -54,16 +54,17 @@ const Users = () => {
     fetchUsers();
   }, []);
 
+  const [allUsers, setAllUsers] = useState<UserType[]>([]);
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const response = await adminUsersAPI.list({
-        limit: 100, // Get more users for better stats
-        role: roleFilter !== 'all' ? roleFilter : undefined,
-        search: searchTerm || undefined,
+        limit: 1000, // Get all users for local filtering
       });
       
       if (response.success && response.data?.users) {
+        setAllUsers(response.data.users);
         setUsers(response.data.users);
       } else {
         throw new Error('Failed to fetch users');
@@ -80,22 +81,24 @@ const Users = () => {
     }
   };
 
-  // Refetch users when filters change
+  // Filter users locally based on search term and role filter
   useEffect(() => {
-    if (!loading) {
-      fetchUsers();
-    }
-  }, [roleFilter, searchTerm]);
+    const filteredUsers = allUsers.filter(user => {
+      const matchesSearch = searchTerm === '' || 
+        user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.phone && user.phone.includes(searchTerm));
+      
+      const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+      
+      return matchesSearch && matchesRole;
+    });
+    
+    setUsers(filteredUsers);
+  }, [searchTerm, roleFilter, allUsers]);
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-    
-    return matchesSearch && matchesRole;
-  });
+
 
   const updateCoinsBalance = async (userId: string, amount: number, action: 'add' | 'remove') => {
     try {
@@ -292,7 +295,7 @@ const Users = () => {
       {/* Users Table */}
       <Card className="bg-card/50 backdrop-blur border-border/50">
         <CardHeader>
-          <CardTitle>Users ({filteredUsers.length})</CardTitle>
+          <CardTitle>Users ({users.length})</CardTitle>
           <CardDescription>
             Registered customers and administrators
           </CardDescription>
@@ -312,7 +315,7 @@ const Users = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <TableRow key={user._id} className="border-border/50">
                     <TableCell>
                       <div className="flex items-center space-x-3">

@@ -213,17 +213,7 @@ export const adminCoinsAPI = {
   getStats: async () => apiRequest(`/admin/coins/stats`),
 };
 
-// ----- Settings (admin) -----
-export const adminSettingsAPI = {
-  getAll: async () => apiRequest(`/settings`),
-  getBySection: async (section) => apiRequest(`/settings/${section}`),
-  updateSection: async (section, data) => apiRequest(`/settings/${section}`, { method: "PUT", body: data }),
-  updateMultiple: async (data) => apiRequest(`/settings`, { method: "PUT", body: data }),
-  reset: async (section) => apiRequest(`/settings/reset${section ? `?section=${section}` : ''}`, { method: "POST" }),
-  testConnection: async (type) => apiRequest(`/settings/test-connection`, { method: "POST", body: { type } }),
-  export: async () => apiRequest(`/settings/export`),
-  import: async (data) => apiRequest(`/settings/import`, { method: "POST", body: data }),
-};
+
 
 // ----- Expose common utilities -----
 export const adminApiUtils = {
@@ -244,7 +234,6 @@ const adminApi = {
   users: adminUsersAPI,
   lookbook: adminLookbookAPI,
   coins: adminCoinsAPI,
-  settings: adminSettingsAPI,
   utils: adminApiUtils,
   request: apiRequest,
   baseUrl: API_BASE_URL,

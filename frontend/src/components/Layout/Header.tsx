@@ -108,16 +108,21 @@ const Header: React.FC = () => {
           {/* Logo */}
           <Link 
             to="/" 
-            className="flex items-center space-x-2 group"
+            className="flex items-center justify-center space-x-3 group"
           >
-            <img 
-              src="/Brelis-01.jpg" 
-              alt="BRELIS Logo" 
-              className="h-8 w-auto transition-transform duration-300 group-hover:scale-105"
-            />
-            <div className="text-2xl lg:text-3xl font-montserrat font-black tracking-tighter transition-transform duration-300 group-hover:scale-105">
-              BRELIS
-            </div>
+                         <div className="relative flex items-center -mt-1">
+               <img 
+                 src="/brelin-01.png" 
+                 alt="BRELIS Logo" 
+                 className="h-12 lg:h-16 w-auto transition-transform duration-300 group-hover:scale-105 object-contain"
+                 style={{
+                   filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
+                 }}
+               />
+             </div>
+                         <div className="text-2xl lg:text-3xl font-montserrat font-black tracking-tighter transition-transform duration-300 group-hover:scale-105 flex items-center mt-3">
+               BRELIS
+             </div>
           </Link>
 
           {/* Desktop Navigation (Right) */}
