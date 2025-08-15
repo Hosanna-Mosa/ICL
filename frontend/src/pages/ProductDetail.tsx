@@ -36,6 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useReviewLinking } from "@/hooks/useReviewLinking";
 import Reviews from "@/components/Reviews/Reviews";
 import ProductReviews from "@/components/Reviews/ProductReviews";
+import { ProductDetailSkeleton } from "@/components/skeletons";
 
 // Mock product images
 import heroImage from "@/assets/hero-image.jpg";
@@ -342,22 +343,7 @@ const ProductDetail = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-20">
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-muted-foreground">
-                Loading product details...
-              </p>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!currentProduct) {

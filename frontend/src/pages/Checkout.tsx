@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ordersAPI, userAPI, paymentAPI } from "@/utils/api";
 import { Link, useNavigate } from "react-router-dom";
+import { CheckoutSkeleton } from "@/components/skeletons";
 
 const Checkout: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<
@@ -24,7 +25,7 @@ const Checkout: React.FC = () => {
   >("razorpay");
   const [useCoins, setUseCoins] = useState(false);
   const [userCoins, setUserCoins] = useState(0);
-  const [coinsToUse, setCoinsToUse] = useState(100);
+  const [coinsToUse, setCoinsToUse] = useState(0);
   const [loadingCoins, setLoadingCoins] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -63,13 +64,20 @@ const Checkout: React.FC = () => {
     }
   }, [isAuthenticated]);
 
+  // Note: Do not auto-apply or auto-remove coins here to avoid loops/log spam
+
   // Keep coins toggle in sync with cart state
   useEffect(() => {
-    setUseCoins((cart?.coinsUsed || 0) > 0);
-    if (cart?.coinsUsed) {
+    const cartHasCoins = (cart?.coinsUsed || 0) > 0;
+    setUseCoins(cartHasCoins);
+    if (cartHasCoins && cart?.coinsUsed) {
       setCoinsToUse(cart.coinsUsed);
-    }
-  }, [cart?.coinsUsed]);
+         } else if (!cartHasCoins) {
+       // Reset local state when cart has no coins
+       setUseCoins(false);
+       setCoinsToUse(0);
+     }
+  }, [cart?.coinsUsed, cart?.coinsDiscount]);
 
   // Load saved addresses
   useEffect(() => {
@@ -94,11 +102,7 @@ const Checkout: React.FC = () => {
       const response = await userAPI.getUserCoins();
       if (response.success) {
         setUserCoins(response.data.coins);
-        // If user has coins and none are currently used, set default amount
-        if (response.data.coins > 0 && !cart?.coinsUsed) {
-          const defaultCoins = Math.min(100, response.data.coins);
-          setCoinsToUse(defaultCoins);
-        }
+        // Don't automatically set default coins - let user choose manually
       }
     } catch (error) {
       console.error("Error fetching user coins:", error);
@@ -116,7 +120,9 @@ const Checkout: React.FC = () => {
   const subtotal = cart?.subtotal || 0;
   // Shipping policy: free if subtotal > 2000 (aligns with backend)
   const shipping = cart && cart.subtotal > 2000 ? 0 : 150;
-  const coinDiscount = cart?.coinsDiscount || 0;
+  // Use local state for coins to ensure UI updates immediately
+  const coinsAreUsed = useCoins && (cart?.coinsUsed || 0) > 0;
+  const coinDiscount = coinsAreUsed ? cart?.coinsDiscount || 0 : 0;
   // Calculate GST (18%) on subtotal after coin discount
   const gstAmount = Math.round((subtotal - coinDiscount) * 0.18);
   const total = subtotal - coinDiscount + gstAmount + shipping;
@@ -392,18 +398,23 @@ const Checkout: React.FC = () => {
     }
   };
 
-  const handleCoinsToggle = async (checked: boolean) => {
+    const handleCoinsToggle = async (checked: boolean) => {
     setUseCoins(checked);
     try {
       if (checked) {
         // Apply the selected coin amount
         await applyCoinsDiscount(coinsToUse);
       } else {
+        // Remove coins discount and reset local state
         await removeCoinsDiscount();
+        setCoinsToUse(0); // Reset to 0
       }
     } catch (error) {
       // Re-sync if anything failed
       await refreshCart();
+      // Reset local state on error
+      setUseCoins(false);
+      setCoinsToUse(0);
     }
   };
 
@@ -415,6 +426,9 @@ const Checkout: React.FC = () => {
     } catch (error) {
       // Re-sync if anything failed
       await refreshCart();
+      // Reset local state on error
+      setUseCoins(false);
+      setCoinsToUse(0);
     }
   };
 
@@ -431,6 +445,9 @@ const Checkout: React.FC = () => {
     } catch (error) {
       // Re-sync if anything failed
       await refreshCart();
+      // Reset local state on error
+      setUseCoins(false);
+      setCoinsToUse(0);
       toast({
         title: "Error applying coins",
         description: "Failed to apply coins. Please try again.",
@@ -509,16 +526,16 @@ const Checkout: React.FC = () => {
 
       <div className="pt-32 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-6 lg:mb-8">
             Checkout
           </h1>
 
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
               {/* Shipping Details */}
-              <div className="space-y-8">
+              <div className="space-y-6 lg:space-y-8">
                 <div>
-                  <h2 className="text-xl font-bold text-foreground mb-6">
+                  <h2 className="text-xl font-bold text-foreground mb-4 lg:mb-6">
                     Shipping Details
                   </h2>
                   {/* Saved addresses list */}
@@ -531,88 +548,99 @@ const Checkout: React.FC = () => {
                         {addresses.map((a) => (
                           <div
                             key={a._id}
-                            className={`border rounded p-3 flex items-start justify-between ${
+                            className={`border rounded-lg p-4 transition-all duration-200 ${
                               selectedAddressId === a._id
-                                ? "border-primary bg-primary/5"
-                                : "border-border"
+                                ? "border-primary bg-primary/5 shadow-sm"
+                                : "border-border hover:border-border/60"
                             }`}
                           >
-                            <label className="flex items-start gap-3 cursor-pointer w-full">
-                              <input
-                                type="radio"
-                                name="selectedAddress"
-                                checked={selectedAddressId === a._id}
-                                onChange={() =>
-                                  !placingOrder && setSelectedAddressId(a._id)
-                                }
-                                disabled={placingOrder}
-                              />
-                              <div className="text-sm">
-                                <div className="font-medium text-foreground">
-                                  {a.firstName} {a.lastName} • {a.phone}
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                              <label className="flex items-start gap-3 cursor-pointer flex-1 min-w-0">
+                                <input
+                                  type="radio"
+                                  name="selectedAddress"
+                                  checked={selectedAddressId === a._id}
+                                  onChange={() =>
+                                    !placingOrder && setSelectedAddressId(a._id)
+                                  }
+                                  disabled={placingOrder}
+                                  className="mt-1 text-primary"
+                                />
+                                <div className="text-sm min-w-0 flex-1">
+                                  <div className="font-medium text-foreground mb-1 break-words">
+                                    {a.firstName} {a.lastName}
+                                  </div>
+                                  <div className="text-muted-foreground mb-1 break-words">
+                                    {a.phone}
+                                  </div>
+                                  <div className="text-muted-foreground text-xs leading-relaxed break-words">
+                                    {a.street}, {a.city}, {a.state} {a.zipCode}
+                                  </div>
                                 </div>
-                                <div className="text-muted-foreground">
-                                  {a.street}, {a.city}, {a.state} {a.zipCode}
-                                </div>
+                              </label>
+                              
+                              {/* Action buttons - responsive layout */}
+                              <div className="flex flex-col sm:flex-row gap-2 sm:ml-3 sm:flex-shrink-0">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    !placingOrder &&
+                                    handleUpdateAddress(a._id, {
+                                      isDefault: !a.isDefault,
+                                    })
+                                  }
+                                  disabled={placingOrder}
+                                  className="w-full sm:w-auto text-xs sm:text-sm px-3 py-2 h-auto"
+                                >
+                                  {a.isDefault ? "Default" : "Make Default"}
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    !placingOrder &&
+                                    (() => {
+                                      setEditingAddressId(a._id);
+                                      setFormData({
+                                        firstName: a.firstName,
+                                        lastName: a.lastName,
+                                        email: formData.email,
+                                        phone: a.phone,
+                                        address: a.street,
+                                        city: a.city,
+                                        state: a.state,
+                                        pincode: a.zipCode,
+                                      });
+                                    })()
+                                  }
+                                  disabled={placingOrder}
+                                  className="w-full sm:w-auto text-xs sm:text-sm px-3 py-2 h-auto"
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() =>
+                                    !placingOrder && handleDeleteAddress(a._id)
+                                  }
+                                  disabled={placingOrder}
+                                  className="w-full sm:w-auto text-xs sm:text-sm px-3 py-2 h-auto"
+                                >
+                                  Delete
+                                </Button>
                               </div>
-                            </label>
-                            <div className="flex gap-2 ml-3">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  !placingOrder &&
-                                  handleUpdateAddress(a._id, {
-                                    isDefault: !a.isDefault,
-                                  })
-                                }
-                                disabled={placingOrder}
-                              >
-                                {a.isDefault ? "Default" : "Make Default"}
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  !placingOrder &&
-                                  (() => {
-                                    setEditingAddressId(a._id);
-                                    setFormData({
-                                      firstName: a.firstName,
-                                      lastName: a.lastName,
-                                      email: formData.email,
-                                      phone: a.phone,
-                                      address: a.street,
-                                      city: a.city,
-                                      state: a.state,
-                                      pincode: a.zipCode,
-                                    });
-                                  })()
-                                }
-                                disabled={placingOrder}
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="sm"
-                                onClick={() =>
-                                  !placingOrder && handleDeleteAddress(a._id)
-                                }
-                                disabled={placingOrder}
-                              >
-                                Delete
-                              </Button>
                             </div>
                           </div>
                         ))}
                       </div>
 
                       {/* Add new address button */}
-                      <div className="pt-2">
+                      <div className="pt-3">
                         <Button
                           type="button"
                           variant="outline"
@@ -621,7 +649,7 @@ const Checkout: React.FC = () => {
                             !placingOrder && setShowAddAddressForm(true)
                           }
                           disabled={placingOrder}
-                          className="flex items-center gap-2 text-primary border-primary hover:bg-primary/5 hover:border-primary/80 transition-colors"
+                          className="w-full sm:w-auto flex items-center justify-center gap-2 text-primary border-primary hover:bg-primary/5 hover:border-primary/80 transition-all duration-200 py-3 px-4"
                         >
                           <svg
                             className="w-4 h-4"
@@ -671,7 +699,7 @@ const Checkout: React.FC = () => {
                           Edit Address
                         </h3>
                       )}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
                           <label className="block text-sm font-medium text-foreground mb-2">
                             First Name *
@@ -683,6 +711,7 @@ const Checkout: React.FC = () => {
                             onChange={handleInputChange}
                             required
                             disabled={placingOrder}
+                            className="w-full"
                           />
                         </div>
                         <div>
@@ -696,6 +725,7 @@ const Checkout: React.FC = () => {
                             onChange={handleInputChange}
                             required
                             disabled={placingOrder}
+                            className="w-full"
                           />
                         </div>
                       </div>
@@ -744,7 +774,7 @@ const Checkout: React.FC = () => {
                           />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-foreground mb-2">
                               City *
@@ -756,6 +786,7 @@ const Checkout: React.FC = () => {
                               onChange={handleInputChange}
                               required
                               disabled={placingOrder}
+                              className="w-full"
                             />
                           </div>
                           <div>
@@ -769,9 +800,10 @@ const Checkout: React.FC = () => {
                               onChange={handleInputChange}
                               required
                               disabled={placingOrder}
+                              className="w-full"
                             />
                           </div>
-                          <div>
+                          <div className="sm:col-span-2 lg:col-span-1">
                             <label className="block text-sm font-medium text-foreground mb-2">
                               PIN Code *
                             </label>
@@ -782,16 +814,18 @@ const Checkout: React.FC = () => {
                               onChange={handleInputChange}
                               required
                               disabled={placingOrder}
+                              className="w-full"
                             />
                           </div>
                         </div>
                       </div>
-                      <div className="mt-4 flex gap-3">
+                                            <div className="mt-6 flex flex-col sm:flex-row gap-3">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={handleSaveAddress}
                           disabled={placingOrder}
+                          className="w-full sm:w-auto order-2 sm:order-1"
                         >
                           Save Address
                         </Button>
@@ -814,6 +848,7 @@ const Checkout: React.FC = () => {
                               });
                             }}
                             disabled={placingOrder}
+                            className="w-full sm:w-auto order-1 sm:order-2"
                           >
                             Cancel
                           </Button>
@@ -825,7 +860,7 @@ const Checkout: React.FC = () => {
 
                 {/* Payment Method */}
                 <div>
-                  <h2 className="text-xl font-bold text-foreground mb-6">
+                  <h2 className="text-xl font-bold text-foreground mb-4 lg:mb-6">
                     Payment Method
                   </h2>
 
@@ -1036,7 +1071,7 @@ const Checkout: React.FC = () => {
                           <div className="space-y-3">
                             <div className="bg-white/50 border border-primary/20 rounded-lg p-3">
                               <label className="text-sm font-medium text-foreground mb-2 block">
-                                How many coins to use?
+                                How many coins to use? *
                               </label>
                               <div className="flex items-center gap-2">
                                 <Input
@@ -1049,8 +1084,11 @@ const Checkout: React.FC = () => {
                                   }
                                   className="flex-1 h-10 text-sm"
                                   disabled={placingOrder}
-                                  placeholder="Enter amount"
+                                  placeholder="Enter coins amount (1 coin = ₹1)"
                                 />
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  Enter the number of coins you want to use for discount
+                                </div>
                                 <Button
                                   type="button"
                                   onClick={handleCoinSubmit}
@@ -1062,16 +1100,20 @@ const Checkout: React.FC = () => {
                                   size="sm"
                                   className="h-10 px-4"
                                 >
-                                  Apply
+                                  Apply Coins
                                 </Button>
                               </div>
                               <div className="flex items-center justify-between mt-2">
                                 <span className="text-xs text-muted-foreground">
                                   Max: {Math.min(userCoins, subtotal)} coins
                                 </span>
-                                {coinsToUse > 0 && (
+                                {coinsToUse > 0 ? (
                                   <span className="text-sm font-semibold text-green-600">
                                     = ₹{coinsToUse.toLocaleString()} discount
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-muted-foreground">
+                                    Enter amount above to see discount
                                   </span>
                                 )}
                               </div>
@@ -1190,7 +1232,7 @@ const Checkout: React.FC = () => {
                     </div>
 
                     {/* Coin Discount */}
-                    {coinDiscount > 0 && (
+                    {coinsAreUsed && coinDiscount > 0 && (
                       <div className="flex justify-between items-center p-3 bg-green-50 border border-green-200 rounded-lg">
                         <div className="flex items-center gap-2">
                           <Coins className="w-4 h-4 text-green-600" />
@@ -1261,7 +1303,7 @@ const Checkout: React.FC = () => {
                     </div>
 
                     {/* Savings Summary */}
-                    {coinDiscount > 0 && (
+                    {coinsAreUsed && coinDiscount > 0 && (
                       <div className="mt-3 pt-3 border-t border-primary/20">
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-muted-foreground">

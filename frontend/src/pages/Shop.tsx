@@ -7,6 +7,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { productsAPI, userAPI } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { ShopSkeleton } from '@/components/skeletons';
 
 interface Product {
   _id: string;
@@ -279,6 +280,10 @@ const Shop: React.FC = () => {
       isNewProduct: product.isNewProduct,
       date: product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'No date'
     })));
+  }
+
+  if (loading) {
+    return <ShopSkeleton />;
   }
 
   return (

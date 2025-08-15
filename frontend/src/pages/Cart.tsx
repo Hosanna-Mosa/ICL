@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/UI/toast';
+import { CartSkeleton } from '@/components/skeletons';
 
 const Cart: React.FC = () => {
   const { cart, loading, removeFromCart, clearCart, addToCart, updateItemQuantity } = useCart();
@@ -75,24 +76,13 @@ const Cart: React.FC = () => {
   // Calculate shipping based on subtotal
   const shipping = cart && cart.subtotal > 2000 ? 0 : 150;
   // Calculate GST (18%) on subtotal after discounts
-  const subtotalAfterDiscounts = cart ? cart.subtotal - (cart.discountAmount || 0) - (cart.coinsDiscount || 0) : 0;
+  const subtotalAfterDiscounts = cart ? cart.subtotal - (cart.discountAmount || 0) - (cart.coinsUsed > 0 ? (cart.coinsDiscount || 0) : 0) : 0;
   const gstAmount = Math.round(subtotalAfterDiscounts * 0.18);
   const total = cart ? subtotalAfterDiscounts + gstAmount + shipping : 0;
 
   // Show loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="pt-32 pb-20 px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading your cart...</p>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <CartSkeleton />;
   }
 
   // Show sign-in prompt if not authenticated
@@ -292,7 +282,7 @@ const Cart: React.FC = () => {
                     </div>
                   )}
                   
-                  {cart.coinsDiscount > 0 && (
+                  {cart.coinsUsed > 0 && cart.coinsDiscount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Coins Discount</span>
                       <span>-₹{cart.coinsDiscount.toLocaleString()}</span>
