@@ -6,12 +6,7 @@ const Footer: React.FC = () => {
   const navigate = useNavigate();
 
   const handleNavigation = (path: string) => {
-    // Scroll to top smoothly before navigation
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Small delay to ensure scroll completes before navigation
-    setTimeout(() => {
-      navigate(path);
-    }, 100);
+    navigate(path);
   };
 
   return (
