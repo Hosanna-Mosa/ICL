@@ -145,7 +145,7 @@ const Header: React.FC = () => {
           <div className="flex items-center space-x-4">
             <Link 
               to="/wishlist" 
-              className="relative p-2 hover:text-accent transition-colors duration-300"
+              className="relative p-2 hover:text-accent transition-colors duration-300 hidden lg:inline-flex"
               aria-label="Wishlist"
             >
               <Heart size={20} />
@@ -157,7 +157,7 @@ const Header: React.FC = () => {
             </Link>
             <Link 
               to="/pocket" 
-              className="relative p-2 hover:text-accent transition-colors duration-300"
+              className="relative p-2 hover:text-accent transition-colors duration-300 hidden lg:inline-flex"
               aria-label="Pocket"
             >
               <div className="relative">
