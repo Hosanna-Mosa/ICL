@@ -28,9 +28,6 @@ export const Logo: React.FC<LogoProps> = ({ className = '', size = 'md' }) => {
         <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent font-black">
           BRELIS
         </span>
-        <span className="text-white text-sm font-medium">
-          Streetwear
-        </span>
       </div>
     </div>
   );
