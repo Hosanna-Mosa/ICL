@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   CreditCard,
-  Smartphone,
   Coins,
   ShoppingBag,
   Loader2,
@@ -21,7 +20,7 @@ import { CheckoutSkeleton } from "@/components/skeletons";
 
 const Checkout: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<
-    "razorpay" | "upi" | "cod"
+    "razorpay" | "cod"
   >("razorpay");
   const [useCoins, setUseCoins] = useState(false);
   const [userCoins, setUserCoins] = useState(0);
@@ -226,17 +225,50 @@ const Checkout: React.FC = () => {
 
     setPlacingOrder(true);
     try {
-      const shippingAddress = selectedAddressId
-        ? addresses.find((a) => a._id === selectedAddressId)
-        : {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            phone: formData.phone,
-            street: formData.address,
-            city: formData.city,
-            state: formData.state,
-            zipCode: formData.pincode,
+      let shippingAddress;
+      
+      if (selectedAddressId) {
+        // Use existing saved address
+        shippingAddress = addresses.find((a) => a._id === selectedAddressId);
+      } else {
+        // Create new address object from form data
+        shippingAddress = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          street: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.pincode,
+        };
+
+        // Auto-save the new address to user's account
+        try {
+          const addrToSave = {
+            ...shippingAddress,
+            isDefault: addresses.length === 0, // Make default if it's the first address
           };
+          
+          const saveResponse = await userAPI.addAddress(addrToSave);
+          if (saveResponse.success) {
+            // Update local addresses state
+            setAddresses(saveResponse.data.addresses);
+            toast({
+              title: "Address saved",
+              description: "Your shipping address has been saved to your account for future use",
+            });
+          }
+        } catch (saveError) {
+          // If saving fails, continue with order but show a warning
+          console.warn("Failed to save address:", saveError);
+          toast({
+            title: "Address not saved",
+            description: "Order will proceed but address won't be saved for future use",
+            variant: "destructive",
+          });
+        }
+      }
 
       if (paymentMethod === "razorpay") {
         // Handle Razorpay payment
@@ -374,6 +406,7 @@ const Checkout: React.FC = () => {
       const addr = {
         firstName: formData.firstName,
         lastName: formData.lastName,
+        email: formData.email,
         phone: formData.phone,
         street: formData.address,
         city: formData.city,
@@ -958,56 +991,7 @@ const Checkout: React.FC = () => {
                       )}
                     </div>
 
-                    {/* UPI Payment */}
-                    <div
-                      className={`border-2 rounded-lg p-4 transition-colors ${
-                        paymentMethod === "upi"
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-border/60"
-                      } ${
-                        placingOrder
-                          ? "opacity-50 cursor-not-allowed"
-                          : "cursor-pointer"
-                      }`}
-                      onClick={() => !placingOrder && setPaymentMethod("upi")}
-                    >
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value="upi"
-                          checked={paymentMethod === "upi"}
-                          onChange={() => setPaymentMethod("upi")}
-                          className="text-primary"
-                          disabled={placingOrder}
-                        />
-                        <Smartphone className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="font-medium text-foreground">
-                            UPI Payment
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Pay via PhonePe, GPay, Paytm • Free shipping
-                          </p>
-                        </div>
-                      </div>
-
-                      {paymentMethod === "upi" && (
-                        <div className="mt-4 p-4 bg-muted/30 rounded">
-                          <p className="text-sm text-muted-foreground mb-3">
-                            Scan QR code or pay via UPI ID
-                          </p>
-                          <div className="bg-white p-4 rounded inline-block">
-                            <div className="w-32 h-32 bg-gradient-to-br from-primary to-primary/60 rounded flex items-center justify-center">
-                              <CreditCard className="w-12 h-12 text-white" />
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            UPI ID: brelis@paytm
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                    
 
                     {/* COD Payment */}
                     <div
