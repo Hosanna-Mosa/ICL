@@ -137,13 +137,13 @@ export const AdminSidebar = () => {
 
         {/* User Section & Logout */}
         <div className="p-4 border-t border-sidebar-border space-y-4">
-          {!isCollapsed && user && (
+          {!isCollapsed && (
             <div className="px-2">
               <p className="text-sm text-sidebar-foreground font-medium truncate">
-                {user.name}
+                BRELIS Admin
               </p>
               <p className="text-xs text-sidebar-foreground/60 truncate">
-                {user.email}
+                {user?.email || 'admin@brelisstreetwear.com'}
               </p>
             </div>
           )}
