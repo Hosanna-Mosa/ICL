@@ -48,7 +48,7 @@ export const validateRegister = [
     .optional({ nullable: true, checkFalsy: false })
     .trim()
     .custom((value) => {
-      if (value && value !== '') {
+      if (value && value !== "") {
         if (!/^[0-9]{10}$/.test(value)) {
           throw new Error("Please provide a valid 10-digit phone number");
         }
@@ -211,7 +211,7 @@ export const validateOrder = [
     .matches(/^[0-9]{6}$/)
     .withMessage("Please provide a valid 6-digit zip code"),
   body("payment.method")
-    .isIn(["cod", "upi", "card", "wallet"])
+    .isIn(["cod", "upi", "card", "wallet", "razorpay"])
     .withMessage("Invalid payment method"),
   validate,
 ];
@@ -324,9 +324,7 @@ export const validateLookbook = [
     .trim()
     .isLength({ min: 5, max: 500 })
     .withMessage("Description must be between 5 and 500 characters"),
-  body("image")
-    .isURL()
-    .withMessage("Image must be a valid URL"),
+  body("image").isURL().withMessage("Image must be a valid URL"),
   body("products")
     .isArray({ min: 1 })
     .withMessage("At least one product is required"),
@@ -345,10 +343,7 @@ export const validateLookbook = [
     .optional()
     .isInt({ min: 0 })
     .withMessage("Sort order must be a non-negative integer"),
-  body("tags")
-    .optional()
-    .isArray()
-    .withMessage("Tags must be an array"),
+  body("tags").optional().isArray().withMessage("Tags must be an array"),
   body("tags.*")
     .optional()
     .trim()

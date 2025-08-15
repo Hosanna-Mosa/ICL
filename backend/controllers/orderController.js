@@ -62,11 +62,13 @@ export const createOrder = asyncHandler(async (req, res) => {
   }));
 
   // Calculate coins to be earned from assigned product coins
-  // Sum of each product's coinsEarned multiplied by quantity
   const coinsEarnedFromProducts = cart.items.reduce((sum, item) => {
     const productCoins = (item.product && item.product.coinsEarned) || 0;
     return sum + productCoins * item.quantity;
   }, 0);
+
+  const incomingPayment = payment || {};
+  const isGatewayCompleted = Boolean(incomingPayment.transactionId);
 
   // Create order
   const order = await Order.create({
@@ -77,16 +79,21 @@ export const createOrder = asyncHandler(async (req, res) => {
     payment: {
       method: payment.method,
       amount: cart.total + shippingCost,
-      status: payment.method === "cod" ? "pending" : "pending",
+      status: isGatewayCompleted ? "completed" : "pending",
+      gateway:
+        incomingPayment.gateway ||
+        (payment.method === "razorpay" ? "razorpay" : undefined),
+      transactionId: incomingPayment.transactionId,
+      gatewayResponse: incomingPayment.gatewayResponse,
     },
     subtotal: cart.subtotal,
     shippingCost,
     discountAmount: cart.discountAmount,
     coinsUsed: cart.coinsUsed,
     total: cart.total + shippingCost,
-    // If product-assigned coins exist, use them; otherwise the Order pre-save
-    // hook will fallback to percentage-based calculation.
-    ...(coinsEarnedFromProducts > 0 ? { coinsEarned: coinsEarnedFromProducts } : {}),
+    ...(coinsEarnedFromProducts > 0
+      ? { coinsEarned: coinsEarnedFromProducts }
+      : {}),
   });
 
   // Update product stock
@@ -98,8 +105,6 @@ export const createOrder = asyncHandler(async (req, res) => {
   // Update user coins if coins were used
   if (cart.coinsUsed > 0) {
     await req.user.redeemCoins(cart.coinsUsed);
-    
-    // Create coin transaction record
     await CoinTransaction.createRedeemedTransaction(
       req.user.id,
       cart.coinsUsed,
@@ -117,6 +122,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     orderNumber: order.orderNumber,
     userId: req.user.id,
     total: order.total,
+    paymentStatus: order.payment.status,
   });
 
   res.status(201).json({
@@ -130,7 +136,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     await sendEmail({
       to: req.user.email,
       subject: `Order Confirmation - ${order.orderNumber}`,
-      html: `<h2>Thank you for your order!</h2><p>Your order <b>${order.orderNumber}</b> has been placed successfully.</p>`
+      html: `<h2>Thank you for your order!</h2><p>Your order <b>${order.orderNumber}</b> has been placed successfully.</p>`,
     });
   } catch (e) {
     console.error("Failed to send order confirmation email", e);
@@ -248,31 +254,35 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     try {
       const user = await User.findById(order.user);
       if (!user) {
-        console.error(`User not found for order ${order.orderNumber} when processing delivery`);
+        console.error(
+          `User not found for order ${order.orderNumber} when processing delivery`
+        );
         return res.status(404).json({
           success: false,
           message: "User not found for this order",
         });
       }
-      
+
       // Check if transaction already exists to prevent duplicates
       const existingTransaction = await CoinTransaction.findOne({
         user: order.user,
         order: order._id,
-        type: 'earned',
-        description: 'Purchase completed'
+        type: "earned",
+        description: "Purchase completed",
       });
-      
+
       if (existingTransaction) {
-        console.log(`Transaction already exists for order ${order.orderNumber}, skipping coin credit`);
+        console.log(
+          `Transaction already exists for order ${order.orderNumber}, skipping coin credit`
+        );
       } else {
         // Add coins to user
         await user.addCoins(order.coinsEarned);
-        
+
         // Mark order as credited
         order.coinsCredited = true;
         await order.save();
-        
+
         // Create coin transaction record
         await CoinTransaction.createEarnedTransaction(
           order.user,
@@ -281,11 +291,16 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
           order.orderNumber,
           order._id
         );
-        
-        console.log(`Successfully credited ${order.coinsEarned} coins for delivered order ${order.orderNumber}`);
+
+        console.log(
+          `Successfully credited ${order.coinsEarned} coins for delivered order ${order.orderNumber}`
+        );
       }
     } catch (error) {
-      console.error(`Error processing coin credit for delivered order ${order.orderNumber}:`, error);
+      console.error(
+        `Error processing coin credit for delivered order ${order.orderNumber}:`,
+        error
+      );
       return res.status(500).json({
         success: false,
         message: "Error processing coin credit for delivery",
@@ -304,31 +319,37 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     try {
       const user = await User.findById(order.user);
       if (!user) {
-        console.error(`User not found for order ${order.orderNumber} when processing return`);
+        console.error(
+          `User not found for order ${order.orderNumber} when processing return`
+        );
         return res.status(404).json({
           success: false,
           message: "User not found for this order",
         });
       }
-      
+
       if (user.coins < order.coinsEarned) {
-        console.error(`Insufficient coins for user ${user.email} when processing return for order ${order.orderNumber}`);
+        console.error(
+          `Insufficient coins for user ${user.email} when processing return for order ${order.orderNumber}`
+        );
         return res.status(400).json({
           success: false,
           message: "User has insufficient coins to process return",
         });
       }
-      
+
       // Check if transaction already exists to prevent duplicates
       const existingTransaction = await CoinTransaction.findOne({
         user: order.user,
         order: order._id,
-        type: 'redeemed',
-        description: 'Order returned - coins debited'
+        type: "redeemed",
+        description: "Order returned - coins debited",
       });
-      
+
       if (existingTransaction) {
-        console.log(`Transaction already exists for order ${order.orderNumber}, skipping coin debit`);
+        console.log(
+          `Transaction already exists for order ${order.orderNumber}, skipping coin debit`
+        );
       } else {
         // Create coin transaction record for debit first (before debiting coins)
         await CoinTransaction.createRedeemedTransaction(
@@ -338,18 +359,23 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
           order.orderNumber,
           order._id
         );
-        
+
         // Debit coins from user
         await user.redeemCoins(order.coinsEarned);
-        
+
         // Mark order as debited
         order.coinsDebited = true;
         await order.save();
-        
-        console.log(`Successfully debited ${order.coinsEarned} coins for returned order ${order.orderNumber}`);
+
+        console.log(
+          `Successfully debited ${order.coinsEarned} coins for returned order ${order.orderNumber}`
+        );
       }
     } catch (error) {
-      console.error(`Error processing coin debit for returned order ${order.orderNumber}:`, error);
+      console.error(
+        `Error processing coin debit for returned order ${order.orderNumber}:`,
+        error
+      );
       return res.status(500).json({
         success: false,
         message: "Error processing coin debit for return",
@@ -376,7 +402,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     await sendEmail({
       to: user.email,
       subject: `Order Status Updated - ${order.orderNumber}`,
-      html: `<h2>Your order status has been updated</h2><p>Order <b>${order.orderNumber}</b> is now <b>${status}</b>.</p>`
+      html: `<h2>Your order status has been updated</h2><p>Order <b>${order.orderNumber}</b> is now <b>${status}</b>.</p>`,
     });
   } catch (e) {
     console.error("Failed to send order status update email", e);
@@ -438,7 +464,7 @@ export const cancelOrder = asyncHandler(async (req, res) => {
   if (order.coinsUsed > 0) {
     const user = await User.findById(order.user);
     await user.addCoins(order.coinsUsed);
-    
+
     // Create coin transaction record for refund
     await CoinTransaction.createEarnedTransaction(
       order.user,
@@ -469,17 +495,24 @@ export const cancelOrder = asyncHandler(async (req, res) => {
 export const requestReturn = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
   if (!order) {
-    return res.status(404).json({ success: false, message: 'Order not found' });
+    return res.status(404).json({ success: false, message: "Order not found" });
   }
   if (order.user.toString() !== req.user.id) {
-    return res.status(403).json({ success: false, message: 'Access denied' });
+    return res.status(403).json({ success: false, message: "Access denied" });
   }
-  if (order.status !== 'delivered') {
-    return res.status(400).json({ success: false, message: 'Only delivered orders can be returned' });
+  if (order.status !== "delivered") {
+    return res.status(400).json({
+      success: false,
+      message: "Only delivered orders can be returned",
+    });
   }
-  order.status = 'return_pending';
+  order.status = "return_pending";
   await order.save();
-  res.json({ success: true, message: 'Return requested. Awaiting admin approval.', data: { order } });
+  res.json({
+    success: true,
+    message: "Return requested. Awaiting admin approval.",
+    data: { order },
+  });
 });
 
 // @desc    Get all orders (Admin only)
@@ -533,10 +566,7 @@ export const getAllOrders = asyncHandler(async (req, res) => {
 export const getRecentOrders = asyncHandler(async (req, res) => {
   try {
     // Simple query without populate to test
-    const orders = await Order.find({})
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .lean(); // Use lean() for better performance
+    const orders = await Order.find({}).sort({ createdAt: -1 }).limit(5).lean(); // Use lean() for better performance
 
     console.log("Recent orders fetched for dashboard", {
       adminId: req.user.id,

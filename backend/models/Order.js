@@ -39,7 +39,7 @@ const paymentSchema = new mongoose.Schema(
     method: {
       type: String,
       required: true,
-      enum: ["cod", "upi", "card", "wallet"],
+      enum: ["cod", "upi", "card", "wallet", "razorpay"],
     },
     status: {
       type: String,
@@ -252,7 +252,7 @@ orderSchema.statics.generateOrderNumber = function () {
   const random = Math.floor(Math.random() * 1000)
     .toString()
     .padStart(3, "0");
-      return `BRELIS${timestamp}${random}`;
+  return `BRELIS${timestamp}${random}`;
 };
 
 // Method to update order status
