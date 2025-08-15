@@ -151,10 +151,16 @@ cartSchema.methods.updateItemQuantity = async function (
 
 // Method to remove item from cart
 cartSchema.methods.removeItem = async function (productId, size) {
-  console.log('removeItem called with:', { productId, size });
-  console.log('Before filtering - items count:', this.items.length);
-  console.log('Items before:', this.items.map(item => ({ product: item.product.toString(), size: item.size })));
-  
+  console.log("removeItem called with:", { productId, size });
+  console.log("Before filtering - items count:", this.items.length);
+  console.log(
+    "Items before:",
+    this.items.map((item) => ({
+      product: item.product.toString(),
+      size: item.size,
+    }))
+  );
+
   this.items = this.items.filter((item) => {
     const itemProductId =
       item.product && item.product._id
@@ -162,13 +168,19 @@ cartSchema.methods.removeItem = async function (productId, size) {
         : item.product.toString();
     return !(itemProductId === productId.toString() && item.size === size);
   });
-  
-  console.log('After filtering - items count:', this.items.length);
-  console.log('Items after:', this.items.map(item => ({ product: item.product.toString(), size: item.size })));
+
+  console.log("After filtering - items count:", this.items.length);
+  console.log(
+    "Items after:",
+    this.items.map((item) => ({
+      product: item.product.toString(),
+      size: item.size,
+    }))
+  );
 
   this.lastUpdated = new Date();
   const savedCart = await this.save();
-  console.log('Cart saved successfully, items count:', savedCart.items.length);
+  console.log("Cart saved successfully, items count:", savedCart.items.length);
   return savedCart;
 };
 
@@ -225,6 +237,11 @@ cartSchema.statics.getOrCreateCart = async function (userId) {
   if (!cart) {
     cart = new this({ user: userId, items: [] });
     await cart.save();
+  }
+
+  // Ensure products are populated
+  if (cart.items.length > 0 && !cart.items[0].product.name) {
+    cart = await this.findOne({ user: userId }).populate("items.product");
   }
 
   return cart;
