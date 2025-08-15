@@ -1,6 +1,9 @@
 import fetch from 'node-fetch';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+// Load environment variables
+require('dotenv').config();
+
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000/api';
 
 // Test data
 const testUser = {
