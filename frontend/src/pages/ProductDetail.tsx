@@ -201,6 +201,7 @@ const ProductDetail = () => {
         description: "Please sign in to save products to your wishlist",
         variant: "destructive",
       });
+      navigate("/register");
       return;
     }
 
@@ -287,6 +288,7 @@ const ProductDetail = () => {
         description: "Please sign in to add items to your cart",
         variant: "destructive",
       });
+      navigate("/register");
       return;
     }
 

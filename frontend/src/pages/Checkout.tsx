@@ -159,6 +159,7 @@ const Checkout: React.FC = () => {
       !selectedAddressId &&
       (!formData.firstName ||
         !formData.lastName ||
+        !formData.email ||
         !formData.phone ||
         !formData.address ||
         !formData.city ||
@@ -168,10 +169,49 @@ const Checkout: React.FC = () => {
       toast({
         title: "Address required",
         description:
-          "Please select a saved address or fill in the shipping details",
+          "Please select a saved address or fill in all shipping details including email",
         variant: "destructive",
       });
       return;
+    }
+
+    // Validate email format if provided
+    if (!selectedAddressId && formData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        toast({
+          title: "Invalid email",
+          description: "Please enter a valid email address",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Validate phone number format if provided
+    if (!selectedAddressId && formData.phone) {
+      const phoneRegex = /^[6-9]\d{9}$/;
+      if (!phoneRegex.test(formData.phone)) {
+        toast({
+          title: "Invalid phone number",
+          description: "Please enter a valid 10-digit Indian phone number",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Validate PIN code format if provided
+    if (!selectedAddressId && formData.pincode) {
+      const pincodeRegex = /^[1-9][0-9]{5}$/;
+      if (!pincodeRegex.test(formData.pincode)) {
+        toast({
+          title: "Invalid PIN code",
+          description: "Please enter a valid 6-digit PIN code",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     // Validate coins usage
