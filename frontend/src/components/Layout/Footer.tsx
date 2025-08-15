@@ -71,10 +71,8 @@ const Footer: React.FC = () => {
             <div className="space-y-4">
               <h3 className="text-sm font-medium tracking-widest uppercase">SUPPORT</h3>
               <ul className="space-y-2 text-sm text-primary-foreground/80">
-                <li><button onClick={() => handleNavigation('/size-guide')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Size Guide</button></li>
                 <li><button onClick={() => handleNavigation('/shipping')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Shipping Info</button></li>
                 <li><button onClick={() => handleNavigation('/returns')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Returns</button></li>
-                <li><button onClick={() => handleNavigation('/faq')} className="hover:text-primary-foreground transition-colors duration-300 text-left">FAQ</button></li>
                 <li><button onClick={() => handleNavigation('/contact')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Contact Us</button></li>
               </ul>
             </div>
