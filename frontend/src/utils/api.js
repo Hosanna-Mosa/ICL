@@ -2,12 +2,12 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 // Environment-based configuration
-const APP_CONFIG = {
-  name: import.meta.env.VITE_APP_NAME || "ICL Streetwear",
-  version: import.meta.env.VITE_APP_VERSION || "1.0.0",
-  enableAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === "true",
-  debugMode: import.meta.env.VITE_ENABLE_DEBUG_MODE === "true",
-};
+// const APP_CONFIG = {
+//   name: import.meta.env.VITE_APP_NAME || "ICL Streetwear",
+//   version: import.meta.env.VITE_APP_VERSION || "1.0.0",
+//   enableAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === "true",
+//   debugMode: import.meta.env.VITE_ENABLE_DEBUG_MODE === "true",
+// };
 
 // Helper function to get auth token from localStorage
 const getAuthToken = () => {

@@ -236,7 +236,9 @@ const Checkout: React.FC = () => {
   const handleRazorpayPayment = async (shippingAddress: any) => {
     try {
       // Ensure a valid Razorpay key is configured
-      const keyId = "rzp_test_R5DtKTSP8JHmK7";
+      const keyId =
+        (import.meta as any).env.VITE_RAZORPAY_KEY_ID ||
+        "rzp_test_R5DtKTSP8JHmK7";
       if (!keyId || typeof keyId !== "string" || !keyId.startsWith("rzp_")) {
         toast({
           title: "Razorpay key missing/invalid",
