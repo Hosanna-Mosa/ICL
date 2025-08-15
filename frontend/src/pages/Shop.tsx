@@ -544,30 +544,33 @@ const Shop: React.FC = () => {
 
               {/* Filter Summary */}
               {(selectedCategory !== 'All' || selectedSizes.length > 0 || selectedPriceRange) && (
-                <div className="mb-4 p-3 bg-muted/50 rounded-lg border border-border">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-sm">
-                      <span className="text-muted-foreground">Active filters:</span>
-                      {selectedCategory !== 'All' && (
-                        <span className="px-2 py-1 bg-accent/20 text-accent rounded text-xs">
-                          {categories.find(c => c.value === selectedCategory)?.label}
-                        </span>
-                      )}
-                      {selectedSizes.map(size => (
-                        <span key={size} className="px-2 py-1 bg-accent/20 text-accent rounded text-xs">
-                          Size: {size}
-                        </span>
-                      ))}
-                      {selectedPriceRange && (
-                        <span className="px-2 py-1 bg-accent/20 text-accent rounded text-xs">
-                          {selectedPriceRange}
-                        </span>
-                      )}
-
+                <div className="mb-4 p-4 bg-muted/50 rounded-lg border border-border">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCategory !== 'All' && (
+                          <span className="inline-flex items-center px-3 py-1.5 bg-accent/20 text-accent rounded-full text-xs font-medium border border-accent/30">
+                            {categories.find(c => c.value === selectedCategory)?.label}
+                          </span>
+                        )}
+                        {selectedSizes.map(size => (
+                          <span key={size} className="inline-flex items-center px-3 py-1.5 bg-accent/20 text-accent rounded-full text-xs font-medium border border-accent/30">
+                            Size: {size}
+                          </span>
+                        ))}
+                        {selectedPriceRange && (
+                          <span className="inline-flex items-center px-3 py-1.5 bg-accent/20 text-accent rounded-full text-xs font-medium border border-accent/30">
+                            {selectedPriceRange}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-sm text-muted-foreground">
-                      {sortedProducts.length} of {products.length} products
-                    </span>
+                    <div className="flex items-center justify-between sm:justify-end">
+                      <span className="text-sm text-muted-foreground font-medium">
+                        {sortedProducts.length} of {products.length} products
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}

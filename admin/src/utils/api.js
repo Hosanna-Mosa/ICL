@@ -4,8 +4,14 @@ const API_BASE_URL =
   import.meta.env.VITE_ADMIN_API_URL ||
   import.meta.env.VITE_API_URL ||
   "http://localhost:8000/api";
-//local host : "http://localhost:8000/api"
-//render host : "https://icl-zsbu.onrender.com/api"
+
+// Environment-based configuration for admin
+const ADMIN_CONFIG = {
+  name: import.meta.env.VITE_ADMIN_APP_NAME || "ICL Admin Panel",
+  version: import.meta.env.VITE_ADMIN_APP_VERSION || "1.0.0",
+  enableAnalytics: import.meta.env.VITE_ENABLE_ADMIN_ANALYTICS === "true",
+  debugMode: import.meta.env.VITE_ENABLE_DEBUG_MODE === "true",
+};
 // ----- LocalStorage keys (admin-specific) -----
 const ADMIN_TOKEN_KEY = "adminAuthToken";
 const ADMIN_USER_KEY = "adminUser";
