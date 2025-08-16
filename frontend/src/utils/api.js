@@ -94,10 +94,11 @@ export const authAPI = {
       body: JSON.stringify(userData),
     });
 
-    if (response.success) {
-      setAuthToken(response.data.token);
-      setUserData(response.data.user);
-    }
+    // Don't set token and user data automatically since user needs to verify email first
+    // if (response.success) {
+    //   setAuthToken(response.data.token);
+    //   setUserData(response.data.user);
+    // }
 
     return response;
   },
@@ -161,6 +162,21 @@ export const authAPI = {
     return await apiRequest("/auth/reset-password-otp", {
       method: "POST",
       body: JSON.stringify({ email, otp, password }),
+    });
+  },
+
+  // Verify email address
+  verifyEmail: async (token) => {
+    return await apiRequest(`/auth/verify-email/${token}`, {
+      method: "GET",
+    });
+  },
+
+  // Resend email verification
+  resendVerification: async (email) => {
+    return await apiRequest("/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify({ email }),
     });
   },
 };
@@ -462,6 +478,17 @@ export const userAPI = {
   },
 };
 
+// Contact API functions
+export const contactAPI = {
+  // Submit contact form
+  submitForm: async (formData) => {
+    return await apiRequest("/contact", {
+      method: "POST",
+      body: JSON.stringify(formData),
+    });
+  },
+};
+
 // Reviews API functions
 export const reviewsAPI = {
   // Get reviews for a product
@@ -542,6 +569,7 @@ export default {
   user: userAPI,
   lookbook: lookbookAPI,
   reviews: reviewsAPI,
+  contact: contactAPI,
 
   utils: apiUtils,
 };

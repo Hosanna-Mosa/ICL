@@ -19,21 +19,55 @@ export const register = asyncHandler(async (req, res) => {
     });
   }
 
-  // Create user
+  // Generate email verification token
+  const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+  const emailVerificationExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  // Create user with email verification token
   const user = await User.create({
     firstName,
     lastName,
     email,
     password,
     phone,
+    emailVerificationToken,
+    emailVerificationExpire,
   });
 
-  // Generate token
-  const token = generateToken(user._id);
+  // Send verification email
+  const verificationUrl = `${process.env.FRONTEND_URL || 'https://brelis.in'}/verify-email?token=${emailVerificationToken}`;
+  
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #333;">Welcome to BRELIS Streetwear!</h2>
+      <p>Hi ${firstName},</p>
+      <p>Thank you for registering with BRELIS Streetwear. To complete your registration, please verify your email address by clicking the button below:</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${verificationUrl}" style="background-color: #000; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Verify Email Address</a>
+      </div>
+      <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+      <p style="word-break: break-all; color: #666;">${verificationUrl}</p>
+      <p>This link will expire in 24 hours.</p>
+      <p>If you didn't create an account with BRELIS Streetwear, please ignore this email.</p>
+      <p>Best regards,<br>The BRELIS Team</p>
+    </div>
+  `;
 
-  // Update last login
-  user.lastLogin = new Date();
-  await user.save();
+  try {
+    await sendEmail({
+      to: email,
+      subject: "Verify Your Email - BRELIS Streetwear",
+      html: emailHtml,
+    });
+
+    console.log("Verification email sent successfully", {
+      userId: user._id,
+      email: user.email,
+    });
+  } catch (error) {
+    console.error("Failed to send verification email:", error);
+    // Don't fail registration if email fails, just log it
+  }
 
   console.log("User registered successfully", {
     userId: user._id,
@@ -42,7 +76,7 @@ export const register = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: "User registered successfully",
+    message: "Registration successful! Please check your email to verify your account.",
     data: {
       user: {
         id: user._id,
@@ -53,8 +87,8 @@ export const register = asyncHandler(async (req, res) => {
         role: user.role,
         coins: user.coins,
         fullName: user.fullName,
+        emailVerified: user.emailVerified,
       },
-      token,
     },
   });
 });
@@ -79,6 +113,14 @@ export const login = asyncHandler(async (req, res) => {
     return res.status(401).json({
       success: false,
       message: "Account is deactivated",
+    });
+  }
+
+  // Check if email is verified
+  if (!user.emailVerified) {
+    return res.status(401).json({
+      success: false,
+      message: "Please verify your email address before logging in. Check your inbox for a verification link.",
     });
   }
 
@@ -227,7 +269,7 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   user.resetPasswordExpire = Date.now() + 1000 * 60 * 30; // 30 minutes
   await user.save();
   // Send email
-  const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password/${resetToken}`;
+  const resetUrl = `${process.env.FRONTEND_URL || "https://brelis.in"}/reset-password/${resetToken}`;
   try {
     await sendEmail({
       to: user.email,
@@ -331,4 +373,122 @@ export const resetPasswordWithOtp = asyncHandler(async (req, res) => {
   user.resetPasswordOtpExpire = undefined;
   await user.save();
   res.json({ success: true, message: "Password reset successful" });
+});
+
+// @desc    Verify email address
+// @route   GET /api/auth/verify-email/:token
+// @access  Public
+export const verifyEmail = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+
+  // Find user with the verification token
+  const user = await User.findOne({
+    emailVerificationToken: token,
+    emailVerificationExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid or expired verification token",
+    });
+  }
+
+  // Mark email as verified
+  user.emailVerified = true;
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpire = undefined;
+  await user.save();
+
+  console.log("Email verified successfully", {
+    userId: user._id,
+    email: user.email,
+  });
+
+  res.json({
+    success: true,
+    message: "Email verified successfully! You can now log in to your account.",
+    data: {
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        emailVerified: user.emailVerified,
+      },
+    },
+  });
+});
+
+// @desc    Resend email verification
+// @route   POST /api/auth/resend-verification
+// @access  Public
+export const resendVerification = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  if (user.emailVerified) {
+    return res.status(400).json({
+      success: false,
+      message: "Email is already verified",
+    });
+  }
+
+  // Generate new verification token
+  const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+  const emailVerificationExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  user.emailVerificationToken = emailVerificationToken;
+  user.emailVerificationExpire = emailVerificationExpire;
+  await user.save();
+
+  // Send verification email
+  const verificationUrl = `${process.env.FRONTEND_URL || 'https://brelis.in'}/verify-email?token=${emailVerificationToken}`;
+  
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #333;">Verify Your Email - BRELIS Streetwear</h2>
+      <p>Hi ${user.firstName},</p>
+      <p>You requested a new verification email. To verify your email address, please click the button below:</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${verificationUrl}" style="background-color: #000; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Verify Email Address</a>
+      </div>
+      <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+      <p style="word-break: break-all; color: #666;">${verificationUrl}</p>
+      <p>This link will expire in 24 hours.</p>
+      <p>If you didn't request this email, please ignore it.</p>
+      <p>Best regards,<br>The BRELIS Team</p>
+    </div>
+  `;
+
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: "Verify Your Email - BRELIS Streetwear",
+      html: emailHtml,
+    });
+
+    console.log("Verification email resent successfully", {
+      userId: user._id,
+      email: user.email,
+    });
+
+    res.json({
+      success: true,
+      message: "Verification email sent successfully",
+    });
+  } catch (error) {
+    console.error("Failed to send verification email:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send verification email",
+    });
+  }
 });

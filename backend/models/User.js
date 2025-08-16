@@ -99,6 +99,8 @@ const userSchema = new mongoose.Schema(
     resetPasswordExpire: Date,
     resetPasswordOtp: String, // OTP for password reset
     resetPasswordOtpExpire: Date, // OTP expiry
+    emailVerificationToken: String, // Token for email verification
+    emailVerificationExpire: Date, // Email verification token expiry
   },
   {
     timestamps: true,

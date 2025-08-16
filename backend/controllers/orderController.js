@@ -10,7 +10,7 @@ import { sendEmail } from "../utils/emailService.js";
 // @route   POST /api/orders
 // @access  Private
 export const createOrder = asyncHandler(async (req, res) => {
-  const { shippingAddress, payment } = req.body;
+  const { shippingAddress, payment, coinsUsed } = req.body;
 
   // Get user cart
   const cart = await Cart.getOrCreateCart(req.user.id);
@@ -90,7 +90,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     subtotal: cart.subtotal,
     shippingCost,
     discountAmount: cart.discountAmount,
-    coinsUsed: cart.coinsUsed,
+    coinsUsed: coinsUsed || 0, // Use coinsUsed from request body, default to 0
     total: cart.total + shippingCost,
     ...(coinsEarnedFromProducts > 0
       ? { coinsEarned: coinsEarnedFromProducts }
@@ -102,13 +102,21 @@ export const createOrder = asyncHandler(async (req, res) => {
     const product = await Product.findById(item.product);
     await product.updateStock(item.size, item.quantity);
   }
-
+  console.log("coinsUsed from request:", coinsUsed);
   // Update user coins if coins were used
-  if (cart.coinsUsed > 0) {
-    await req.user.redeemCoins(cart.coinsUsed);
+  if (coinsUsed > 0) {
+    // Validate that user has sufficient coins before redeeming
+    if (req.user.coins < coinsUsed) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient coins to complete this order. Please remove coin discount or add more coins.",
+      });
+    }
+    
+    await req.user.redeemCoins(coinsUsed);
     await CoinTransaction.createRedeemedTransaction(
       req.user.id,
-      cart.coinsUsed,
+      coinsUsed,
       "Applied to order",
       order.orderNumber,
       order._id

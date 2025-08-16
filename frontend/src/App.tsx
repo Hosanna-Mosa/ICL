@@ -14,6 +14,7 @@ import Checkout from "./pages/Checkout";
 import Account from "./pages/Account";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
 import Wishlist from "./pages/Wishlist";
 import Pocket from "./pages/Pocket";
 import Privacy from "./pages/Privacy";
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/pocket" element={<Pocket />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />

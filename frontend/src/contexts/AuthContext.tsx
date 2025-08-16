@@ -98,7 +98,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authAPI.register(userData);
 
       if (response.success) {
-        setUser(response.data.user);
+        // Don't set user automatically since they need to verify email first
+        // setUser(response.data.user);
         return { success: true, message: response.message };
       } else {
         return { success: false, message: response.message };

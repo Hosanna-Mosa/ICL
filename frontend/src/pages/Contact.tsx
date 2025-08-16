@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
-import { MessageSquare, Instagram, Mail, MapPin } from 'lucide-react';
+import { MessageSquare, Instagram, Mail, MapPin, Loader2 } from 'lucide-react';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import { Button } from '@/components/UI/button';
 import { Input } from '@/components/UI/input';
 import { Textarea } from '@/components/UI/textarea';
+import { contactAPI } from '@/utils/api';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/UI/toaster';
 
 const Contact: React.FC = () => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -20,10 +25,40 @@ const Contact: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
+    
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await contactAPI.submitForm(formData);
+      
+      if (response.success) {
+        toast({
+          title: "Message sent successfully!",
+          description: "We'll get back to you soon. Check your email for confirmation.",
+          variant: "default",
+        });
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          message: ''
+        });
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      toast({
+        title: "Failed to send message",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -105,8 +140,15 @@ const Contact: React.FC = () => {
                 />
               </div>
               
-              <Button type="submit" className="w-full">
-                Send Message
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  'Send Message'
+                )}
               </Button>
             </form>
           </div>
@@ -155,12 +197,12 @@ const Contact: React.FC = () => {
                     Follow us for latest drops and style inspiration
                   </p>
                   <a 
-                    href="https://instagram.com/brelis_streetwear" 
+                    href="https://www.instagram.com/brelis.club/?igsh=aGlzOHFiMmxicGh0&utm_source=qr#" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-primary hover:text-primary/80 font-medium text-sm"
                   >
-                                          @brelis_streetwear
+                                          @brelis.club
                   </a>
                 </div>
               </div>
@@ -228,7 +270,7 @@ const Contact: React.FC = () => {
 
       {/* WhatsApp Fixed Button */}
       <a
-        href="https://wa.me/919876543210"
+        href="https://wa.me/919381032323"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-colors z-50"
@@ -238,6 +280,7 @@ const Contact: React.FC = () => {
       </a>
 
       <Footer />
+      <Toaster />
     </div>
   );
 };
