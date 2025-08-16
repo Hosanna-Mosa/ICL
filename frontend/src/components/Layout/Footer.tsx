@@ -32,7 +32,7 @@ const Footer: React.FC = () => {
                 <Instagram size={20} />
               </a>
               <a 
-                href="https://wa.me/919876543210" 
+                href="https://wa.me/919381032323" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 hover:text-accent transition-colors duration-300"
@@ -41,7 +41,7 @@ const Footer: React.FC = () => {
                 <MessageCircle size={20} />
               </a>
               <a 
-                href="mailto:hello@brelis.in" 
+                href="mailto:brelisbrelis1@gmail.com" 
                 className="p-2 hover:text-accent transition-colors duration-300"
                 aria-label="Email us"
               >
