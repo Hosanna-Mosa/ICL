@@ -417,6 +417,13 @@ export const userAPI = {
     return await apiRequest("/user/coins");
   },
 
+  // Add welcome coins for first-time buyers
+  addWelcomeCoins: async () => {
+    return await apiRequest("/user/welcome-coins", {
+      method: "POST",
+    });
+  },
+
   // Redeem coins
   redeemCoins: async (amount) => {
     return await apiRequest("/user/coins/redeem", {

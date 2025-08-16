@@ -75,8 +75,8 @@ const Cart: React.FC = () => {
 
   // Calculate shipping based on subtotal
   const shipping = cart && cart.subtotal > 2000 ? 0 : 150;
-  // Calculate GST (18%) on subtotal after discounts
-  const subtotalAfterDiscounts = cart ? cart.subtotal - (cart.discountAmount || 0) - (cart.coinsUsed > 0 ? (cart.coinsDiscount || 0) : 0) : 0;
+  // Calculate GST (18%) on subtotal after discounts (excluding coins on cart page)
+  const subtotalAfterDiscounts = cart ? cart.subtotal - (cart.discountAmount || 0) : 0;
   const gstAmount = Math.round(subtotalAfterDiscounts * 0.18);
   const total = cart ? subtotalAfterDiscounts + gstAmount + shipping : 0;
 
@@ -282,12 +282,7 @@ const Cart: React.FC = () => {
                     </div>
                   )}
                   
-                  {cart.coinsUsed > 0 && cart.coinsDiscount > 0 && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Coins Discount</span>
-                      <span>-₹{cart.coinsDiscount.toLocaleString()}</span>
-                    </div>
-                  )}
+                  {/* Coins discount is hidden on cart page - only shown during checkout */}
                   
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">GST (18%)</span>
@@ -326,6 +321,9 @@ const Cart: React.FC = () => {
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Get 100 coins worth ₹100 off on your first order!
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Note: Coin discounts are applied during checkout, not shown in cart view.
                   </p>
                 </div>
                 

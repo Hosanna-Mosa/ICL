@@ -1319,7 +1319,7 @@ const Account: React.FC = () => {
 
                   {/* Address Information Section */}
                   <div>
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                       <h2 className="text-xl font-bold text-foreground">
                         Delivery Addresses
                       </h2>
@@ -1339,7 +1339,7 @@ const Account: React.FC = () => {
                           });
                           setShowAddAddress(true);
                         }}
-                        className="flex items-center gap-2 btn-hover-lift"
+                        className="flex items-center gap-2 btn-hover-lift w-full sm:w-auto justify-center"
                       >
                         <Plus className="w-4 h-4" />
                         Add Address
@@ -1374,7 +1374,7 @@ const Account: React.FC = () => {
                             });
                             setShowAddAddress(true);
                           }} 
-                          className="btn-hero"
+                          className="btn-hero w-full sm:w-auto"
                         >
                           Add First Address
                         </Button>
@@ -1382,43 +1382,55 @@ const Account: React.FC = () => {
                     ) : (
                       <div className="space-y-4">
                         {addresses.map((address) => (
-                          <div key={address._id} className="bg-card p-6 shadow-soft border-l-4 border-primary">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <h3 className="font-semibold text-foreground">
+                          <div key={address._id} className="bg-card p-4 sm:p-6 shadow-soft border-l-4 border-primary">
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+                                  <h3 className="font-semibold text-foreground text-base sm:text-lg">
                                     {address.firstName} {address.lastName}
                                   </h3>
                                   {address.isDefault && (
-                                    <span className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded-full">
+                                    <span className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded-full w-fit">
                                       Default
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-muted-foreground mb-1">{address.phone}</p>
-                                <p className="text-foreground mb-1">{address.street}</p>
-                                <p className="text-foreground">
-                                  {address.city}, {address.state} {address.zipCode}
-                                </p>
-                                <p className="text-muted-foreground">{address.country}</p>
+                                <div className="space-y-1 text-sm">
+                                  <p className="text-muted-foreground flex items-center gap-2">
+                                    <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
+                                    {address.phone}
+                                  </p>
+                                  <p className="text-foreground flex items-center gap-2">
+                                    <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
+                                    {address.street}
+                                  </p>
+                                  <p className="text-foreground flex items-center gap-2">
+                                    <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
+                                    {address.city}, {address.state} {address.zipCode}
+                                  </p>
+                                  <p className="text-muted-foreground flex items-center gap-2">
+                                    <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
+                                    {address.country}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/20">
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleStartEditAddress(address)}
-                                  className="flex items-center gap-1"
+                                  className="flex items-center justify-center gap-2 w-full sm:w-auto h-10"
                                 >
-                                  <Edit className="w-3 h-3" />
+                                  <Edit className="w-4 h-4" />
                                   Edit
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleDeleteAddress(address._id)}
-                                  className="flex items-center gap-1 text-destructive hover:text-destructive"
+                                  className="flex items-center justify-center gap-2 w-full sm:w-auto h-10 text-destructive hover:text-destructive border-destructive/20 hover:border-destructive/40"
                                 >
-                                  <Trash2 className="w-3 h-3" />
+                                  <Trash2 className="w-4 h-4" />
                                   Delete
                                 </Button>
                               </div>
@@ -1433,12 +1445,12 @@ const Account: React.FC = () => {
                 {/* Add/Edit Address Form (Modal) */}
                 {showAddAddress && (
                   <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-background rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+                    <div className="bg-background rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
                       <h3 className="text-lg font-semibold mb-4">
                         {editingAddressId ? "Edit Address" : "Add New Address"}
                       </h3>
                       <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-foreground mb-2">
                               First Name
@@ -1480,7 +1492,7 @@ const Account: React.FC = () => {
                             placeholder="Street address"
                           />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-foreground mb-2">
                               City
@@ -1502,7 +1514,7 @@ const Account: React.FC = () => {
                             />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-foreground mb-2">
                               ZIP Code
@@ -1537,14 +1549,14 @@ const Account: React.FC = () => {
                           </label>
                         </div>
                       </div>
-                      <div className="flex gap-2 mt-6">
-                        <Button onClick={handleSubmitAddress} className="flex-1">
+                      <div className="flex flex-col sm:flex-row gap-2 mt-6">
+                        <Button onClick={handleSubmitAddress} className="w-full sm:flex-1">
                           {editingAddressId ? "Update Address" : "Add Address"}
                         </Button>
                         <Button
                           variant="outline"
                           onClick={handleCancelAddressEdit}
-                          className="flex-1"
+                          className="w-full sm:flex-1"
                         >
                           Cancel
                         </Button>

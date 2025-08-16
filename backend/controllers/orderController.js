@@ -48,8 +48,9 @@ export const createOrder = asyncHandler(async (req, res) => {
     }
   }
 
-  // Calculate shipping cost
-  const shippingCost = cart.subtotal > 2000 ? 0 : 150;
+  // Calculate shipping cost based on payment method
+  // COD: ₹50 extra shipping fee, other methods: free shipping
+  const shippingCost = payment.method === "cod" ? 50 : 0;
 
   // Create order items
   const orderItems = cart.items.map((item) => ({

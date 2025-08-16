@@ -430,3 +430,51 @@ export const getCoinTransactions = asyncHandler(async (req, res) => {
     },
   });
 });
+
+// @desc    Add welcome coins for first-time buyers
+// @route   POST /api/user/welcome-coins
+// @access  Private
+export const addWelcomeCoins = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  
+  // Check if user has already received welcome coins
+  const hasWelcomeCoins = await CoinTransaction.findOne({
+    user: req.user.id,
+    type: "welcome_bonus"
+  });
+
+  if (hasWelcomeCoins) {
+    return res.status(400).json({
+      success: false,
+      message: "Welcome coins already received"
+    });
+  }
+
+  // Add 100 welcome coins
+  user.coins += 100;
+  await user.save();
+
+  // Create transaction record
+  await CoinTransaction.create({
+    user: req.user.id,
+    type: "welcome_bonus",
+    amount: 100,
+    description: "First-time buyer welcome bonus",
+    balance: user.coins
+  });
+
+  console.log("Welcome coins added for first-time buyer", {
+    userId: user._id,
+    coinsAdded: 100,
+    newBalance: user.coins
+  });
+
+  res.json({
+    success: true,
+    message: "Welcome coins added successfully",
+    data: {
+      coins: user.coins,
+      coinsAdded: 100
+    }
+  });
+});

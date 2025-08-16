@@ -16,6 +16,7 @@ import {
   addAddress,
   updateAddress,
   deleteAddress,
+  addWelcomeCoins,
 } from "../controllers/userController.js";
 import { protect, authorize } from "../middlewares/auth.js";
 import { validateId, validateCoins, validateProductIdParam } from "../middlewares/validation.js";
@@ -33,6 +34,7 @@ router.delete("/wishlist/:productId", validateProductIdParam, removeFromWishlist
 router.get("/coins", getUserCoins);
 router.get("/coins/transactions", getCoinTransactions);
 router.post("/coins/redeem", validateCoins, redeemCoins);
+router.post("/welcome-coins", addWelcomeCoins);
 // Address book
 router.get("/addresses", getAddresses);
 router.post("/addresses", addAddress);
