@@ -8,6 +8,7 @@ import {
   Star,
   Loader2,
   ArrowRight,
+  Share2,
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -83,6 +84,7 @@ const ProductDetail = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [relatedProductsLoading, setRelatedProductsLoading] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
 
   // Use review linking hook to determine which component to use
   const { isEnabled: reviewLinkingEnabled, isLoading: reviewLinkingLoading } =
@@ -317,6 +319,77 @@ const ProductDetail = () => {
     navigate("/cart");
   };
 
+  // Handle share product
+  const handleShare = async () => {
+    if (!currentProduct) return;
+
+    try {
+      setShareLoading(true);
+      const productUrl = `https://brelis.in/product/${currentProduct._id}`;
+      
+      // Try to use native share API first (mobile devices)
+      if (navigator.share && navigator.canShare) {
+        const shareData = {
+          title: currentProduct.name,
+          text: `Check out this amazing product: ${currentProduct.name}`,
+          url: productUrl,
+        };
+        
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          toast({
+            title: "Shared Successfully!",
+            description: "Product has been shared",
+            duration: 2000,
+          });
+          return;
+        }
+      }
+      
+      // Fallback to clipboard copy
+      await navigator.clipboard.writeText(productUrl);
+      toast({
+        title: "Link Copied!",
+        description: "Product link has been copied to clipboard",
+        duration: 3000,
+      });
+      
+    } catch (error: any) {
+      console.error('Error sharing product:', error);
+      
+      // If clipboard API fails, try alternative method
+      try {
+        const productUrl = `https://brelis.in/product/${currentProduct._id}`;
+        
+        // Create temporary textarea for copying
+        const textarea = document.createElement('textarea');
+        textarea.value = productUrl;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        toast({
+          title: "Link Copied!",
+          description: "Product link has been copied to clipboard",
+          duration: 3000,
+        });
+      } catch (fallbackError) {
+        console.error('Fallback copy failed:', fallbackError);
+        toast({
+          title: "Share Failed",
+          description: "Failed to copy link. Please try again or manually copy the URL.",
+          variant: "destructive",
+          duration: 4000,
+        });
+      }
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
   const sizeChart = {
     S: { chest: "40-42", length: "27", shoulder: "20" },
     M: { chest: "42-44", length: "28", shoulder: "21" },
@@ -407,6 +480,20 @@ const ProductDetail = () => {
                           : "text-foreground"
                       }`}
                     />
+                  )}
+                </button>
+                {/* Share Button */}
+                <button
+                  onClick={handleShare}
+                  disabled={shareLoading}
+                  className="absolute top-16 right-4 p-2 rounded-full bg-background/80 backdrop-blur-sm transition-all duration-300 hover:bg-background hover:scale-110 disabled:opacity-50 group"
+                  title="Share this product"
+                  aria-label="Share product"
+                >
+                  {shareLoading ? (
+                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <Share2 className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
                   )}
                 </button>
               </div>

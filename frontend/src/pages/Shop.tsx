@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, Grid, List, Heart, Loader2, X } from 'lucide-react';
+import { Filter, Grid, List, Heart, Loader2, X, Check } from 'lucide-react';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import Button from '@/components/UI/ICLButton';
@@ -319,7 +319,33 @@ const Shop: React.FC = () => {
                 <div className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-background shadow-strong" onClick={(e) => e.stopPropagation()}>
                   <div className="p-6 h-full overflow-y-auto">
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-lg font-semibold">FILTERS</h3>
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold">FILTERS</h3>
+                        <Button 
+                          variant="accent"
+                          size="sm"
+                          className="text-xs px-3 py-1 h-8 btn-hover-lift font-medium flex items-center gap-1"
+                          onClick={() => {
+                            setIsFilterOpen(false);
+                            // Show feedback that filters have been applied
+                            const activeFilters = [];
+                            if (selectedCategory !== 'All') activeFilters.push(selectedCategory);
+                            if (selectedSizes.length > 0) activeFilters.push(`${selectedSizes.length} size(s)`);
+                            if (selectedPriceRange) activeFilters.push(selectedPriceRange);
+                            
+                            if (activeFilters.length > 0) {
+                              toast({
+                                title: "Filters Applied",
+                                description: `Applied: ${activeFilters.join(', ')}`,
+                                duration: 2000,
+                              });
+                            }
+                          }}
+                        >
+                          <Check size={12} />
+                          Apply Filter
+                        </Button>
+                      </div>
                       <button
                         onClick={() => setIsFilterOpen(false)}
                         className="p-2 hover:bg-muted rounded-full transition-colors"
