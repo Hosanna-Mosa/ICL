@@ -22,13 +22,13 @@ const Footer: React.FC = () => {
               Urban Spirit. Elite Streetwear.
             </p>
             <div className="flex space-x-4">
-              <a 
-                href="https://instagram.com/brelis.streetwear" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="p-2 hover:text-accent transition-colors duration-300"
-                aria-label="Follow us on Instagram"
-              >
+                             <a 
+                 href="https://www.instagram.com/brelis.club/?igsh=aGlzOHFiMmxicGh0&utm_source=qr#" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="p-2 hover:text-accent transition-colors duration-300"
+                 aria-label="Follow us on Instagram"
+               >
                 <Instagram size={20} />
               </a>
               <a 
@@ -94,6 +94,24 @@ const Footer: React.FC = () => {
           <p className="text-sm text-primary-foreground/80">
             🎯 <strong>First-time buyers:</strong> Use your welcome coins for instant discount at checkout!
           </p>
+        </div>
+
+        {/* Developer Credit */}
+        <div className="mt-6 text-center">
+          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-white/20 border border-white/30 rounded-full backdrop-blur-sm shadow-lg hover:bg-white/30 transition-all duration-300 cursor-pointer group">
+            <span className="text-xs text-white/90 font-medium tracking-wide">
+              Developed by
+            </span>
+            <a 
+              href="https://www.buildyourvision.in/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm font-bold text-yellow-300 bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent animate-pulse hover:from-yellow-200 hover:to-orange-300 transition-all duration-1500"
+            >
+              BUILD YOUR VISION
+            </a>
+            <div className="w-1.5 h-1.5 bg-yellow-300 rounded-full animate-bounce shadow-sm group-hover:bg-yellow-200 transition-colors duration-1000"></div>
+          </div>
         </div>
       </div>
     </footer>

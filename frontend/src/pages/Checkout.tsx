@@ -303,14 +303,18 @@ const Checkout: React.FC = () => {
         }
       }
 
+      // Determine coinsUsed based on checkbox state
+      const coinsUsedForOrder = useCoins && coinsToUse ? parseInt(coinsToUse, 10) : 0;
+
       if (paymentMethod === "razorpay") {
         // Handle Razorpay payment
-        await handleRazorpayPayment(shippingAddress);
+        await handleRazorpayPayment(shippingAddress, coinsUsedForOrder);
       } else {
         // Handle regular order (UPI/COD)
         const response = await ordersAPI.createOrder({
           shippingAddress,
           payment: { method: paymentMethod },
+          coinsUsed: coinsUsedForOrder, // Send coinsUsed based on checkbox state
         });
 
         if (response.success) {
@@ -344,7 +348,7 @@ const Checkout: React.FC = () => {
     }
   };
 
-  const handleRazorpayPayment = async (shippingAddress: any) => {
+  const handleRazorpayPayment = async (shippingAddress: any, coinsUsedForOrder: number) => {
     try {
       // Ensure a valid Razorpay key is configured
       const keyId =
@@ -382,6 +386,7 @@ const Checkout: React.FC = () => {
                 gateway: "razorpay",
                 gatewayResponse: response,
               },
+              coinsUsed: coinsUsedForOrder, // Send coinsUsed based on checkbox state
             });
 
             if (orderResponse.success) {
@@ -508,12 +513,19 @@ const Checkout: React.FC = () => {
     setUseCoins(checked);
     try {
       if (checked) {
-        // Apply the selected coin amount
-        await applyCoinsDiscount(coinsToUse ? parseInt(coinsToUse, 10) : 0);
+        // Set default coin amount if none is set
+        if (coinsToUse === '0' || coinsToUse === '') {
+          setCoinsToUse('100');
+          // Apply the default coin amount
+          await applyCoinsDiscount(100);
+        } else {
+          // Apply the selected coin amount
+          await applyCoinsDiscount(parseInt(coinsToUse, 10));
+        }
       } else {
-        // Remove coins discount and reset local state
-        await removeCoinsDiscount();
+        // When unchecking, call backend to remove coin discount
         setCoinsToUse('0'); // Reset to 0
+        await removeCoinsDiscount();
       }
     } catch (error) {
       // Re-sync if anything failed
@@ -528,7 +540,12 @@ const Checkout: React.FC = () => {
     if (!useCoins) return;
 
     try {
-      await applyCoinsDiscount(coinsToUse ? parseInt(coinsToUse, 10) : 0);
+      const coinsToApply = parseInt(coinsToUse, 10);
+      if (isNaN(coinsToApply) || coinsToApply <= 0) {
+        return; // Don't apply if invalid amount
+      }
+      
+      await applyCoinsDiscount(coinsToApply);
     } catch (error) {
       // Re-sync if anything failed
       await refreshCart();
@@ -543,10 +560,20 @@ const Checkout: React.FC = () => {
     if (!useCoins) return;
 
     try {
-      await applyCoinsDiscount(coinsToUse ? parseInt(coinsToUse, 10) : 0);
+      const coinsToApply = parseInt(coinsToUse, 10);
+      if (isNaN(coinsToApply) || coinsToApply <= 0) {
+        toast({
+          title: "Invalid coin amount",
+          description: "Please enter a valid number of coins to use",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      await applyCoinsDiscount(coinsToApply);
       toast({
         title: "Coins applied successfully!",
-        description: `₹${coinsToUse} discount applied to your order`,
+        description: `₹${coinsToApply} discount applied to your order`,
       });
     } catch (error) {
       // Re-sync if anything failed
@@ -1074,18 +1101,7 @@ const Checkout: React.FC = () => {
                         <Checkbox
                           id="useCoins"
                           checked={useCoins}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setUseCoins(true);
-                              if (coinsToUse === '0' || coinsToUse === '') {
-                                setCoinsToUse('100');
-                              }
-                            } else {
-                              setUseCoins(false);
-                              setCoinsToUse('0');
-                              removeCoinsDiscount();
-                            }
-                          }}
+                          onCheckedChange={handleCoinsToggle}
                           className="data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
                         />
                         <div className="flex-1">

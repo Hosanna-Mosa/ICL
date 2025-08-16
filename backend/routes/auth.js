@@ -10,6 +10,8 @@ import {
   requestResetOtp,
   verifyResetOtp,
   resetPasswordWithOtp,
+  verifyEmail,
+  resendVerification,
 } from "../controllers/authController.js";
 import { protect } from "../middlewares/auth.js";
 import { validateRegister, validateLogin } from "../middlewares/validation.js";
@@ -19,6 +21,8 @@ const router = express.Router();
 // Public routes
 router.post("/register", validateRegister, register);
 router.post("/login", validateLogin, login);
+router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification", resendVerification);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 router.post("/request-reset-otp", requestResetOtp);
