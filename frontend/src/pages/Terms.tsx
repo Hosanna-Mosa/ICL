@@ -153,8 +153,8 @@ const Terms: React.FC = () => {
               If you have any questions about these Terms of Service, please contact us at:
             </p>
             <div className="bg-muted p-4 rounded-lg">
-              <p className="mb-2"><strong>Email:</strong> legal@brelis.in</p>
-              <p className="mb-2"><strong>Phone:</strong> +91 98765 43210</p>
+              <p className="mb-2"><strong>Email:</strong> brelisbrelis1@gmail.com</p>
+              <p className="mb-2"><strong>Phone:</strong> +91 939810 32323</p>
               <p><strong>Address:</strong> BRELIS Streetwear, India</p>
             </div>
           </section>

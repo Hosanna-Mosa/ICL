@@ -134,12 +134,12 @@ const Contact: React.FC = () => {
                     Quick chat for instant support and order updates
                   </p>
                   <a 
-                    href="https://wa.me/919876543210" 
+                    href="https://wa.me/919381032323" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-primary hover:text-primary/80 font-medium text-sm"
                   >
-                    +91 98765 43210
+                    +91 93810 32323
                   </a>
                 </div>
               </div>
@@ -176,15 +176,15 @@ const Contact: React.FC = () => {
                     For detailed inquiries and business partnerships
                   </p>
                   <a 
-                    href="mailto:hello@brelisstreetwear.com"
+                    href="mailto:brelisbrelis1@gmail.com"
                     className="text-primary hover:text-primary/80 font-medium text-sm"
                   >
-                                          hello@brelisstreetwear.com
+                                          brelisbrelis1@gmail.com
                   </a>
                 </div>
               </div>
               
-              {/* Address */}
+              {/* Address
               <div className="flex items-start gap-4 p-6 bg-card shadow-soft hover:shadow-medium transition-shadow">
                 <div className="bg-muted-foreground p-3 rounded-full">
                   <MapPin className="w-6 h-6 text-background" />
@@ -201,7 +201,7 @@ const Contact: React.FC = () => {
                     India
                   </address>
                 </div>
-              </div>
+              </div> */}
             </div>
             
             {/* Business Hours */}
