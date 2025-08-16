@@ -66,8 +66,8 @@ const Footer: React.FC = () => {
             <div className="space-y-4">
               <h3 className="text-sm font-medium tracking-widest uppercase">SUPPORT</h3>
               <ul className="space-y-2 text-sm text-primary-foreground/80">
-                <li><button onClick={() => handleNavigation('/shipping')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Shipping Info</button></li>
-                <li><button onClick={() => handleNavigation('/returns')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Returns</button></li>
+                <li><button onClick={() => handleNavigation('/account?tab=orders')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Orders</button></li>
+                <li><button onClick={() => handleNavigation('/account?tab=orders')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Returns</button></li>
                 <li><button onClick={() => handleNavigation('/contact')} className="hover:text-primary-foreground transition-colors duration-300 text-left">Contact Us</button></li>
               </ul>
             </div>
@@ -77,7 +77,7 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-primary-foreground/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="text-sm text-primary-foreground/60">
-            © 2024 BRELIS. All rights reserved.
+            © 2025 BRELIS. All rights reserved.
           </div>
                      <div className="flex space-x-6 text-sm text-primary-foreground/60">
              <button onClick={() => handleNavigation('/privacy')} className="hover:text-primary-foreground transition-colors duration-300">
@@ -99,5 +99,4 @@ const Footer: React.FC = () => {
     </footer>
   );
 };
-
 export default Footer;

@@ -24,11 +24,13 @@ const Checkout: React.FC = () => {
   >("razorpay");
   const [useCoins, setUseCoins] = useState(false);
   const [userCoins, setUserCoins] = useState(0);
-  const [coinsToUse, setCoinsToUse] = useState(0);
+  const [coinsToUse, setCoinsToUse] = useState<string>('');
   const [loadingCoins, setLoadingCoins] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [placedOrder, setPlacedOrder] = useState(null);
+  const [isFirstTimeBuyer, setIsFirstTimeBuyer] = useState(false);
+  const [firstTimeBonusApplied, setFirstTimeBonusApplied] = useState(false);
   const {
     cart,
     loading,
@@ -60,6 +62,7 @@ const Checkout: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated) {
       fetchUserCoins();
+      checkFirstTimeBuyer();
     }
   }, [isAuthenticated]);
 
@@ -70,11 +73,11 @@ const Checkout: React.FC = () => {
     const cartHasCoins = (cart?.coinsUsed || 0) > 0;
     setUseCoins(cartHasCoins);
     if (cartHasCoins && cart?.coinsUsed) {
-      setCoinsToUse(cart.coinsUsed);
+      setCoinsToUse(cart.coinsUsed.toString());
          } else if (!cartHasCoins) {
        // Reset local state when cart has no coins
        setUseCoins(false);
-       setCoinsToUse(0);
+       setCoinsToUse('0');
      }
   }, [cart?.coinsUsed, cart?.coinsDiscount]);
 
@@ -98,30 +101,57 @@ const Checkout: React.FC = () => {
   const fetchUserCoins = async () => {
     try {
       setLoadingCoins(true);
-      const response = await userAPI.getUserCoins();
+      const response = await userAPI.getProfile();
       if (response.success) {
-        setUserCoins(response.data.coins);
-        // Don't automatically set default coins - let user choose manually
+        setUserCoins(response.data.user.coins || 0);
       }
     } catch (error) {
       console.error("Error fetching user coins:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load your coin balance",
-        variant: "destructive",
-      });
     } finally {
       setLoadingCoins(false);
     }
   };
 
+  const checkFirstTimeBuyer = async () => {
+    try {
+      const response = await ordersAPI.getOrders();
+      if (response.success) {
+        const hasPreviousOrders = (response.data.orders || []).length > 0;
+        setIsFirstTimeBuyer(!hasPreviousOrders);
+        
+        // If first-time buyer and hasn't received bonus yet, give 100 coins
+        if (!hasPreviousOrders && !firstTimeBonusApplied) {
+          try {
+            const bonusResponse = await userAPI.addWelcomeCoins();
+            if (bonusResponse.success) {
+              setUserCoins(prev => prev + 100);
+              setFirstTimeBonusApplied(true);
+              toast({
+                title: "Welcome Bonus! 🎉",
+                description: "You've received 100 free coins as a first-time buyer!",
+              });
+            }
+          } catch (error) {
+            console.error("Error adding welcome coins:", error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error checking first-time buyer status:", error);
+    }
+  };
+
   const cartItems = useMemo(() => cart?.items || [], [cart?.items]);
   const subtotal = cart?.subtotal || 0;
-  // Shipping policy: free if subtotal > 2000 (aligns with backend)
-  const shipping = cart && cart.subtotal > 2000 ? 0 : 150;
+  
+  // Shipping policy: based on payment method
+  // COD: ₹50 extra shipping fee, other methods: free shipping
+  const shipping = paymentMethod === "cod" ? 50 : 0;
+  
   // Use local state for coins to ensure UI updates immediately
   const coinsAreUsed = useCoins && (cart?.coinsUsed || 0) > 0;
   const coinDiscount = coinsAreUsed ? cart?.coinsDiscount || 0 : 0;
+  
   // Calculate GST (18%) on subtotal after coin discount
   const gstAmount = Math.round((subtotal - coinDiscount) * 0.18);
   const total = subtotal - coinDiscount + gstAmount + shipping;
@@ -214,13 +244,16 @@ const Checkout: React.FC = () => {
     }
 
     // Validate coins usage
-    if (useCoins && coinsToUse > userCoins) {
-      toast({
-        title: "Insufficient coins",
-        description: "You don't have enough coins for this purchase",
-        variant: "destructive",
-      });
-      return;
+    if (useCoins && coinsToUse) {
+      const coinsToApply = parseInt(coinsToUse, 10);
+      if (coinsToApply > userCoins) {
+        toast({
+          title: "Insufficient coins",
+          description: "You don't have enough coins for this purchase",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setPlacingOrder(true);
@@ -476,18 +509,18 @@ const Checkout: React.FC = () => {
     try {
       if (checked) {
         // Apply the selected coin amount
-        await applyCoinsDiscount(coinsToUse);
+        await applyCoinsDiscount(coinsToUse ? parseInt(coinsToUse, 10) : 0);
       } else {
         // Remove coins discount and reset local state
         await removeCoinsDiscount();
-        setCoinsToUse(0); // Reset to 0
+        setCoinsToUse('0'); // Reset to 0
       }
     } catch (error) {
       // Re-sync if anything failed
       await refreshCart();
       // Reset local state on error
       setUseCoins(false);
-      setCoinsToUse(0);
+      setCoinsToUse('0');
     }
   };
 
@@ -495,13 +528,13 @@ const Checkout: React.FC = () => {
     if (!useCoins) return;
 
     try {
-      await applyCoinsDiscount(coinsToUse);
+      await applyCoinsDiscount(coinsToUse ? parseInt(coinsToUse, 10) : 0);
     } catch (error) {
       // Re-sync if anything failed
       await refreshCart();
       // Reset local state on error
       setUseCoins(false);
-      setCoinsToUse(0);
+      setCoinsToUse('0');
     }
   };
 
@@ -510,7 +543,7 @@ const Checkout: React.FC = () => {
     if (!useCoins) return;
 
     try {
-      await applyCoinsDiscount(coinsToUse);
+      await applyCoinsDiscount(coinsToUse ? parseInt(coinsToUse, 10) : 0);
       toast({
         title: "Coins applied successfully!",
         description: `₹${coinsToUse} discount applied to your order`,
@@ -520,7 +553,7 @@ const Checkout: React.FC = () => {
       await refreshCart();
       // Reset local state on error
       setUseCoins(false);
-      setCoinsToUse(0);
+      setCoinsToUse('0');
       toast({
         title: "Error applying coins",
         description: "Failed to apply coins. Please try again.",
@@ -892,7 +925,7 @@ const Checkout: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                                            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                      <div className="mt-6 flex flex-col sm:flex-row gap-3">
                         <Button
                           type="button"
                           variant="outline"
@@ -968,9 +1001,9 @@ const Checkout: React.FC = () => {
                           <p className="font-medium text-foreground">
                             Secure Payment Gateway
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <div className="text-sm text-muted-foreground">
                             Credit/Debit Cards, UPI, Net Banking • Free shipping
-                          </p>
+                          </div>
                         </div>
                       </div>
 
@@ -1021,9 +1054,9 @@ const Checkout: React.FC = () => {
                           <p className="font-medium text-foreground">
                             Cash on Delivery
                           </p>
-                          <p className="text-sm text-muted-foreground">
-                            Pay when you receive • ₹150 shipping charge
-                          </p>
+                          <div className="text-sm text-muted-foreground">
+                            Pay when you receive • ₹50 shipping charge
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1031,142 +1064,193 @@ const Checkout: React.FC = () => {
                 </div>
 
                 {/* Coin Discount */}
-                {userCoins > 0 && (
-                  <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                        <Coins className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <Checkbox
-                            id="useCoins"
-                            checked={useCoins}
-                            onCheckedChange={(checked) =>
-                              !placingOrder && handleCoinsToggle(!!checked)
-                            }
-                            disabled={placingOrder || loadingCoins}
-                          />
-                          <label
-                            htmlFor="useCoins"
-                            className="flex items-center gap-2 cursor-pointer"
-                          >
-                            <span className="font-semibold text-foreground">
-                              Use Coins for Discount
-                            </span>
-                          </label>
-                        </div>
-                        <p className="text-sm text-muted-foreground ml-7">
-                          Redeem your earned coins for instant discounts
-                        </p>
-                      </div>
+                <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border border-amber-200 rounded-xl p-4 sm:p-6 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4 sm:mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+                      <Coins className="w-6 h-6 text-white" />
                     </div>
-
-                    {loadingCoins ? (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground ml-7">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Loading your coin balance...
-                      </div>
-                    ) : (
-                      <div className="space-y-4 ml-7">
-                        {/* Coin Balance Display */}
-                        <div className="bg-white/50 border border-primary/20 rounded-lg p-3">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm font-medium text-foreground">
-                                Available Coins
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                1 coin = ₹1 discount
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-lg font-bold text-primary">
-                                {userCoins}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                coins
-                              </p>
-                            </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+                        <Checkbox
+                          id="useCoins"
+                          checked={useCoins}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setUseCoins(true);
+                              if (coinsToUse === '0' || coinsToUse === '') {
+                                setCoinsToUse('100');
+                              }
+                            } else {
+                              setUseCoins(false);
+                              setCoinsToUse('0');
+                              removeCoinsDiscount();
+                            }
+                          }}
+                          className="data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                        />
+                        <div className="flex-1">
+                          <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1">
+                            Use Coins for Discount
+                          </h3>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
+                            <span className="text-muted-foreground">
+                              Available: <span className="font-medium text-foreground">{userCoins} coins</span>
+                            </span>
+                            <span className="text-muted-foreground">
+                              Value: <span className="font-medium text-foreground">₹{userCoins}</span>
+                            </span>
                           </div>
+                          {isFirstTimeBuyer && (
+                            <div className="mt-2 p-2 bg-green-100 border border-green-200 rounded-lg">
+                              <p className="text-xs text-green-700 font-medium">
+                                🎉 First-time buyer bonus: 100 free coins included!
+                              </p>
+                            </div>
+                          )}
                         </div>
+                      </div>
 
-                        {useCoins && (
-                          <div className="space-y-3">
-                            <div className="bg-white/50 border border-primary/20 rounded-lg p-3">
-                              <label className="text-sm font-medium text-foreground mb-2 block">
-                                How many coins to use? *
-                              </label>
-                              <div className="flex items-center gap-2">
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  max={Math.min(userCoins, subtotal)}
-                                  value={coinsToUse}
-                                  onChange={(e) =>
-                                    setCoinsToUse(Number(e.target.value))
-                                  }
-                                  className="flex-1 h-10 text-sm"
-                                  disabled={placingOrder}
-                                  placeholder="Enter coins amount (1 coin = ₹1)"
-                                />
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  Enter the number of coins you want to use for discount
-                                </div>
-                                <Button
-                                  type="button"
-                                  onClick={handleCoinSubmit}
-                                  disabled={
-                                    placingOrder ||
-                                    coinsToUse <= 0 ||
-                                    coinsToUse > Math.min(userCoins, subtotal)
-                                  }
-                                  size="sm"
-                                  className="h-10 px-4"
-                                >
-                                  Apply Coins
-                                </Button>
+                      {loadingCoins ? (
+                        <div className="flex items-center gap-3 text-gray-600 sm:ml-16">
+                          <Loader2 className="w-5 h-5 animate-spin text-amber-500" />
+                          <span className="text-sm">Loading your coin balance...</span>
+                        </div>
+                      ) : (
+                        <div className="sm:ml-16 space-y-4 sm:space-y-5">
+                          {/* Coin Balance Display */}
+                          <div className="bg-white/80 border border-amber-200 rounded-lg p-3 sm:p-4 shadow-sm">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-semibold text-gray-800">
+                                  Available Coins
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  1 coin = ₹1 discount
+                                </p>
                               </div>
-                              <div className="flex items-center justify-between mt-2">
-                                <span className="text-xs text-muted-foreground">
-                                  Max: {Math.min(userCoins, subtotal)} coins
-                                </span>
-                                {coinsToUse > 0 ? (
-                                  <span className="text-sm font-semibold text-green-600">
-                                    = ₹{coinsToUse.toLocaleString()} discount
-                                  </span>
-                                ) : (
-                                  <span className="text-xs text-muted-foreground">
-                                    Enter amount above to see discount
-                                  </span>
-                                )}
+                              <div className="text-center sm:text-right">
+                                <p className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                                  {userCoins}
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  coins
+                                </p>
                               </div>
-                            </div>
-
-                            {/* Usage Guidelines */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                              <h4 className="text-xs font-semibold text-blue-700 mb-2">
-                                💡 Usage Guidelines
-                              </h4>
-                              <ul className="text-xs text-blue-600 space-y-1">
-                                <li>
-                                  • You can use up to{" "}
-                                  {Math.min(userCoins, subtotal)} coins
-                                </li>
-                                <li>• Each coin gives you ₹1 discount</li>
-                                <li>
-                                  • Coins are deducted from your balance after
-                                  order
-                                </li>
-                                <li>• Unused coins remain in your account</li>
-                              </ul>
                             </div>
                           </div>
-                        )}
-                      </div>
-                    )}
+
+                          {useCoins && userCoins > 0 && (
+                            <div className="space-y-4">
+                              <div className="bg-white/80 border border-amber-200 rounded-lg p-3 sm:p-4 shadow-sm">
+                                <label className="text-sm font-semibold text-gray-800 mb-3 block">
+                                  How many coins to use? *
+                                </label>
+                                <div className="space-y-3">
+                                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      max={Math.min(userCoins, subtotal)}
+                                      value={coinsToUse}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        // Handle empty string and prevent leading zeros
+                                        if (value === '') {
+                                          setCoinsToUse('');
+                                        } else {
+                                          const numValue = parseInt(value, 10);
+                                          if (!isNaN(numValue) && numValue > 0) {
+                                            setCoinsToUse(value);
+                                          }
+                                        }
+                                      }}
+                                      onBlur={(e) => {
+                                        // Ensure we have a valid number when leaving the field
+                                        if (e.target.value === '' || e.target.value === '0') {
+                                          setCoinsToUse('');
+                                        }
+                                      }}
+                                      className="flex-1 h-12 text-base border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                                      disabled={placingOrder}
+                                      placeholder="Enter coins amount"
+                                    />
+                                    <Button
+                                      type="button"
+                                      onClick={handleCoinSubmit}
+                                      disabled={
+                                        placingOrder ||
+                                        coinsToUse === '' ||
+                                        parseInt(coinsToUse, 10) <= 0 ||
+                                        parseInt(coinsToUse, 10) > Math.min(userCoins, subtotal)
+                                      }
+                                      size="sm"
+                                      className="h-12 px-4 sm:px-6 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold shadow-md whitespace-nowrap"
+                                    >
+                                      Apply Coins
+                                    </Button>
+                                  </div>
+                                  
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
+                                    <span className="text-gray-600 text-center sm:text-left">
+                                      Max: {Math.min(userCoins, subtotal)} coins
+                                    </span>
+                                    {coinsToUse !== '' && parseInt(coinsToUse, 10) > 0 ? (
+                                      <span className="text-lg font-bold text-green-600 text-center sm:text-right">
+                                        = ₹{parseInt(coinsToUse, 10).toLocaleString()} discount
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-500 text-center sm:text-right">
+                                        Enter amount above to see discount
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Usage Guidelines */}
+                              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <span className="text-white text-xs font-bold">💡</span>
+                                  </div>
+                                  <h4 className="text-sm font-semibold text-blue-800">
+                                    Usage Guidelines
+                                  </h4>
+                                </div>
+                                <ul className="text-sm text-blue-700 space-y-1.5">
+                                  <li className="flex items-start gap-2">
+                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
+                                    <span>You can use up to {Math.min(userCoins, subtotal)} coins</span>
+                                  </li>
+                                  <li className="flex items-start gap-2">
+                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
+                                    <span>Each coin gives you ₹1 discount</span>
+                                  </li>
+                                  <li className="flex items-start gap-2">
+                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
+                                    <span>Coins are deducted from your balance after order</span>
+                                  </li>
+                                  <li className="flex items-start gap-2">
+                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
+                                    <span>Unused coins remain in your account</span>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          )}
+
+                          {userCoins === 0 && !isFirstTimeBuyer && (
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                              <p className="text-sm text-gray-600">
+                                No coins available. Earn coins by making purchases!
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Order Summary */}
@@ -1297,9 +1381,9 @@ const Checkout: React.FC = () => {
                           Shipping
                         </span>
                         <p className="text-xs text-orange-600">
-                          {shipping === 0
-                            ? "Free shipping on orders above ₹2,000"
-                            : "Standard delivery charge"}
+                          {paymentMethod === "cod" 
+                            ? "Cash on Delivery - ₹50 shipping fee"
+                            : "Free shipping on online payments"}
                         </p>
                       </div>
                       <span className="text-sm font-semibold text-orange-700">
